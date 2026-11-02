@@ -9,8 +9,7 @@ import FiverrLogo from '@/components/FiverrLogo'
 const navItems = [
   { label: 'Home', href: '#hero' },
   { label: 'About', href: '#about' },
-  { label: 'Apps', href: '#apps' },
-  { label: 'Works', href: '#projects' },
+  { label: 'Works', href: '#apps' },
   { label: 'Skills', href: '#skills' },
   { label: 'Contact', href: '#contact' },
 ]

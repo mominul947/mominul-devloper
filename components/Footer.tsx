@@ -124,13 +124,19 @@ export default function Footer() {
               SECTIONS
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-              {['Hero', 'About', 'Apps', 'Works', 'Skills', 'Contact'].map((sec) => (
+              {[
+                { label: 'Hero', href: '#hero' },
+                { label: 'About', href: '#about' },
+                { label: 'Works', href: '#apps' },
+                { label: 'Skills', href: '#skills' },
+                { label: 'Contact', href: '#contact' },
+              ].map((item) => (
                 <a
-                  key={sec}
-                  href={`#${sec.toLowerCase()}`}
+                  key={item.label}
+                  href={item.href}
                   className="hover:theme-text-main transition-colors"
                 >
-                  {sec}
+                  {item.label}
                 </a>
               ))}
               <Link

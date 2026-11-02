@@ -113,7 +113,7 @@ export default function Hero() {
               {/* Action Buttons */}
               <div className="flex flex-col xs:flex-row gap-1.5 pt-1.5">
                 <button
-                  onClick={() => scrollTo('projects')}
+                  onClick={() => scrollTo('apps')}
                   className="btn-theme-primary px-3 py-2 rounded-xl text-[10px] xs:text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-1 cursor-pointer shadow-md"
                 >
                   <span>Works</span>
@@ -306,7 +306,7 @@ export default function Hero() {
               </div>
 
               <button
-                onClick={() => scrollTo('projects')}
+                onClick={() => scrollTo('apps')}
                 className="inline-flex items-center gap-1.5 text-[10px] font-mono theme-text-muted hover:theme-text-accent transition-colors uppercase tracking-widest cursor-pointer pl-2"
               >
                 <span>Scroll</span>
@@ -369,7 +369,7 @@ export default function Hero() {
               className="flex items-center gap-3 pt-2"
             >
               <button
-                onClick={() => scrollTo('projects')}
+                onClick={() => scrollTo('apps')}
                 className="btn-theme-primary px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg"
               >
                 <span>View Selected Works</span>
@@ -551,7 +551,7 @@ export default function Hero() {
             {/* Scroll Indicator */}
             <div className="pt-2 text-right">
               <button
-                onClick={() => scrollTo('projects')}
+                onClick={() => scrollTo('apps')}
                 className="inline-flex items-center gap-2 text-xs font-mono theme-text-muted hover:theme-text-accent transition-colors uppercase tracking-widest cursor-pointer"
               >
                 <span>Scroll to Explore</span>
