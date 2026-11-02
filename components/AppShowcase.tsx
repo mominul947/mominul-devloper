@@ -155,13 +155,41 @@ export default function AppShowcase() {
       .catch(() => {})
   }, [])
 
+  const [isPaused, setIsPaused] = useState<boolean>(false)
+
+  const currentAppIdx = apps.findIndex((a) => a.id === selectedApp.id)
+  const nextAppIdx = (currentAppIdx + 1) % apps.length
+  const nextApp = apps[nextAppIdx]
+  const prevAppIdx = (currentAppIdx - 1 + apps.length) % apps.length
+  const prevApp = apps[prevAppIdx]
+
   const handlePrev = () => {
-    setSelectedScreenshotIdx((prev) => (prev - 1 + selectedApp.screenshots.length) % selectedApp.screenshots.length)
+    if (selectedScreenshotIdx > 0) {
+      setSelectedScreenshotIdx((prev) => prev - 1)
+    } else {
+      const prevIdx = (currentAppIdx - 1 + apps.length) % apps.length
+      setSelectedApp(apps[prevIdx])
+      setSelectedScreenshotIdx(apps[prevIdx].screenshots.length - 1)
+    }
   }
 
   const handleNext = () => {
-    setSelectedScreenshotIdx((prev) => (prev + 1) % selectedApp.screenshots.length)
+    if (selectedScreenshotIdx < selectedApp.screenshots.length - 1) {
+      setSelectedScreenshotIdx((prev) => prev + 1)
+    } else {
+      const nextIdx = (currentAppIdx + 1) % apps.length
+      setSelectedApp(apps[nextIdx])
+      setSelectedScreenshotIdx(0)
+    }
   }
+
+  useEffect(() => {
+    if (isPaused || isZoomed) return
+    const timer = setInterval(() => {
+      handleNext()
+    }, 4500)
+    return () => clearInterval(timer)
+  }, [selectedApp, selectedScreenshotIdx, isPaused, isZoomed, currentAppIdx])
 
   const isCarbook = selectedApp.id === 'carbook'
   const currentDownloads = isCarbook ? carbookLive.downloads : selectedApp.downloads
@@ -401,9 +429,64 @@ export default function AppShowcase() {
           {/* Center: Slideable Android Flagship Phone View (4 Cols) */}
           <div className="lg:col-span-4 flex flex-col items-center justify-center order-1 lg:order-2 relative">
             
-            {/* Phone Slide Stage with Left / Right Arrows */}
-            <div className="relative flex items-center justify-center w-full">
+            {/* Quick App Selector Pills directly on Phone View */}
+            <div className="w-full max-w-[320px] mb-3 flex items-center justify-between gap-1.5 p-1 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-md">
+              {apps.map((app, idx) => {
+                const isCur = app.id === selectedApp.id
+                return (
+                  <button
+                    key={app.id}
+                    onClick={() => {
+                      setSelectedApp(app)
+                      setSelectedScreenshotIdx(0)
+                    }}
+                    className={`flex-1 py-1.5 px-1.5 rounded-xl text-[10px] font-mono font-bold transition-all truncate text-center cursor-pointer ${
+                      isCur
+                        ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {idx + 1}. {app.name}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Phone Slide Stage with Left / Right Arrows & Stacked Next App Preview */}
+            <div
+              className="relative flex items-center justify-center w-full"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               
+              {/* STACKED "NEXT APP" MOCKUP UNDERNEATH / BEHIND (Lower Opacity, Scaled Down) */}
+              <div
+                onClick={() => {
+                  setSelectedApp(nextApp)
+                  setSelectedScreenshotIdx(0)
+                }}
+                className="absolute top-2.5 sm:top-4 right-0 xs:right-1 sm:-right-8 w-full max-w-[250px] xs:max-w-[270px] sm:max-w-[285px] rounded-[34px] sm:rounded-[40px] p-2 sm:p-2.5 shadow-2xl border-[3px] border-[#27272a]/60 bg-[#09090b] scale-[0.91] sm:scale-[0.93] origin-right opacity-35 hover:opacity-75 transition-all duration-300 cursor-pointer z-0 select-none group"
+                title={`Next App: ${nextApp.name} (Click to view)`}
+              >
+                <div className="w-full rounded-[26px] sm:rounded-[32px] overflow-hidden bg-white/95 aspect-[390/884] relative">
+                  <Image
+                    src={nextApp.screenshots[0]}
+                    alt={nextApp.name}
+                    fill
+                    sizes="(max-width: 640px) 180px, 240px"
+                    className="object-contain"
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 backdrop-blur-[0.5px] transition-colors flex flex-col items-center justify-center p-3 text-center">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[8px] font-mono uppercase tracking-wider mb-1 shadow-sm">
+                      Next App →
+                    </span>
+                    <span className="text-white font-bold text-xs sm:text-sm font-billboard tracking-wide drop-shadow">
+                      {nextApp.name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Left Slide Arrow */}
               <button
                 onClick={handlePrev}
@@ -414,8 +497,8 @@ export default function AppShowcase() {
                 <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
               </button>
 
-              {/* Android Mockup Frame */}
-              <div className="relative w-full max-w-[270px] xs:max-w-[285px] sm:max-w-[295px] rounded-[36px] sm:rounded-[40px] p-2 sm:p-2.5 shadow-2xl border-[3.5px] border-[#27272a] bg-[#09090b]">
+              {/* Active Android Mockup Frame in Front (z-20) */}
+              <div className="relative z-20 w-full max-w-[270px] xs:max-w-[285px] sm:max-w-[295px] rounded-[36px] sm:rounded-[40px] p-2 sm:p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b]">
                 
                 {/* Android Hardware Side Buttons */}
                 <div className="absolute -right-[4.5px] top-24 w-[2.5px] h-9 rounded-r bg-[#3f3f46]" />
@@ -466,9 +549,9 @@ export default function AppShowcase() {
                           src={selectedApp.screenshots[selectedScreenshotIdx]}
                           alt={`${selectedApp.name} Screen ${selectedScreenshotIdx + 1}`}
                           fill
+                          sizes="(max-width: 640px) 260px, 320px"
                           className="object-contain"
                           priority
-                          
                         />
                         <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                           <span className="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-mono text-white flex items-center gap-1.5 border border-white/20">
@@ -532,10 +615,17 @@ export default function AppShowcase() {
               </div>
 
               {/* Slide Navigation Hint */}
-              <p className="text-[10px] font-mono theme-text-muted flex items-center gap-1.5">
+              <p className="text-[10px] font-mono theme-text-muted flex items-center gap-1.5 text-center px-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Slide or tap arrows to view all 4 screens</span>
-                <span className="opacity-50">({selectedScreenshotIdx + 1}/{selectedApp.screenshots.length})</span>
+                {selectedScreenshotIdx === selectedApp.screenshots.length - 1 ? (
+                  <span className="text-emerald-400 font-bold">
+                    Screen 4 of 4 • Tap Next or Swipe for Next App ({nextApp.name}) →
+                  </span>
+                ) : (
+                  <span>
+                    Screen {selectedScreenshotIdx + 1} of {selectedApp.screenshots.length} • Slide or tap arrow
+                  </span>
+                )}
               </p>
             </div>
 
