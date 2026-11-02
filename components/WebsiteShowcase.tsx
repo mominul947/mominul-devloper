@@ -246,7 +246,7 @@ export default function WebsiteShowcase() {
                   </a>
                 </div>
 
-                {/* Scaled Desktop Iframe Viewport */}
+                {/* Scaled Desktop Iframe Viewport (Zero Scrollbar) */}
                 <div
                   ref={laptopRef}
                   className="w-full overflow-hidden bg-white relative rounded-b-xl"
@@ -255,6 +255,7 @@ export default function WebsiteShowcase() {
                   <iframe
                     key={`studio-laptop-${iframeKey}`}
                     src={liveUrl}
+                    scrolling="no"
                     title="Carbook 3D Studio Desktop View"
                     className="absolute top-0 left-0 border-0 pointer-events-auto"
                     style={{
@@ -262,6 +263,9 @@ export default function WebsiteShowcase() {
                       height: '800px',
                       transform: `scale(${laptopScale})`,
                       transformOrigin: 'top left',
+                      overflow: 'hidden',
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
                     }}
                     loading="lazy"
                   />
@@ -273,7 +277,7 @@ export default function WebsiteShowcase() {
                 </div>
               </div>
 
-              {/* FOREGROUND RIGHT: 3D FLOATING ANDROID FLAGSHIP PHONE (Pixel-Perfect Zero Gap) */}
+              {/* FOREGROUND RIGHT: 3D FLOATING ANDROID FLAGSHIP PHONE (Zero Scrollbar, Edge-to-Edge) */}
               <motion.div
                 initial={{ opacity: 0, x: 30, y: 30 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
@@ -316,7 +320,7 @@ export default function WebsiteShowcase() {
                       </div>
                     </div>
 
-                    {/* Pixel-Perfect Scaled Mobile Viewport (Dynamic Scale = 100% Edge-to-Edge) */}
+                    {/* Pixel-Perfect Scaled Mobile Viewport with Zero Scrollbar */}
                     <div
                       ref={studioPhoneRef}
                       className="w-full overflow-hidden bg-white relative"
@@ -326,6 +330,7 @@ export default function WebsiteShowcase() {
                     >
                       <iframe
                         src={liveUrl}
+                        scrolling="no"
                         title="Carbook 3D Studio Android View"
                         className="absolute top-0 left-0 border-0 pointer-events-none"
                         style={{
@@ -333,6 +338,9 @@ export default function WebsiteShowcase() {
                           height: '780px',
                           transform: `scale(${studioPhoneScale})`,
                           transformOrigin: 'top left',
+                          overflow: 'hidden',
+                          scrollbarWidth: 'none',
+                          msOverflowStyle: 'none',
                         }}
                         loading="lazy"
                       />
@@ -357,7 +365,7 @@ export default function WebsiteShowcase() {
                 </div>
               </motion.div>
 
-              {/* FOREGROUND LEFT: 3D FLOATING TABLET (Pixel-Perfect Zero Gap) */}
+              {/* FOREGROUND LEFT: 3D FLOATING TABLET (Zero Scrollbar) */}
               <motion.div
                 initial={{ opacity: 0, x: -30, y: 30 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
@@ -382,6 +390,7 @@ export default function WebsiteShowcase() {
                   >
                     <iframe
                       src={liveUrl}
+                      scrolling="no"
                       title="Carbook 3D Studio Tablet View"
                       className="absolute top-0 left-0 border-0 pointer-events-none"
                       style={{
@@ -389,6 +398,9 @@ export default function WebsiteShowcase() {
                         height: '850px',
                         transform: `scale(${studioTabletScale})`,
                         transformOrigin: 'top left',
+                        overflow: 'hidden',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
                       }}
                       loading="lazy"
                     />
@@ -454,7 +466,7 @@ export default function WebsiteShowcase() {
                   </div>
                 </div>
 
-                {/* Real Mobile Scaled Viewport - Generous Height so Hero & Form Never Cut Off */}
+                {/* Real Mobile Scaled Viewport - Zero Scrollbar */}
                 <div
                   ref={phoneRef}
                   className="w-full overflow-hidden bg-white relative"
@@ -465,6 +477,7 @@ export default function WebsiteShowcase() {
                   <iframe
                     key={`phone-mode-${iframeKey}`}
                     src={liveUrl}
+                    scrolling="no"
                     title="Carbook Mobile Website Live"
                     onLoad={() => setIsLoading(false)}
                     className="absolute top-0 left-0 border-0 pointer-events-auto"
@@ -473,6 +486,9 @@ export default function WebsiteShowcase() {
                       height: '780px',
                       transform: `scale(${phoneScale})`,
                       transformOrigin: 'top left',
+                      overflow: 'hidden',
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
                     }}
                     loading="lazy"
                   />
@@ -531,6 +547,7 @@ export default function WebsiteShowcase() {
                 <iframe
                   key={`laptop-mode-${iframeKey}`}
                   src={liveUrl}
+                  scrolling="no"
                   title="Carbook Desktop Website Live"
                   onLoad={() => setIsLoading(false)}
                   className="absolute top-0 left-0 border-0 pointer-events-auto"
@@ -539,6 +556,9 @@ export default function WebsiteShowcase() {
                     height: '780px',
                     transform: `scale(${laptopScale})`,
                     transformOrigin: 'top left',
+                    overflow: 'hidden',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
                   }}
                   loading="lazy"
                 />
@@ -580,6 +600,7 @@ export default function WebsiteShowcase() {
                 <iframe
                   key={`tablet-mode-${iframeKey}`}
                   src={liveUrl}
+                  scrolling="no"
                   title="Carbook Tablet Live"
                   onLoad={() => setIsLoading(false)}
                   className="absolute top-0 left-0 border-0 pointer-events-auto"
@@ -588,6 +609,9 @@ export default function WebsiteShowcase() {
                     height: '940px',
                     transform: `scale(${tabletScale})`,
                     transformOrigin: 'top left',
+                    overflow: 'hidden',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
                   }}
                   loading="lazy"
                 />
