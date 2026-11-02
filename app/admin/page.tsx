@@ -656,7 +656,7 @@ export default function AdminPage() {
                     }}
                     className="text-xs text-slate-400 hover:text-emerald-400 hover:underline cursor-pointer transition-colors"
                   >
-                    পাসওয়ার্ড মনে নেই? মোবাইল নম্বর দিয়ে রিসেট করুন
+                    পাসওয়ার্ড ভুলে গেছেন? সিক্রেট কি দিয়ে রিসেট করুন
                   </button>
                 </div>
 
@@ -676,7 +676,7 @@ export default function AdminPage() {
                     <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
                       <h3 className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
                         <KeyRound size={14} />
-                        <span>পাসওয়ার্ড রিকভারি / রিসেট</span>
+                        <span>অ্যাডমিন রিকভারি কি দিয়ে রিসেট</span>
                       </h3>
                       <button
                         type="button"
@@ -689,14 +689,14 @@ export default function AdminPage() {
 
                     <div className="space-y-1">
                       <label className="text-[11px] text-slate-300 block">
-                        মোবাইল নম্বর (01303482412) বা রিকভারি কি *
+                        গোপন রিকভারি কি (Secret Recovery Key) *
                       </label>
                       <input
                         type="text"
                         required
                         value={resetKey}
                         onChange={(e) => setResetKey(e.target.value)}
-                        placeholder="01303482412 বা রিকভারি কি"
+                        placeholder="আপনার গোপন রিকভারি কি পেস্ট করুন"
                         className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/60 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
                       />
                     </div>

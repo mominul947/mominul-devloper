@@ -152,7 +152,7 @@ export async function POST(request: Request) {
         )
       }
 
-      // 2. Validate Password
+      // 2. Validate Password with PBKDF2 Cryptographic Security
       let isValid = false
 
       if (auth && auth.hash && auth.salt) {
@@ -166,39 +166,13 @@ export async function POST(request: Request) {
         }
       }
 
-      // Master fallback recovery passwords for owner (guarantees owner can always log in)
-      const OWNER_FALLBACKS = [
-        '01303482412',
-        '01963259247',
-        'mominul947',
-        'admin123',
-        'admin',
-      ]
-      if (!isValid && OWNER_FALLBACKS.includes(password)) {
-        isValid = true
-        // Auto-save the owner's password as the official master hash
-        try {
-          const { hash, salt } = hashPasswordSecure(password)
-          const authFilePath = getAuthFilePath()
-          const dirPath = path.dirname(authFilePath)
-          if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true })
-          fs.writeFileSync(
-            authFilePath,
-            JSON.stringify({ hash, salt, updatedAt: new Date().toISOString() }, null, 2),
-            'utf-8'
-          )
-        } catch (e) {
-          console.error('Error auto-syncing password hash:', e)
-        }
-      }
-
       // If Failed:
       if (!isValid) {
         const attempt = recordFailedLoginAttempt(ip)
         if (attempt.locked) {
           return NextResponse.json(
             {
-              error: 'পরপর ৫ বার ভুল পাসওয়ার্ড দেওয়ায় ১৫ মিনিটের জন্য লক করা হয়েছে! আপনার ভেরিফাইড মোবাইল নম্বর (01303482412) দিয়ে আনলক করতে পারবেন।',
+              error: 'পরপর ৫ বার ভুল পাসওয়ার্ড দেওয়ায় ১৫ মিনিটের জন্য অ্যাকাউন্ট লক করা হয়েছে!',
               locked: true,
             },
             { status: 429 }
@@ -206,7 +180,7 @@ export async function POST(request: Request) {
         }
         return NextResponse.json(
           {
-            error: `ভুল পাসওয়ার্ড! আপনার আর ${attempt.remainingAttempts} বার চেষ্টা বাকি আছে। (ভুলে গেলে আপনার মোবাইল নম্বর 01303482412 দিয়েও লগইন করতে পারবেন)`,
+            error: `ভুল পাসওয়ার্ড! আপনার আর ${attempt.remainingAttempts} বার চেষ্টা বাকি আছে।`,
             remainingAttempts: attempt.remainingAttempts,
           },
           { status: 401 }
@@ -282,27 +256,20 @@ export async function POST(request: Request) {
     }
 
     // -------------------------------------------------------------
-    // ACTION 5: EMERGENCY RECOVERY & RESET
+    // ACTION 5: EMERGENCY RECOVERY & RESET (Private Secret Key Only)
     // -------------------------------------------------------------
     if (action === 'emergency_reset') {
       const serverRecoveryKey = process.env.ADMIN_RECOVERY_KEY || '8999f2c05c21b99e2621bf60cafcbf586bee6ce98ef6c027'
-      const ALLOWED_RECOVERY_IDENTIFIERS = [
-        serverRecoveryKey,
-        '8999f2c05c21b99e2621bf60cafcbf586bee6ce98ef6c027',
-        '01303482412',
-        '01963259247',
-        'mominul947',
-      ]
 
-      if (!ALLOWED_RECOVERY_IDENTIFIERS.includes(recoveryKey)) {
+      if (!recoveryKey || recoveryKey !== serverRecoveryKey) {
         recordFailedLoginAttempt(ip)
         return NextResponse.json(
-          { error: 'অবৈধ রিকভারি কি বা ভেরিফিকেশন নম্বর!' },
+          { error: 'অবৈধ সিক্রেট রিকভারি কি!' },
           { status: 403 }
         )
       }
 
-      // Valid recovery identifier: either set newPassword directly or delete auth file
+      // Valid recovery key: update to new password with PBKDF2
       const authFilePath = getAuthFilePath()
       clearLoginRateLimit(ip)
 
