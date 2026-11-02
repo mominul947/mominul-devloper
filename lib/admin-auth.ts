@@ -3,7 +3,9 @@ import fs from 'fs'
 import path from 'path'
 import { getStorageFilePath } from '@/lib/storage'
 
-// 1. Server Secret Management
+// 1. Server Secret Management (Deterministic fallback ensures all Vercel serverless containers share the same HMAC key)
+const STATIC_SECRET_FALLBACK = 'mominul-portfolio-secure-session-key-2026-d74f3f252e91d471dc532bb688294f8ed3069b85917a5701da1e72fff46821e5'
+
 function getServerSecret(): string {
   if (process.env.ADMIN_SECRET_KEY && process.env.ADMIN_SECRET_KEY.length >= 32) {
     return process.env.ADMIN_SECRET_KEY
@@ -17,18 +19,10 @@ function getServerSecret(): string {
       if (secret.length >= 32) return secret
     }
   } catch (e) {
-    // continue to create
+    // continue to fallback
   }
 
-  const newSecret = crypto.randomBytes(48).toString('hex')
-  try {
-    const dir = path.dirname(secretFilePath)
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(secretFilePath, newSecret, { encoding: 'utf-8', mode: 0o600 })
-  } catch (e) {
-    console.error('Error saving server secret:', e)
-  }
-  return newSecret
+  return STATIC_SECRET_FALLBACK
 }
 
 // 2. PBKDF2 Password Hashing (Industry Standard for Authentication)

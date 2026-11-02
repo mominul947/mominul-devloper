@@ -55,6 +55,11 @@ export default function AdminPage() {
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
 
+  // Emergency Recovery / Reset State
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetKey, setResetKey] = useState('')
+  const [resetNewPassword, setResetNewPassword] = useState('')
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -116,7 +121,7 @@ export default function AdminPage() {
       .catch(() => setIsConfigured(false))
 
     if (typeof window !== 'undefined') {
-      const savedToken = sessionStorage.getItem('admin_token')
+      const savedToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
       if (savedToken) {
         setToken(savedToken)
         setIsLoggedIn(true)
@@ -155,7 +160,7 @@ export default function AdminPage() {
   // Secure Authenticated Fetch Helper
   const authFetch = async (url: string, options: RequestInit = {}) => {
     const headers = new Headers(options.headers || {})
-    const currentToken = token || (typeof window !== 'undefined' ? sessionStorage.getItem('admin_token') : null)
+    const currentToken = token || (typeof window !== 'undefined' ? localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') : null)
     if (currentToken) {
       headers.set('Authorization', `Bearer ${currentToken}`)
     }
@@ -163,7 +168,10 @@ export default function AdminPage() {
     if (res.status === 401) {
       setIsLoggedIn(false)
       setToken('')
-      if (typeof window !== 'undefined') sessionStorage.removeItem('admin_token')
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_token')
+        sessionStorage.removeItem('admin_token')
+      }
     }
     return res
   }
@@ -227,6 +235,7 @@ export default function AdminPage() {
         setIsLoggedIn(true)
         setToken(data.token || '')
         if (typeof window !== 'undefined' && data.token) {
+          localStorage.setItem('admin_token', data.token)
           sessionStorage.setItem('admin_token', data.token)
         }
         setSuccess('মাস্টার পাসওয়ার্ড সফলভাবে তৈরি ও এনক্রিপ্ট হয়েছে!')
@@ -264,6 +273,7 @@ export default function AdminPage() {
         setIsLoggedIn(true)
         setToken(data.token || '')
         if (typeof window !== 'undefined' && data.token) {
+          localStorage.setItem('admin_token', data.token)
           sessionStorage.setItem('admin_token', data.token)
         }
         setPassword('')
@@ -272,6 +282,48 @@ export default function AdminPage() {
       }
     } catch (err: any) {
       setError(err?.message || 'Server connection error.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 2.5 Emergency Reset
+  const handleEmergencyReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    setLoading(true)
+
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'emergency_reset',
+          recoveryKey: resetKey,
+          newPassword: resetNewPassword,
+        }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.success) {
+        if (data.token) {
+          setIsLoggedIn(true)
+          setToken(data.token)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('admin_token', data.token)
+            sessionStorage.setItem('admin_token', data.token)
+          }
+        }
+        setShowResetModal(false)
+        setSuccess(data.message || 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!')
+        setResetKey('')
+        setResetNewPassword('')
+      } else {
+        setError(data.error || 'রিকভারি তথ্য সঠিক নয়!')
+      }
+    } catch (err: any) {
+      setError(err?.message || 'সার্ভার সংযোগে সমস্যা হয়েছে।')
     } finally {
       setLoading(false)
     }
@@ -288,6 +340,7 @@ export default function AdminPage() {
     setIsLoggedIn(false)
     setToken('')
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('admin_token')
       sessionStorage.removeItem('admin_token')
     }
   }
@@ -593,6 +646,20 @@ export default function AdminPage() {
                   )}
                 </button>
 
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError('')
+                      setSuccess('')
+                      setShowResetModal(true)
+                    }}
+                    className="text-xs text-slate-400 hover:text-emerald-400 hover:underline cursor-pointer transition-colors"
+                  >
+                    পাসওয়ার্ড মনে নেই? মোবাইল নম্বর দিয়ে রিসেট করুন
+                  </button>
+                </div>
+
                 <div className="pt-3 border-t border-white/5 space-y-1.5 text-center">
                   <div className="flex items-center justify-center gap-1.5 text-[11px] font-mono text-emerald-400">
                     <ShieldCheck size={14} className="text-emerald-400" />
@@ -602,6 +669,71 @@ export default function AdminPage() {
                     পরপর ৫ বার ভুল পাসওয়ার্ড দিলে সিস্টেম স্বয়ংক্রিয়ভাবে লক হয়ে যাবে
                   </p>
                 </div>
+
+                {/* RESET / RECOVERY FORM */}
+                {showResetModal && (
+                  <div className="mt-4 p-4 rounded-2xl bg-black/80 border border-emerald-500/40 space-y-3 shadow-2xl text-left">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
+                      <h3 className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                        <KeyRound size={14} />
+                        <span>পাসওয়ার্ড রিকভারি / রিসেট</span>
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowResetModal(false)}
+                        className="text-slate-400 hover:text-white text-xs cursor-pointer"
+                      >
+                        ✕ বন্ধ
+                      </button>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-slate-300 block">
+                        মোবাইল নম্বর (01303482412) বা রিকভারি কি *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={resetKey}
+                        onChange={(e) => setResetKey(e.target.value)}
+                        placeholder="01303482412 বা রিকভারি কি"
+                        className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/60 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-slate-300 block">
+                        নতুন মাস্টার পাসওয়ার্ড দিন *
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={resetNewPassword}
+                        onChange={(e) => setResetNewPassword(e.target.value)}
+                        placeholder="কমপক্ষে ৪ অক্ষরের নতুন পাসওয়ার্ড"
+                        className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/60 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
+                      />
+                    </div>
+
+                    <div className="pt-1 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleEmergencyReset}
+                        disabled={loading || !resetKey || !resetNewPassword}
+                        className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs uppercase tracking-wider hover:opacity-95 transition-opacity disabled:opacity-50 cursor-pointer"
+                      >
+                        {loading ? 'রিসেট হচ্ছে...' : 'পাসওয়ার্ড সেভ ও প্রবেশ'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowResetModal(false)}
+                        className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 font-bold transition-colors cursor-pointer"
+                      >
+                        বাতিল
+                      </button>
+                    </div>
+                  </div>
+                )}
               </form>
             ) : (
               /* FORM: INITIAL SETUP */
