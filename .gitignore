@@ -1,0 +1,36 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+/build
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local environment files containing secrets (CRITICAL: Do not leak secrets to GitHub!)
+.env*.local
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel deployment cache
+.vercel
+
+# System files
+.DS_Store
+*.pem
+Thumbs.db
+
+# Sensitive local server secrets
+data/.server-secret
