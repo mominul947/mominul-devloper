@@ -468,7 +468,7 @@ export default function AppShowcase() {
                           fill
                           className="object-contain"
                           priority
-                          unoptimized
+                          
                         />
                         <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                           <span className="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-mono text-white flex items-center gap-1.5 border border-white/20">
@@ -521,7 +521,7 @@ export default function AppShowcase() {
                         alt={`Thumbnail ${idx + 1}`}
                         fill
                         className="object-cover"
-                        unoptimized
+                        
                       />
                       <span className="absolute bottom-0.5 right-0.5 text-[8px] font-mono px-1 rounded bg-black/85 text-white font-bold">
                         {idx + 1}
@@ -693,7 +693,7 @@ export default function AppShowcase() {
                 alt="Enlarged App Screen"
                 fill
                 className="object-contain"
-                unoptimized
+                
               />
               <button
                 onClick={() => setIsZoomed(false)}

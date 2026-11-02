@@ -286,3 +286,34 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
+
+/* -------------------------------------------------------------
+   MOBILE TOUCH SMOOTH SCROLL & HIGH-FPS OPTIMIZATION
+   Eliminates touch lag, stutter and scroll fighting on Android & iOS
+------------------------------------------------------------- */
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: auto !important; /* Disables programmatic interpolation fighting touch momentum */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+  }
+
+  /* GPU-friendly lightweight backdrop filters on mobile */
+  .neu-card,
+  .glass-pill {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* Hardware acceleration for scroll containers */
+  main {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}

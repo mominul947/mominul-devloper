@@ -115,7 +115,7 @@ export default function About() {
                 <Image
                   src="/images/Approachable Young Man in Glasses.png"
                   alt="Md. Mominul Islam - Full-Stack & Mobile Architect"
-                  fill
+                  fill sizes="(max-width: 768px) 100vw, 450px"
                   priority
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                 />

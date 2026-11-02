@@ -161,6 +161,7 @@ export default function Hero() {
                       alt="Md. Mominul Islam"
                       fill
                       priority
+                      sizes="(max-width: 640px) 215px, (max-width: 1024px) 280px, 350px"
                       className={`object-contain object-bottom drop-shadow-md transition-transform duration-500 ${
                         activePhoto === 0 ? 'scale-[1.18] origin-bottom' : 'scale-100'
                       }`}
@@ -446,6 +447,7 @@ export default function Hero() {
                     alt="Md. Mominul Islam"
                     fill
                     priority
+                    sizes="(max-width: 1280px) 420px, 480px"
                     className={`object-contain object-bottom drop-shadow-2xl transition-transform duration-500 ${
                       activePhoto === 0 ? 'scale-[1.18] origin-bottom' : 'scale-100'
                     }`}
