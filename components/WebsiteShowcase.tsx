@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Laptop,
   Tablet,
-  Smartphone,
   ExternalLink,
   RotateCw,
   Sparkles,
@@ -16,6 +15,7 @@ import {
   CheckCircle2,
   Box,
 } from 'lucide-react'
+import { FaAndroid } from 'react-icons/fa6'
 
 type DeviceMode = '3d-studio' | 'phone' | 'laptop' | 'tablet'
 
@@ -145,8 +145,8 @@ export default function WebsiteShowcase() {
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <Smartphone size={14} />
-              <span>Phone (3D Mobile)</span>
+              <FaAndroid size={14} className={activeMode === 'phone' ? 'text-black' : 'text-[#3ddc84]'} />
+              <span>Android Phone (3D)</span>
             </button>
 
             <button
@@ -203,7 +203,7 @@ export default function WebsiteShowcase() {
             {/* Unified 3D Stage */}
             <div className="relative w-full max-w-5xl flex items-center justify-center">
               
-              {/* BACKDROP/CENTER: 3D LAPBOOK FRAME */}
+              {/* BACKDROP/CENTER: 3D LAPTOP FRAME */}
               <div
                 className="relative z-10 w-full max-w-4xl rounded-t-[26px] sm:rounded-t-[34px] border-[5px] sm:border-[7px] border-[#27272a] bg-[#0c0c0e] p-2 sm:p-3 shadow-[0_25px_60px_rgba(0,0,0,0.85)] transition-transform duration-500 hover:scale-[1.01]"
                 style={{
@@ -259,57 +259,84 @@ export default function WebsiteShowcase() {
                 </div>
               </div>
 
-              {/* FOREGROUND RIGHT: 3D FLOATING SMARTPHONE (Overlapping Front in 3D) */}
+              {/* FOREGROUND RIGHT: 3D FLOATING ANDROID FLAGSHIP PHONE (Overlapping Front in 3D) */}
               <motion.div
                 initial={{ opacity: 0, x: 30, y: 30 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 onClick={() => setActiveMode('phone')}
-                className="absolute -bottom-6 -right-2 xs:-right-4 sm:-right-8 lg:-right-6 z-30 w-[170px] xs:w-[210px] sm:w-[260px] cursor-pointer group"
+                className="absolute -bottom-6 -right-2 xs:-right-4 sm:-right-8 lg:-right-6 z-30 w-[180px] xs:w-[215px] sm:w-[260px] cursor-pointer group"
                 style={{
-                  transform: 'rotateY(-10deg) rotateX(4deg) translateZ(50px)',
+                  transform: 'rotateY(-10deg) rotateX(4deg) translateZ(60px)',
                   transformStyle: 'preserve-3d',
                 }}
-                title="Click to zoom in Phone Mode"
+                title="Click to view in Android Phone Mode"
               >
-                <div className="w-full rounded-[38px] sm:rounded-[46px] border-[4px] sm:border-[6px] border-[#27272a] bg-[#09090b] p-1.5 sm:p-2 shadow-[0_30px_60px_rgba(0,0,0,0.9)] ring-1 ring-emerald-500/30 group-hover:ring-emerald-400 group-hover:scale-105 transition-all duration-300">
+                {/* Modern Android Flagship Frame */}
+                <div className="w-full rounded-[36px] sm:rounded-[42px] border-[3.5px] sm:border-[4.5px] border-[#27272a] bg-[#09090b] p-1.5 sm:p-2 shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-emerald-500/30 group-hover:ring-emerald-400 group-hover:scale-105 transition-all duration-300 relative">
                   
-                  {/* Smartphone Dynamic Island */}
-                  <div className="w-16 sm:w-20 h-3 sm:h-3.5 bg-black rounded-full mx-auto mb-1 sm:mb-1.5 flex items-center justify-center border border-neutral-800">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-900/60" />
-                  </div>
+                  {/* Android Hardware Side Buttons */}
+                  <div className="absolute -right-[4.5px] top-14 w-[2.5px] h-7 rounded-r bg-[#3f3f46]" />
+                  <div className="absolute -right-[4.5px] top-24 w-[2.5px] h-12 rounded-r bg-[#3f3f46]" />
 
-                  {/* Scaled Mobile Viewport inside 3D Phone */}
-                  <div
-                    className="w-full overflow-hidden bg-white relative rounded-[28px] sm:rounded-[34px]"
-                    style={{ height: '340px' }}
-                  >
-                    <iframe
-                      src={liveUrl}
-                      title="Carbook 3D Studio Phone View"
-                      className="absolute top-0 left-0 border-0 pointer-events-none"
-                      style={{
-                        width: '390px',
-                        height: '780px',
-                        transform: 'scale(0.44)',
-                        transformOrigin: 'top left',
-                      }}
-                      loading="lazy"
-                    />
+                  {/* Micro Speaker Ear-Piece */}
+                  <div className="w-10 sm:w-12 h-[2px] rounded-full bg-neutral-700/80 mx-auto mb-1" />
+
+                  {/* Inner Screen Display */}
+                  <div className="w-full rounded-[28px] sm:rounded-[34px] overflow-hidden bg-white flex flex-col relative shadow-inner">
                     
-                    {/* Hover Click-to-Zoom Indicator */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center pointer-events-none">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold text-[9px] font-mono uppercase tracking-wider mb-1">
-                        🔍 Tap to Zoom
-                      </span>
-                      <span className="text-white font-bold text-xs">
-                        Mobile Mode
-                      </span>
+                    {/* Native Android Status Bar with Centered Punch-Hole Camera */}
+                    <div className="w-full h-5 sm:h-5.5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5 border-b border-stone-100">
+                      <span className="font-bold text-[9px] text-stone-800">9:41</span>
+                      
+                      {/* Centered Android Punch-Hole Camera Dot */}
+                      <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700 shadow-inner">
+                        <span className="w-1 h-1 rounded-full bg-[#18181b]" />
+                      </div>
+
+                      <div className="flex items-center gap-1 text-stone-700">
+                        <span className="text-[8px] font-bold">5G</span>
+                        <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
+                          <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Scaled Mobile Viewport inside Android Phone */}
+                    <div
+                      className="w-full overflow-hidden bg-white relative"
+                      style={{ height: '350px' }}
+                    >
+                      <iframe
+                        src={liveUrl}
+                        title="Carbook 3D Studio Android View"
+                        className="absolute top-0 left-0 border-0 pointer-events-none"
+                        style={{
+                          width: '390px',
+                          height: '750px',
+                          transform: 'scale(0.46)',
+                          transformOrigin: 'top left',
+                        }}
+                        loading="lazy"
+                      />
+                      
+                      {/* Hover Click-to-Zoom Indicator */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center pointer-events-none">
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold text-[9px] font-mono uppercase tracking-wider mb-1 flex items-center gap-1 shadow-md">
+                          <FaAndroid size={11} />
+                          <span>Tap to Zoom</span>
+                        </span>
+                        <span className="text-white font-bold text-xs font-billboard">
+                          Android Mode
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Android Gesture Navigation Line */}
+                    <div className="w-full h-3 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
+                      <div className="w-16 h-0.5 rounded-full bg-stone-300" />
                     </div>
                   </div>
-
-                  {/* Bottom Gesture Bar */}
-                  <div className="w-14 sm:w-20 h-1 rounded-full bg-neutral-600 mx-auto mt-1 sm:mt-1.5" />
                 </div>
               </motion.div>
 
@@ -362,7 +389,7 @@ export default function WebsiteShowcase() {
         )}
 
         {/* ------------------------------------------------------------------ */}
-        {/* MODE 2: PHONE MODE (Fixed, Full-Height 3D Smartphone Flagship)     */}
+        {/* MODE 2: ANDROID PHONE MODE (Full-Height Flagship Android Smartphone)*/}
         {/* ------------------------------------------------------------------ */}
         {activeMode === 'phone' && (
           <motion.div
@@ -372,59 +399,74 @@ export default function WebsiteShowcase() {
             transition={{ duration: 0.4 }}
             className="flex flex-col items-center w-full py-4"
           >
-            {/* Flagship Titanium Smartphone Frame with 3D Depth */}
+            {/* Flagship Android Smartphone Frame */}
             <div
-              className="relative w-full max-w-[340px] xs:max-w-[365px] sm:max-w-[385px] rounded-[48px] sm:rounded-[54px] border-[6px] sm:border-[8px] border-[#27272a] bg-[#09090b] p-2.5 sm:p-3 shadow-[0_30px_70px_rgba(0,0,0,0.85)] ring-1 ring-emerald-500/20"
+              className="relative w-full max-w-[340px] xs:max-w-[365px] sm:max-w-[385px] rounded-[42px] sm:rounded-[48px] border-[4.5px] sm:border-[6px] border-[#27272a] bg-[#09090b] p-2 sm:p-2.5 shadow-[0_30px_70px_rgba(0,0,0,0.85)] ring-1 ring-emerald-500/20"
               style={{
                 transform: 'rotateX(2deg)',
               }}
             >
-              {/* Smartphone Side Buttons (Volume & Power) */}
-              <div className="absolute -left-[9px] top-24 w-[3px] h-10 rounded-l bg-[#3f3f46]" />
-              <div className="absolute -left-[9px] top-38 w-[3px] h-10 rounded-l bg-[#3f3f46]" />
-              <div className="absolute -right-[9px] top-28 w-[3px] h-14 rounded-r bg-[#3f3f46]" />
+              {/* Android Hardware Side Buttons */}
+              <div className="absolute -right-[6px] top-24 w-[2.5px] h-10 rounded-r bg-[#3f3f46]" />
+              <div className="absolute -right-[6px] top-38 w-[2.5px] h-14 rounded-r bg-[#3f3f46]" />
 
-              {/* Dynamic Island Header */}
-              <div className="w-28 sm:w-32 h-4 sm:h-4.5 bg-black rounded-full mx-auto mb-2 flex items-center justify-between px-3 border border-neutral-800 shadow-inner">
-                <span className="text-[9px] font-mono text-neutral-400 font-bold">9:41</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#18181b]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-900/80" />
+              {/* Top Speaker Ear-piece Slit */}
+              <div className="w-14 sm:w-16 h-[2px] rounded-full bg-neutral-700/80 mx-auto mb-1.5" />
+
+              {/* Inner Screen */}
+              <div className="w-full rounded-[32px] sm:rounded-[38px] overflow-hidden bg-white flex flex-col relative shadow-inner">
+                
+                {/* Android Status Bar with Centered Punch-Hole Camera */}
+                <div className="w-full h-6 px-3.5 flex items-center justify-between text-[10px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 border-b border-stone-100">
+                  <span className="font-bold text-[10px] text-stone-900">9:41</span>
+                  
+                  {/* Centered Android Punch-Hole Camera */}
+                  <div className="w-3 h-3 rounded-full bg-black flex items-center justify-center border border-neutral-700 shadow-inner">
+                    <span className="w-1 h-1 rounded-full bg-[#1e293b]" />
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-stone-700">
+                    <span className="text-[9px] font-bold">5G</span>
+                    <div className="w-3.5 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
+                      <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                    </div>
+                  </div>
                 </div>
-                <span className="text-[8px] font-mono text-neutral-400">5G</span>
-              </div>
 
-              {/* Real Mobile Scaled Viewport - Generous Height so Hero & Form Never Cut Off */}
-              <div
-                ref={phoneRef}
-                className="w-full overflow-hidden bg-white relative rounded-[36px] sm:rounded-[42px] shadow-inner"
-                style={{
-                  height: `${750 * phoneScale}px`,
-                }}
-              >
-                <iframe
-                  key={`phone-mode-${iframeKey}`}
-                  src={liveUrl}
-                  title="Carbook Mobile Website Live"
-                  onLoad={() => setIsLoading(false)}
-                  className="absolute top-0 left-0 border-0 pointer-events-auto"
+                {/* Real Mobile Scaled Viewport - Generous Height so Hero & Form Never Cut Off */}
+                <div
+                  ref={phoneRef}
+                  className="w-full overflow-hidden bg-white relative"
                   style={{
-                    width: '390px',
-                    height: '750px',
-                    transform: `scale(${phoneScale})`,
-                    transformOrigin: 'top left',
+                    height: `${750 * phoneScale}px`,
                   }}
-                  loading="lazy"
-                />
-              </div>
+                >
+                  <iframe
+                    key={`phone-mode-${iframeKey}`}
+                    src={liveUrl}
+                    title="Carbook Mobile Website Live"
+                    onLoad={() => setIsLoading(false)}
+                    className="absolute top-0 left-0 border-0 pointer-events-auto"
+                    style={{
+                      width: '390px',
+                      height: '750px',
+                      transform: `scale(${phoneScale})`,
+                      transformOrigin: 'top left',
+                    }}
+                    loading="lazy"
+                  />
+                </div>
 
-              {/* Home Gesture Bar */}
-              <div className="w-28 h-1 rounded-full bg-neutral-500 mx-auto mt-2.5" />
+                {/* Android Bottom Gesture Navigation Line */}
+                <div className="w-full h-3.5 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
+                  <div className="w-20 h-0.5 rounded-full bg-stone-300" />
+                </div>
+              </div>
             </div>
 
             <p className="mt-4 text-xs font-mono text-slate-400 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Full Interactive Mobile Preview • Scroll and click directly inside the phone</span>
+              <FaAndroid className="text-[#3ddc84]" size={14} />
+              <span>Flagship Android View • Live Interactive Mobile Responsive Engine</span>
             </p>
           </motion.div>
         )}
