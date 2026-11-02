@@ -7,25 +7,17 @@ import {
   Smartphone,
   Sparkles,
   Zap,
-  ShieldCheck,
-  Activity,
   ArrowRight,
   ExternalLink,
   CheckCircle2,
-  Cpu,
-  Globe,
   Maximize2,
   X,
   ChevronLeft,
   ChevronRight,
-  Wrench,
-  Server,
-  FileCode,
-  Layers,
   Star,
   DownloadCloud,
 } from 'lucide-react'
-import { FaAndroid, FaGooglePlay } from 'react-icons/fa6'
+import { FaGooglePlay } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 
 interface AppProject {
@@ -56,7 +48,7 @@ const apps: AppProject[] = [
     deliverable: 'Google Play Store Production Release',
     performance: '60fps Native Android UI',
     platform: 'Android (Google Play)',
-    accent: '#3b82f6',
+    accent: '#10b981',
     playStoreUrl: 'https://play.google.com/store/apps/details?id=com.appuser.carbook',
     downloads: '5K+',
     rating: '4.7',
@@ -132,15 +124,28 @@ const apps: AppProject[] = [
 ]
 
 export default function AppShowcase() {
-  const [selectedApp, setSelectedApp] = useState<AppProject>(apps[0])
-  const [selectedScreenshotIdx, setSelectedScreenshotIdx] = useState<number>(0)
-  const [isZoomed, setIsZoomed] = useState<boolean>(false)
+  // Independent screenshot indices for each project
+  const [screenshotIndices, setScreenshotIndices] = useState<Record<string, number>>({
+    carbook: 0,
+    servicego: 0,
+    tournament: 0,
+  })
+
+  // Mobile focused app selection
+  const [selectedMobileApp, setSelectedMobileApp] = useState<AppProject>(apps[0])
+
+  // Lightbox zoom modal
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null)
+
+  // Live Google Play stats for Carbook
   const [carbookLive, setCarbookLive] = useState({
     downloads: '5K+',
     rating: '4.7',
   })
 
-  // Live Google Play Downloads & Rating Auto-Updater
+  const [isPaused, setIsPaused] = useState<boolean>(false)
+
+  // Fetch live stats
   useEffect(() => {
     fetch('/api/playstore?id=com.appuser.carbook')
       .then((res) => res.json())
@@ -155,57 +160,61 @@ export default function AppShowcase() {
       .catch(() => {})
   }, [])
 
-  const [isPaused, setIsPaused] = useState<boolean>(false)
-
-  const currentAppIdx = apps.findIndex((a) => a.id === selectedApp.id)
-  const nextAppIdx = (currentAppIdx + 1) % apps.length
-  const nextApp = apps[nextAppIdx]
-  const prevAppIdx = (currentAppIdx - 1 + apps.length) % apps.length
-  const prevApp = apps[prevAppIdx]
-
-  const handlePrev = () => {
-    if (selectedScreenshotIdx > 0) {
-      setSelectedScreenshotIdx((prev) => prev - 1)
-    } else {
-      const prevIdx = (currentAppIdx - 1 + apps.length) % apps.length
-      setSelectedApp(apps[prevIdx])
-      setSelectedScreenshotIdx(apps[prevIdx].screenshots.length - 1)
-    }
-  }
-
-  const handleNext = () => {
-    if (selectedScreenshotIdx < selectedApp.screenshots.length - 1) {
-      setSelectedScreenshotIdx((prev) => prev + 1)
-    } else {
-      const nextIdx = (currentAppIdx + 1) % apps.length
-      setSelectedApp(apps[nextIdx])
-      setSelectedScreenshotIdx(0)
-    }
-  }
-
+  // Auto-cycle screenshots independently
   useEffect(() => {
-    if (isPaused || isZoomed) return
-    const timer = setInterval(() => {
-      handleNext()
-    }, 4500)
-    return () => clearInterval(timer)
-  }, [selectedApp, selectedScreenshotIdx, isPaused, isZoomed, currentAppIdx])
+    if (isPaused || zoomedImage) return
 
-  const isCarbook = selectedApp.id === 'carbook'
-  const currentDownloads = isCarbook ? carbookLive.downloads : selectedApp.downloads
-  const currentRating = isCarbook ? '4.7' : selectedApp.rating
+    const timer = setInterval(() => {
+      setScreenshotIndices((prev) => {
+        const next: Record<string, number> = { ...prev }
+        apps.forEach((app) => {
+          next[app.id] = ((prev[app.id] || 0) + 1) % app.screenshots.length
+        })
+        return next
+      })
+    }, 4500)
+
+    return () => clearInterval(timer)
+  }, [isPaused, zoomedImage])
+
+  const handlePrevScreenshot = (appId: string) => {
+    setScreenshotIndices((prev) => {
+      const current = prev[appId] || 0
+      const app = apps.find((a) => a.id === appId)
+      const max = app ? app.screenshots.length : 4
+      return {
+        ...prev,
+        [appId]: (current - 1 + max) % max,
+      }
+    })
+  }
+
+  const handleNextScreenshot = (appId: string) => {
+    setScreenshotIndices((prev) => {
+      const current = prev[appId] || 0
+      const app = apps.find((a) => a.id === appId)
+      const max = app ? app.screenshots.length : 4
+      return {
+        ...prev,
+        [appId]: (current + 1) % max,
+      }
+    })
+  }
+
+  const currentMobileAppIdx = apps.findIndex((a) => a.id === selectedMobileApp.id)
+  const nextMobileApp = apps[(currentMobileAppIdx + 1) % apps.length]
 
   return (
-    <section id="apps" className="relative py-24 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+    <section id="apps" className="relative py-20 sm:py-24 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header with Scroll Reveal */}
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, margin: '-50px' }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-10 border-b theme-border pb-4 sm:pb-6"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-12 border-b theme-border pb-4 sm:pb-6"
         >
           <div>
             <p className="text-xs font-mono uppercase tracking-widest theme-text-accent font-bold mb-1 flex items-center gap-1.5">
@@ -216,306 +225,410 @@ export default function AppShowcase() {
               FEATURED APPLICATIONS
             </h2>
           </div>
-          <span className="text-xs font-mono theme-text-muted">
-            ANDROID &amp; CROSS-PLATFORM NATIVE 60FPS BUILDS
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono px-3 py-1 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-bold">
+              3 LIVE BUILDS • 60FPS NATIVE ANDROID
+            </span>
+          </div>
         </motion.div>
 
-        {/* 3 Prominent High-Impact App Switcher Cards (Carbook 1st!) with Staggered Scroll Animation */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12">
+        {/* =========================================================================
+            DESKTOP PC VIEW (hidden on mobile, grid on lg: screens):
+            "jei koita project sei koita phone" -> 3 PROJECTS = 3 PHONES SIDE-BY-SIDE
+           ========================================================================= */}
+        <div
+          className="hidden lg:grid lg:grid-cols-3 gap-6 xl:gap-8 items-stretch"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           {apps.map((app, idx) => {
-            const isActive = selectedApp.id === app.id
-            const isThisCarbook = app.id === 'carbook'
-            return (
-              <motion.button
-                key={app.id}
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, margin: '-40px' }}
-                transition={{ duration: 0.45, delay: idx * 0.1 }}
-                onClick={() => {
-                  setSelectedApp(app)
-                  setSelectedScreenshotIdx(0)
-                }}
-                className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
-                  isActive
-                    ? 'border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-500/30'
-                    : 'theme-border hover:border-emerald-500/40 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'
-                }`}
-              >
-                {isActive && (
-                  <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-                )}
+            const isCarbook = app.id === 'carbook'
+            const currentIdx = screenshotIndices[app.id] || 0
+            const activeScreenshot = app.screenshots[currentIdx] || app.screenshots[0]
+            const downloads = isCarbook ? carbookLive.downloads : app.downloads
+            const rating = isCarbook ? carbookLive.rating : app.rating
 
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-xs font-bold text-emerald-500 flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-500'}`} />
+            return (
+              <motion.div
+                key={app.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, margin: '-30px' }}
+                transition={{ duration: 0.5, delay: idx * 0.12 }}
+                className="flex flex-col rounded-3xl p-5 xl:p-6 border theme-border hover:border-emerald-500/40 transition-all duration-300 shadow-xl relative overflow-hidden group"
+                style={{ backgroundColor: 'var(--bg-card)' }}
+              >
+                {/* Accent ambient glow */}
+                <div
+                  className="absolute -top-16 -right-16 w-36 h-36 rounded-full blur-3xl pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity"
+                  style={{ backgroundColor: app.accent }}
+                />
+
+                {/* Top Badge & Number */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-mono text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span>0{idx + 1} • {app.category}</span>
                   </span>
 
-                  {isThisCarbook ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/30 flex items-center gap-1">
+                  {isCarbook ? (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/40 flex items-center gap-1 shadow-sm">
                       <FaGooglePlay size={10} />
-                      <span>{carbookLive.downloads} Live</span>
+                      <span>{downloads} Live</span>
                     </span>
                   ) : (
-                    <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold border transition-colors ${
-                      isActive
-                        ? 'bg-emerald-500 text-black border-emerald-500'
-                        : 'border-stone-700 theme-text-muted group-hover:border-stone-500'
-                    }`}>
-                      {isActive ? 'ACTIVE VIEW' : 'VIEW'}
+                    <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold border border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
+                      Client MVP
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <h3 className="font-billboard text-xl sm:text-2xl theme-text-main leading-snug">
-                    {app.name}
-                  </h3>
-                  {isThisCarbook && (
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                      PLAY STORE
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-xs theme-text-muted mt-1 leading-relaxed line-clamp-2">
-                  {app.tagline}
-                </p>
-              </motion.button>
-            )
-          })}
-        </div>
-
-        {/* 3D Interactive Device Stage */}
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* Left: App Details & Engineering Specs (4 Cols) */}
-          <div className="lg:col-span-4 space-y-5 sm:space-y-6 order-2 lg:order-1">
-            <motion.div
-              key={selectedApp.id + '-info'}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-6"
-            >
-              {/* Header Card */}
-              <div
-                className="rounded-3xl p-6 border theme-border space-y-4 shadow-sm"
-                style={{ backgroundColor: 'var(--bg-card)' }}
-              >
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider theme-text-accent">
-                    {selectedApp.category}
-                  </span>
-                  
-                  {selectedApp.playStoreUrl ? (
-                    <a
-                      href={selectedApp.playStoreUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1 rounded-full text-xs font-mono font-bold border border-emerald-500/40 text-emerald-400 bg-emerald-500/15 flex items-center gap-1.5 hover:bg-emerald-500 hover:text-black transition-all shadow-xs"
-                    >
-                      <FaGooglePlay size={12} />
-                      <span>Live on Google Play ({currentDownloads})</span>
-                      <ExternalLink size={11} />
-                    </a>
-                  ) : (
-                    <span
-                      className="px-3 py-1 rounded-full text-xs font-mono font-semibold border theme-border text-emerald-500 bg-emerald-500/10"
-                    >
-                      Custom Client Release
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="font-billboard text-3xl theme-text-main">{selectedApp.name}</h3>
-                  <p className="text-sm font-medium theme-text-main leading-snug mt-1">
-                    {selectedApp.tagline}
+                {/* App Name & Tagline */}
+                <div className="mb-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-billboard text-2xl xl:text-3xl theme-text-main leading-tight">
+                      {app.name}
+                    </h3>
+                    {isCarbook && (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                        PLAY STORE
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs theme-text-muted mt-1 line-clamp-2 leading-relaxed">
+                    {app.tagline}
                   </p>
                 </div>
 
-                <p className="text-xs theme-text-muted leading-relaxed">
-                  {selectedApp.description}
-                </p>
-
-                {/* Engineering Metrics */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div
-                    className="p-3 rounded-2xl border theme-border text-center"
-                    style={{ backgroundColor: 'var(--bg-surface)' }}
-                  >
-                    <p className="text-xs theme-text-muted font-mono flex items-center justify-center gap-1">
-                      {selectedApp.playStoreUrl ? (
+                {/* Key Metrics Strip */}
+                <div className="grid grid-cols-2 gap-2 mb-4 p-2.5 rounded-2xl border theme-border bg-black/10 dark:bg-black/30">
+                  <div className="text-center">
+                    <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
+                      {isCarbook ? (
                         <>
-                          <DownloadCloud size={12} className="text-emerald-500" />
+                          <DownloadCloud size={11} className="text-emerald-400" />
                           <span>Downloads</span>
                         </>
                       ) : (
                         <>
-                          <Smartphone size={12} className="text-emerald-500" />
+                          <Smartphone size={11} className="text-emerald-400" />
                           <span>Deliverable</span>
                         </>
                       )}
                     </p>
-                    <p className="text-sm font-bold theme-text-main mt-1 leading-tight">
-                      {selectedApp.playStoreUrl ? `${currentDownloads} (Live)` : selectedApp.deliverable}
+                    <p className="text-xs font-bold theme-text-main mt-0.5">
+                      {isCarbook ? `${downloads} Live` : app.deliverable}
                     </p>
                   </div>
-                  
-                  <div
-                    className="p-3 rounded-2xl border theme-border text-center"
-                    style={{ backgroundColor: 'var(--bg-surface)' }}
-                  >
-                    <p className="text-xs theme-text-muted font-mono flex items-center justify-center gap-1">
-                      {selectedApp.playStoreUrl ? (
+                  <div className="text-center border-l theme-border">
+                    <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
+                      {isCarbook ? (
                         <>
-                          <Star size={12} className="text-amber-400 fill-amber-400" />
+                          <Star size={11} className="text-amber-400 fill-amber-400" />
                           <span>Rating</span>
                         </>
                       ) : (
                         <>
-                          <Zap size={12} className="text-emerald-500" />
-                          <span>Benchmark</span>
+                          <Zap size={11} className="text-emerald-400" />
+                          <span>Performance</span>
                         </>
                       )}
                     </p>
-                    <p className="text-sm font-bold text-emerald-500 mt-1 leading-tight">
-                      {selectedApp.playStoreUrl ? `${currentRating} ★ / 5.0` : selectedApp.performance}
+                    <p className="text-xs font-bold text-emerald-400 mt-0.5">
+                      {isCarbook ? `${rating} ★ / 5.0` : app.performance}
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Core App Features */}
-              <div
-                className="rounded-3xl p-6 border theme-border space-y-3 shadow-sm"
-                style={{ backgroundColor: 'var(--bg-card)' }}
-              >
-                <p className="text-xs font-mono uppercase tracking-wider theme-text-main font-bold flex items-center gap-2">
-                  <CheckCircle2 size={14} className="text-[#10b981]" />
-                  Key Architectural Capabilities
-                </p>
-                <div className="space-y-2.5">
-                  {selectedApp.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-xs theme-text-muted">
-                      <span className="theme-text-accent mt-0.5">•</span>
-                      <span>{feat}</span>
+                {/* DEDICATED PHONE MOCKUP FOR THIS PROJECT */}
+                <div className="relative flex flex-col items-center justify-center my-2">
+                  <div className="relative w-full max-w-[270px] xl:max-w-[280px] rounded-[38px] p-2 sm:p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
+                    
+                    {/* Hardware Buttons */}
+                    <div className="absolute -right-[4.5px] top-20 w-[2.5px] h-8 rounded-r bg-[#3f3f46]" />
+                    <div className="absolute -right-[4.5px] top-32 w-[2.5px] h-12 rounded-r bg-[#3f3f46]" />
+
+                    {/* Phone Inner Screen */}
+                    <div className="w-full rounded-[30px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
+                      
+                      {/* Android Status Bar */}
+                      <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5 border-b border-stone-100">
+                        <span className="font-bold text-[9px]">9:41</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
+                          <span className="w-1 h-1 rounded-full bg-[#18181b]" />
+                        </div>
+                        <div className="flex items-center gap-1 text-stone-700">
+                          <span className="text-[8px] font-bold">5G</span>
+                          <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
+                            <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Screen Image Body with Interactive Arrows & Zoom */}
+                      <div
+                        className="relative w-full aspect-[390/860] bg-white cursor-zoom-in group/screen select-none overflow-hidden"
+                        onClick={() => setZoomedImage(activeScreenshot)}
+                        title="Click to Zoom Screenshot"
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={app.id + '-' + currentIdx}
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.02 }}
+                            transition={{ duration: 0.22 }}
+                            className="relative w-full h-full"
+                          >
+                            <Image
+                              src={activeScreenshot}
+                              alt={`${app.name} Screen ${currentIdx + 1}`}
+                              fill
+                              sizes="(max-width: 1280px) 270px, 290px"
+                              className="object-contain"
+                              priority={idx === 0}
+                            />
+                            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/screen:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                              <span className="px-2.5 py-1 rounded-full bg-black/85 backdrop-blur-md text-[10px] font-mono text-white flex items-center gap-1.5 border border-white/20 shadow-lg">
+                                <Maximize2 size={11} />
+                                <span>Zoom</span>
+                              </span>
+                            </div>
+                          </motion.div>
+                        </AnimatePresence>
+
+                        {/* Interactive In-Phone Left Arrow */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePrevScreenshot(app.id)
+                          }}
+                          className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/75 hover:bg-emerald-500 hover:text-black text-white border border-white/20 shadow-md flex items-center justify-center transition-all cursor-pointer z-30"
+                          title="Previous screenshot"
+                          aria-label="Previous screenshot"
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+
+                        {/* Interactive In-Phone Right Arrow */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleNextScreenshot(app.id)
+                          }}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/75 hover:bg-emerald-500 hover:text-black text-white border border-white/20 shadow-md flex items-center justify-center transition-all cursor-pointer z-30"
+                          title="Next screenshot"
+                          aria-label="Next screenshot"
+                        >
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+
+                      {/* Android Home Navigation Bar */}
+                      <div className="w-full h-3 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
+                        <div className="w-14 h-0.5 rounded-full bg-stone-300" />
+                      </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Screenshot Thumbnails & Counter */}
+                <div className="mt-3 flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl border theme-border bg-black/30 backdrop-blur-sm">
+                    {app.screenshots.map((thumb, tIdx) => {
+                      const isCurrent = currentIdx === tIdx
+                      return (
+                        <button
+                          key={tIdx}
+                          onClick={() =>
+                            setScreenshotIndices((prev) => ({
+                              ...prev,
+                              [app.id]: tIdx,
+                            }))
+                          }
+                          className={`relative w-8 xl:w-9 h-12 xl:h-13 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                            isCurrent
+                              ? 'border-emerald-500 scale-105 shadow-md shadow-emerald-500/20 ring-1 ring-emerald-500/30'
+                              : 'border-white/10 opacity-50 hover:opacity-90'
+                          }`}
+                          title={`View screen ${tIdx + 1}`}
+                        >
+                          <Image
+                            src={thumb}
+                            alt={`Screen ${tIdx + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <span className="text-[10px] font-mono theme-text-muted">
+                    Screen {currentIdx + 1} of {app.screenshots.length} • Click to switch
+                  </span>
+                </div>
+
+                {/* Key Architectural Features */}
+                <div className="mt-4 pt-3 border-t theme-border space-y-1.5 flex-1">
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold flex items-center gap-1">
+                    <CheckCircle2 size={12} className="text-emerald-500" />
+                    Key Capabilities
+                  </p>
+                  {app.features.slice(0, 3).map((feat, fIdx) => (
+                    <p key={fIdx} className="text-[11px] theme-text-muted leading-relaxed flex items-start gap-1.5">
+                      <span className="text-emerald-400 mt-0.5">•</span>
+                      <span className="line-clamp-2">{feat}</span>
+                    </p>
                   ))}
                 </div>
-              </div>
 
-              {/* Tech Stack Chips */}
-              <div className="flex flex-wrap gap-2">
-                {selectedApp.techStack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="px-3 py-1 rounded-full text-[11px] font-mono border theme-border"
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      color: 'var(--text-main)',
-                    }}
+                {/* Tech Stack Chips */}
+                <div className="flex flex-wrap gap-1.5 mt-3 mb-4">
+                  {app.techStack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-mono border theme-border bg-black/5 dark:bg-white/5 theme-text-muted"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action CTA Buttons */}
+                <div className="space-y-2 mt-auto">
+                  {isCarbook && app.playStoreUrl ? (
+                    <a
+                      href={app.playStoreUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.01]"
+                    >
+                      <FaGooglePlay size={13} />
+                      <span>Live on Play Store ({downloads})</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  ) : (
+                    <a
+                      href="https://www.fiverr.com/s/WebEmax"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 rounded-xl btn-theme-primary font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md"
+                    >
+                      <FiverrLogo size={15} />
+                      <span>Order on Fiverr</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+
+                  <a
+                    href="#contact"
+                    className="w-full py-2 rounded-xl btn-theme-secondary font-mono text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
+                    <span>Request Custom Build</span>
+                    <ArrowRight size={12} />
+                  </a>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* =========================================================================
+            MOBILE VIEW (lg:hidden):
+            Keeps smooth single-phone view with clean tabs so mobile isn't cramped
+           ========================================================================= */}
+        <div className="lg:hidden space-y-6">
+          
+          {/* Mobile App Selector Cards (Carbook 1st) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {apps.map((app, idx) => {
+              const isActive = selectedMobileApp.id === app.id
+              const isThisCarbook = app.id === 'carbook'
+              return (
+                <button
+                  key={app.id}
+                  onClick={() => {
+                    setSelectedMobileApp(app)
+                  }}
+                  className={`p-3.5 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                    isActive
+                      ? 'border-emerald-500 bg-emerald-500/10 shadow-md shadow-emerald-500/10 ring-1 ring-emerald-500/30'
+                      : 'theme-border bg-black/5 dark:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[11px] font-bold text-emerald-500 flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-500'}`} />
+                      <span>0{idx + 1} • {app.category}</span>
+                    </span>
+                    {isThisCarbook ? (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/30 flex items-center gap-1">
+                        <FaGooglePlay size={9} />
+                        <span>{carbookLive.downloads}</span>
+                      </span>
+                    ) : (
+                      <span className={`text-[9px] font-mono px-2 py-0.2 rounded-full uppercase font-bold border ${
+                        isActive ? 'bg-emerald-500 text-black border-emerald-500' : 'theme-border theme-text-muted'
+                      }`}>
+                        {isActive ? 'ACTIVE' : 'VIEW'}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-billboard text-lg theme-text-main">
+                    {app.name}
+                  </h3>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Center: Slideable Android Flagship Phone View (4 Cols) */}
-          <div className="lg:col-span-4 flex flex-col items-center justify-center order-1 lg:order-2 relative">
-            
-            {/* Quick App Selector Pills directly on Phone View */}
-            <div className="w-full max-w-[320px] mb-3 flex items-center justify-between gap-1.5 p-1 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-md">
-              {apps.map((app, idx) => {
-                const isCur = app.id === selectedApp.id
-                return (
-                  <button
-                    key={app.id}
-                    onClick={() => {
-                      setSelectedApp(app)
-                      setSelectedScreenshotIdx(0)
-                    }}
-                    className={`flex-1 py-1.5 px-1.5 rounded-xl text-[10px] font-mono font-bold transition-all truncate text-center cursor-pointer ${
-                      isCur
-                        ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {idx + 1}. {app.name}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Phone Slide Stage with Left / Right Arrows & Stacked Next App Preview */}
-            <div
-              className="relative flex items-center justify-center w-full"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
+          {/* Mobile Phone Mockup View */}
+          <div className="flex flex-col items-center justify-center relative">
+            <div className="relative flex items-center justify-center w-full">
               
-              {/* STACKED "NEXT APP" MOCKUP UNDERNEATH / BEHIND (Lower Opacity, Scaled Down) */}
+              {/* Stacked Next App Peek */}
               <div
-                onClick={() => {
-                  setSelectedApp(nextApp)
-                  setSelectedScreenshotIdx(0)
-                }}
-                className="absolute top-2.5 sm:top-4 right-0 xs:right-1 sm:-right-8 w-full max-w-[250px] xs:max-w-[270px] sm:max-w-[285px] rounded-[34px] sm:rounded-[40px] p-2 sm:p-2.5 shadow-2xl border-[3px] border-[#27272a]/60 bg-[#09090b] scale-[0.91] sm:scale-[0.93] origin-right opacity-35 hover:opacity-75 transition-all duration-300 cursor-pointer z-0 select-none group"
-                title={`Next App: ${nextApp.name} (Click to view)`}
+                onClick={() => setSelectedMobileApp(nextMobileApp)}
+                className="absolute top-3 right-0 xs:right-2 w-full max-w-[250px] rounded-[34px] p-2 shadow-2xl border-[3px] border-[#27272a]/60 bg-[#09090b] scale-[0.92] origin-right opacity-35 hover:opacity-75 transition-all cursor-pointer z-0 select-none group"
+                title={`Next: ${nextMobileApp.name}`}
               >
-                <div className="w-full rounded-[26px] sm:rounded-[32px] overflow-hidden bg-white/95 aspect-[390/884] relative">
+                <div className="w-full rounded-[26px] overflow-hidden bg-white aspect-[390/884] relative">
                   <Image
-                    src={nextApp.screenshots[0]}
-                    alt={nextApp.name}
+                    src={nextMobileApp.screenshots[0]}
+                    alt={nextMobileApp.name}
                     fill
-                    sizes="(max-width: 640px) 180px, 240px"
+                    sizes="200px"
                     className="object-contain"
                   />
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 backdrop-blur-[0.5px] transition-colors flex flex-col items-center justify-center p-3 text-center">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[8px] font-mono uppercase tracking-wider mb-1 shadow-sm">
+                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-2 text-center">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[8px] font-mono uppercase mb-1">
                       Next App →
                     </span>
-                    <span className="text-white font-bold text-xs sm:text-sm font-billboard tracking-wide drop-shadow">
-                      {nextApp.name}
+                    <span className="text-white font-bold text-xs font-billboard">
+                      {nextMobileApp.name}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Left Slide Arrow */}
+              {/* Prev Arrow */}
               <button
-                onClick={handlePrev}
-                className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-900/90 hover:bg-emerald-500 hover:text-black text-white border border-stone-700 shadow-xl flex items-center justify-center transition-all cursor-pointer z-40 group"
-                title="Previous screen"
+                onClick={() => handlePrevScreenshot(selectedMobileApp.id)}
+                className="absolute -left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-xl flex items-center justify-center cursor-pointer z-40 hover:bg-emerald-500 hover:text-black transition-colors"
                 aria-label="Previous screen"
               >
-                <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+                <ChevronLeft size={18} />
               </button>
 
-              {/* Active Android Mockup Frame in Front (z-20) */}
-              <div className="relative z-20 w-full max-w-[270px] xs:max-w-[285px] sm:max-w-[295px] rounded-[36px] sm:rounded-[40px] p-2 sm:p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b]">
-                
-                {/* Android Hardware Side Buttons */}
-                <div className="absolute -right-[4.5px] top-24 w-[2.5px] h-9 rounded-r bg-[#3f3f46]" />
-                <div className="absolute -right-[4.5px] top-36 w-[2.5px] h-14 rounded-r bg-[#3f3f46]" />
-
-                {/* Inner Screen Container */}
-                <div className="w-full rounded-[28px] sm:rounded-[32px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
-                  
-                  {/* Native Android Status Bar */}
-                  <div className="w-full h-5 sm:h-5.5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
-                    <span className="font-bold text-[9px] tracking-tight">9:41</span>
-                    
-                    {/* Centered Android Punch-Hole Camera */}
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
+              {/* Mobile Phone Container */}
+              <div className="relative z-20 w-full max-w-[275px] rounded-[38px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b]">
+                <div className="w-full rounded-[30px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
+                  {/* Status Bar */}
+                  <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
+                    <span className="font-bold text-[9px]">9:41</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
                       <span className="w-1 h-1 rounded-full bg-[#18181b]" />
                     </div>
-
                     <div className="flex items-center gap-1 text-stone-700">
                       <span className="text-[8px] font-bold">5G</span>
                       <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
@@ -524,252 +637,141 @@ export default function AppShowcase() {
                     </div>
                   </div>
 
-                  {/* Slideable Screenshot Body (Touch-Swipeable & Click-Zoomable) */}
+                  {/* Screenshot Image */}
                   <div
                     className="relative w-full aspect-[390/884] bg-white cursor-zoom-in group select-none overflow-hidden"
-                    onClick={() => setIsZoomed(true)}
+                    onClick={() => {
+                      const cur = screenshotIndices[selectedMobileApp.id] || 0
+                      setZoomedImage(selectedMobileApp.screenshots[cur])
+                    }}
                   >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={selectedApp.id + '-' + selectedScreenshotIdx}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.25 }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.2}
-                        onDragEnd={(_, { offset }) => {
-                          if (offset.x > 35) handlePrev()
-                          else if (offset.x < -35) handleNext()
-                        }}
-                        className="relative w-full h-full"
-                      >
-                        <Image
-                          src={selectedApp.screenshots[selectedScreenshotIdx]}
-                          alt={`${selectedApp.name} Screen ${selectedScreenshotIdx + 1}`}
-                          fill
-                          sizes="(max-width: 640px) 260px, 320px"
-                          className="object-contain"
-                          priority
-                        />
-                        <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                          <span className="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-mono text-white flex items-center gap-1.5 border border-white/20">
-                            <Maximize2 size={11} />
-                            <span>Click to Zoom</span>
-                          </span>
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
+                    <Image
+                      src={selectedMobileApp.screenshots[screenshotIndices[selectedMobileApp.id] || 0]}
+                      alt={`${selectedMobileApp.name} Screen`}
+                      fill
+                      sizes="280px"
+                      className="object-contain"
+                      priority
+                    />
                   </div>
 
-                  {/* Native Android Gesture Navigation Bar */}
-                  <div className="w-full h-3 sm:h-3.5 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
+                  {/* Android Home Bar */}
+                  <div className="w-full h-3 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
                     <div className="w-16 h-0.5 rounded-full bg-stone-300" />
                   </div>
-
                 </div>
               </div>
 
-              {/* Right Slide Arrow */}
+              {/* Next Arrow */}
               <button
-                onClick={handleNext}
-                className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-900/90 hover:bg-emerald-500 hover:text-black text-white border border-stone-700 shadow-xl flex items-center justify-center transition-all cursor-pointer z-40 group"
-                title="Next screen"
+                onClick={() => handleNextScreenshot(selectedMobileApp.id)}
+                className="absolute -right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-xl flex items-center justify-center cursor-pointer z-40 hover:bg-emerald-500 hover:text-black transition-colors"
                 aria-label="Next screen"
               >
-                <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight size={18} />
               </button>
-
             </div>
 
-            {/* Screenshots Slide Dots & Thumbnail Strip */}
+            {/* Mobile Thumbnails */}
             <div className="mt-4 flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2 p-1.5 rounded-2xl border theme-border bg-black/40 backdrop-blur-md">
-                {selectedApp.screenshots.map((img, idx) => {
-                  const isSelected = selectedScreenshotIdx === idx
+              <div className="flex items-center gap-1.5 p-1 rounded-xl border theme-border bg-black/40 backdrop-blur-md">
+                {selectedMobileApp.screenshots.map((img, idx) => {
+                  const isCur = (screenshotIndices[selectedMobileApp.id] || 0) === idx
                   return (
                     <button
                       key={idx}
-                      onClick={() => setSelectedScreenshotIdx(idx)}
-                      className={`relative w-11 sm:w-12 h-16 sm:h-18 rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? 'border-emerald-500 scale-105 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/30'
-                          : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30'
+                      onClick={() =>
+                        setScreenshotIndices((prev) => ({
+                          ...prev,
+                          [selectedMobileApp.id]: idx,
+                        }))
+                      }
+                      className={`relative w-10 h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                        isCur ? 'border-emerald-500 scale-105 shadow-md shadow-emerald-500/25' : 'border-white/10 opacity-50'
                       }`}
-                      title={`View Screen ${idx + 1}`}
                     >
-                      <Image
-                        src={img}
-                        alt={`Thumbnail ${idx + 1}`}
-                        fill
-                        className="object-cover"
-                        
-                      />
-                      <span className="absolute bottom-0.5 right-0.5 text-[8px] font-mono px-1 rounded bg-black/85 text-white font-bold">
-                        {idx + 1}
-                      </span>
+                      <Image src={img} alt={`Thumb ${idx + 1}`} fill className="object-cover" />
                     </button>
                   )
                 })}
               </div>
-
-              {/* Slide Navigation Hint */}
-              <p className="text-[10px] font-mono theme-text-muted flex items-center gap-1.5 text-center px-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                {selectedScreenshotIdx === selectedApp.screenshots.length - 1 ? (
-                  <span className="text-emerald-400 font-bold">
-                    Screen 4 of 4 • Tap Next or Swipe for Next App ({nextApp.name}) →
-                  </span>
-                ) : (
-                  <span>
-                    Screen {selectedScreenshotIdx + 1} of {selectedApp.screenshots.length} • Slide or tap arrow
-                  </span>
-                )}
+              <p className="text-[10px] font-mono theme-text-muted">
+                Screen {(screenshotIndices[selectedMobileApp.id] || 0) + 1} of {selectedMobileApp.screenshots.length} • Tap arrows or thumbnails
               </p>
             </div>
-
           </div>
 
-          {/* Right Column: Custom Client Deliverables & CTAs (4 Cols) */}
-          <div className="lg:col-span-4 space-y-6 order-3">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-6"
-            >
-              {/* Order / Inquiry CTA Card */}
-              <div
-                className="rounded-3xl p-6 border theme-border space-y-4 shadow-sm"
-                style={{ backgroundColor: 'var(--bg-card)' }}
+          {/* Mobile App Details & Actions */}
+          <div className="rounded-3xl p-5 border theme-border space-y-4 shadow-sm" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+                {selectedMobileApp.category}
+              </span>
+              {selectedMobileApp.playStoreUrl ? (
+                <a
+                  href={selectedMobileApp.playStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 rounded-full text-xs font-mono font-bold border border-emerald-500/40 text-emerald-400 bg-emerald-500/15 flex items-center gap-1.5"
+                >
+                  <FaGooglePlay size={11} />
+                  <span>{carbookLive.downloads} Live</span>
+                  <ExternalLink size={10} />
+                </a>
+              ) : (
+                <span className="px-2.5 py-1 rounded-full text-xs font-mono font-semibold border theme-border text-emerald-500 bg-emerald-500/10">
+                  Custom Client Release
+                </span>
+              )}
+            </div>
+
+            <div>
+              <h3 className="font-billboard text-2xl theme-text-main">{selectedMobileApp.name}</h3>
+              <p className="text-xs font-medium theme-text-muted mt-1">{selectedMobileApp.tagline}</p>
+            </div>
+
+            <p className="text-xs theme-text-muted leading-relaxed">{selectedMobileApp.description}</p>
+
+            {/* Mobile CTAs */}
+            <div className="space-y-2 pt-2">
+              {selectedMobileApp.playStoreUrl && (
+                <a
+                  href={selectedMobileApp.playStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md"
+                >
+                  <FaGooglePlay size={14} />
+                  <span>Install on Google Play ({carbookLive.downloads})</span>
+                  <ExternalLink size={12} />
+                </a>
+              )}
+              <a
+                href="https://www.fiverr.com/s/WebEmax"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 rounded-full btn-theme-primary font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer"
               >
-                <div className="flex items-center gap-2">
-                  <Sparkles size={16} className="theme-text-accent" />
-                  <p className="text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
-                    {selectedApp.playStoreUrl ? 'Explore On Google Play' : 'Need A Custom Mobile Application?'}
-                  </p>
-                </div>
-                
-                <p className="text-xs theme-text-muted leading-relaxed">
-                  {selectedApp.playStoreUrl
-                    ? 'Download and test the live production build directly from Google Play Store with real-time GPS tracking and booking.'
-                    : 'I engineer production-ready Android & Web applications custom built to your specific business workflow.'}
-                </p>
-
-                <div className="space-y-3">
-                  {selectedApp.playStoreUrl && (
-                    <a
-                      href={selectedApp.playStoreUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.01]"
-                    >
-                      <FaGooglePlay size={15} />
-                      <span>Install on Google Play ({currentDownloads})</span>
-                      <ExternalLink size={13} />
-                    </a>
-                  )}
-
-                  <a
-                    href="https://www.fiverr.com/s/WebEmax"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3.5 rounded-full btn-theme-primary font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer"
-                  >
-                    <FiverrLogo size={18} />
-                    <span>Order on Fiverr</span>
-                    <ExternalLink size={14} />
-                  </a>
-
-                  <a
-                    href="#contact"
-                    className="w-full py-3.5 rounded-full btn-theme-secondary font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>Request Custom Quote &amp; Architecture</span>
-                    <ArrowRight size={14} />
-                  </a>
-                </div>
-              </div>
-
-              {/* Custom Client Deliverables */}
-              <div
-                className="rounded-3xl p-6 border theme-border space-y-4 shadow-sm"
-                style={{ backgroundColor: 'var(--bg-card)' }}
-              >
-                <p className="text-xs font-mono uppercase tracking-wider theme-text-muted font-bold">
-                  Custom Client Deliverables
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div
-                    className="p-3 rounded-2xl border theme-border flex items-center gap-2.5"
-                    style={{ backgroundColor: 'var(--bg-surface)' }}
-                  >
-                    {selectedApp.playStoreUrl ? (
-                      <FaGooglePlay size={20} className="text-[#34A853] flex-shrink-0" />
-                    ) : (
-                      <FaAndroid size={22} className="text-[#22c55e] flex-shrink-0" />
-                    )}
-                    <div>
-                      <p className="text-[10px] theme-text-muted font-mono">
-                        {selectedApp.playStoreUrl ? 'Play Store' : 'Production'}
-                      </p>
-                      <p className="text-xs font-bold theme-text-main">
-                        {selectedApp.playStoreUrl ? 'Released Live' : 'Android APK'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    className="p-3 rounded-2xl border theme-border flex items-center gap-2.5"
-                    style={{ backgroundColor: 'var(--bg-surface)' }}
-                  >
-                    <Server size={20} className="text-[#06b6d4] flex-shrink-0" />
-                    <div>
-                      <p className="text-[10px] theme-text-muted font-mono">Real-Time</p>
-                      <p className="text-xs font-bold theme-text-main">Backend API</p>
-                    </div>
-                  </div>
-
-                  <div
-                    className="p-3 rounded-2xl border theme-border flex items-center gap-2.5"
-                    style={{ backgroundColor: 'var(--bg-surface)' }}
-                  >
-                    <Cpu size={20} className="text-[#10b981] flex-shrink-0" />
-                    <div>
-                      <p className="text-[10px] theme-text-muted font-mono">Cloud VPS</p>
-                      <p className="text-xs font-bold theme-text-main">Dedicated Deploy</p>
-                    </div>
-                  </div>
-
-                  <div
-                    className="p-3 rounded-2xl border theme-border flex items-center gap-2.5"
-                    style={{ backgroundColor: 'var(--bg-surface)' }}
-                  >
-                    <FileCode size={20} className="text-[#8b5cf6] flex-shrink-0" />
-                    <div>
-                      <p className="text-[10px] theme-text-muted font-mono">Source Code</p>
-                      <p className="text-xs font-bold theme-text-main">Full Handover</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </motion.div>
+                <FiverrLogo size={16} />
+                <span>Order on Fiverr</span>
+                <ExternalLink size={13} />
+              </a>
+            </div>
           </div>
 
         </div>
+
       </div>
 
       {/* High-Resolution Screenshot Zoom Lightbox Modal */}
       <AnimatePresence>
-        {isZoomed && selectedApp.screenshots && (
+        {zoomedImage && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
-            onClick={() => setIsZoomed(false)}
+            onClick={() => setZoomedImage(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -779,14 +781,13 @@ export default function AppShowcase() {
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={selectedApp.screenshots[selectedScreenshotIdx]}
+                src={zoomedImage}
                 alt="Enlarged App Screen"
                 fill
                 className="object-contain"
-                
               />
               <button
-                onClick={() => setIsZoomed(false)}
+                onClick={() => setZoomedImage(null)}
                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/80 border border-white/25 text-white flex items-center justify-center hover:bg-black transition-colors cursor-pointer z-30"
                 title="Close Lightbox"
               >
