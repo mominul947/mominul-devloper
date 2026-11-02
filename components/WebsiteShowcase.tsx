@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Laptop,
@@ -28,10 +28,14 @@ export default function WebsiteShowcase() {
   const laptopRef = useRef<HTMLDivElement>(null)
   const tabletRef = useRef<HTMLDivElement>(null)
   const phoneRef = useRef<HTMLDivElement>(null)
+  const studioPhoneRef = useRef<HTMLDivElement>(null)
+  const studioTabletRef = useRef<HTMLDivElement>(null)
 
   const [laptopScale, setLaptopScale] = useState<number>(0.65)
   const [tabletScale, setTabletScale] = useState<number>(0.65)
   const [phoneScale, setPhoneScale] = useState<number>(0.85)
+  const [studioPhoneScale, setStudioPhoneScale] = useState<number>(0.56)
+  const [studioTabletScale, setStudioTabletScale] = useState<number>(0.34)
 
   const liveUrl = 'https://www.carbookbd.com/'
 
@@ -40,30 +44,40 @@ export default function WebsiteShowcase() {
     setIframeKey((prev) => prev + 1)
   }
 
-  useEffect(() => {
-    const calcScales = () => {
-      if (laptopRef.current) {
-        const w = laptopRef.current.clientWidth
-        setLaptopScale(Math.min(1, Math.max(0.3, w / 1280)))
-      }
-      if (tabletRef.current) {
-        const w = tabletRef.current.clientWidth
-        setTabletScale(Math.min(1, Math.max(0.4, w / 768)))
-      }
-      if (phoneRef.current) {
-        const w = phoneRef.current.clientWidth
-        setPhoneScale(Math.min(1, Math.max(0.65, w / 390)))
-      }
+  const calcScales = useCallback(() => {
+    if (laptopRef.current) {
+      const w = laptopRef.current.clientWidth
+      if (w > 0) setLaptopScale(Math.min(1, Math.max(0.3, w / 1280)))
     }
+    if (tabletRef.current) {
+      const w = tabletRef.current.clientWidth
+      if (w > 0) setTabletScale(Math.min(1, Math.max(0.4, w / 768)))
+    }
+    if (phoneRef.current) {
+      const w = phoneRef.current.clientWidth
+      if (w > 0) setPhoneScale(Math.min(1, Math.max(0.65, w / 390)))
+    }
+    if (studioPhoneRef.current) {
+      const w = studioPhoneRef.current.clientWidth
+      if (w > 0) setStudioPhoneScale(w / 390)
+    }
+    if (studioTabletRef.current) {
+      const w = studioTabletRef.current.clientWidth
+      if (w > 0) setStudioTabletScale(w / 768)
+    }
+  }, [])
 
+  useEffect(() => {
     calcScales()
     window.addEventListener('resize', calcScales)
-    const t = setTimeout(calcScales, 250)
+    const t1 = setTimeout(calcScales, 150)
+    const t2 = setTimeout(calcScales, 500)
     return () => {
       window.removeEventListener('resize', calcScales)
-      clearTimeout(t)
+      clearTimeout(t1)
+      clearTimeout(t2)
     }
-  }, [activeMode])
+  }, [activeMode, calcScales])
 
   return (
     <section id="website" className="relative py-20 sm:py-28 overflow-hidden theme-main-bg theme-text-main border-t theme-border">
@@ -236,7 +250,7 @@ export default function WebsiteShowcase() {
                 <div
                   ref={laptopRef}
                   className="w-full overflow-hidden bg-white relative rounded-b-xl"
-                  style={{ height: `${760 * laptopScale}px` }}
+                  style={{ height: `${800 * laptopScale}px` }}
                 >
                   <iframe
                     key={`studio-laptop-${iframeKey}`}
@@ -245,7 +259,7 @@ export default function WebsiteShowcase() {
                     className="absolute top-0 left-0 border-0 pointer-events-auto"
                     style={{
                       width: '1280px',
-                      height: '760px',
+                      height: '800px',
                       transform: `scale(${laptopScale})`,
                       transformOrigin: 'top left',
                     }}
@@ -259,21 +273,21 @@ export default function WebsiteShowcase() {
                 </div>
               </div>
 
-              {/* FOREGROUND RIGHT: 3D FLOATING ANDROID FLAGSHIP PHONE (Overlapping Front in 3D) */}
+              {/* FOREGROUND RIGHT: 3D FLOATING ANDROID FLAGSHIP PHONE (Pixel-Perfect Zero Gap) */}
               <motion.div
                 initial={{ opacity: 0, x: 30, y: 30 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 onClick={() => setActiveMode('phone')}
-                className="absolute -bottom-6 -right-2 xs:-right-4 sm:-right-8 lg:-right-6 z-30 w-[180px] xs:w-[215px] sm:w-[260px] cursor-pointer group"
+                className="absolute -bottom-8 -right-2 xs:-right-4 sm:-right-8 lg:-right-4 z-30 w-[170px] xs:w-[200px] sm:w-[235px] cursor-pointer group"
                 style={{
-                  transform: 'rotateY(-10deg) rotateX(4deg) translateZ(60px)',
+                  transform: 'rotateY(-8deg) rotateX(3deg) translateZ(50px)',
                   transformStyle: 'preserve-3d',
                 }}
                 title="Click to view in Android Phone Mode"
               >
                 {/* Modern Android Flagship Frame */}
-                <div className="w-full rounded-[36px] sm:rounded-[42px] border-[3.5px] sm:border-[4.5px] border-[#27272a] bg-[#09090b] p-1.5 sm:p-2 shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-emerald-500/30 group-hover:ring-emerald-400 group-hover:scale-105 transition-all duration-300 relative">
+                <div className="w-full rounded-[38px] sm:rounded-[44px] border-[3.5px] sm:border-[4.5px] border-[#2c2d30] bg-[#0c0d0e] p-1.5 sm:p-2 shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-emerald-500/30 group-hover:ring-emerald-400 group-hover:scale-105 transition-all duration-300 relative">
                   
                   {/* Android Hardware Side Buttons */}
                   <div className="absolute -right-[4.5px] top-14 w-[2.5px] h-7 rounded-r bg-[#3f3f46]" />
@@ -302,10 +316,13 @@ export default function WebsiteShowcase() {
                       </div>
                     </div>
 
-                    {/* Scaled Mobile Viewport inside Android Phone */}
+                    {/* Pixel-Perfect Scaled Mobile Viewport (Dynamic Scale = 100% Edge-to-Edge) */}
                     <div
+                      ref={studioPhoneRef}
                       className="w-full overflow-hidden bg-white relative"
-                      style={{ height: '350px' }}
+                      style={{
+                        height: `${780 * studioPhoneScale}px`,
+                      }}
                     >
                       <iframe
                         src={liveUrl}
@@ -313,8 +330,8 @@ export default function WebsiteShowcase() {
                         className="absolute top-0 left-0 border-0 pointer-events-none"
                         style={{
                           width: '390px',
-                          height: '750px',
-                          transform: 'scale(0.46)',
+                          height: '780px',
+                          transform: `scale(${studioPhoneScale})`,
                           transformOrigin: 'top left',
                         }}
                         loading="lazy"
@@ -340,24 +357,28 @@ export default function WebsiteShowcase() {
                 </div>
               </motion.div>
 
-              {/* FOREGROUND LEFT: 3D FLOATING TABLET (Overlapping Left in 3D) */}
+              {/* FOREGROUND LEFT: 3D FLOATING TABLET (Pixel-Perfect Zero Gap) */}
               <motion.div
                 initial={{ opacity: 0, x: -30, y: 30 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 onClick={() => setActiveMode('tablet')}
-                className="hidden md:block absolute -bottom-4 -left-6 sm:-left-10 z-20 w-[240px] sm:w-[290px] cursor-pointer group"
+                className="hidden md:block absolute -bottom-6 -left-6 sm:-left-10 z-20 w-[220px] sm:w-[270px] cursor-pointer group"
                 style={{
-                  transform: 'rotateY(10deg) rotateX(4deg) translateZ(30px)',
+                  transform: 'rotateY(8deg) rotateX(3deg) translateZ(30px)',
                   transformStyle: 'preserve-3d',
                 }}
                 title="Click to zoom in Tablet Mode"
               >
                 <div className="w-full rounded-[32px] sm:rounded-[38px] border-[5px] border-[#27272a] bg-[#0c0c0e] p-2 shadow-[0_30px_60px_rgba(0,0,0,0.85)] ring-1 ring-white/10 group-hover:ring-emerald-400 group-hover:scale-105 transition-all duration-300">
                   <div className="w-2 h-2 rounded-full bg-black border border-neutral-700 mx-auto mb-1.5" />
+                  
                   <div
-                    className="w-full overflow-hidden bg-white relative rounded-[22px]"
-                    style={{ height: '320px' }}
+                    ref={studioTabletRef}
+                    className="w-full overflow-hidden bg-white relative rounded-[20px]"
+                    style={{
+                      height: `${850 * studioTabletScale}px`,
+                    }}
                   >
                     <iframe
                       src={liveUrl}
@@ -365,8 +386,8 @@ export default function WebsiteShowcase() {
                       className="absolute top-0 left-0 border-0 pointer-events-none"
                       style={{
                         width: '768px',
-                        height: '900px',
-                        transform: 'scale(0.35)',
+                        height: '850px',
+                        transform: `scale(${studioTabletScale})`,
                         transformOrigin: 'top left',
                       }}
                       loading="lazy"
@@ -438,7 +459,7 @@ export default function WebsiteShowcase() {
                   ref={phoneRef}
                   className="w-full overflow-hidden bg-white relative"
                   style={{
-                    height: `${750 * phoneScale}px`,
+                    height: `${780 * phoneScale}px`,
                   }}
                 >
                   <iframe
@@ -449,7 +470,7 @@ export default function WebsiteShowcase() {
                     className="absolute top-0 left-0 border-0 pointer-events-auto"
                     style={{
                       width: '390px',
-                      height: '750px',
+                      height: '780px',
                       transform: `scale(${phoneScale})`,
                       transformOrigin: 'top left',
                     }}
