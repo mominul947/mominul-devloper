@@ -6,6 +6,7 @@ import Hero from '@/components/Hero'
 import About from '@/components/About'
 import Projects from '@/components/Projects'
 import AppShowcase from '@/components/AppShowcase'
+import WebsiteShowcase from '@/components/WebsiteShowcase'
 import Skills from '@/components/Skills'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
@@ -23,6 +24,7 @@ export default function Home() {
         <Hero />
         <About />
         <AppShowcase />
+        <WebsiteShowcase />
         <Projects />
         <Skills />
         <Contact />
