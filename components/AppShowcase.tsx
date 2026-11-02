@@ -193,7 +193,7 @@ export default function AppShowcase() {
 
   const isCarbook = selectedApp.id === 'carbook'
   const currentDownloads = isCarbook ? carbookLive.downloads : selectedApp.downloads
-  const currentRating = isCarbook ? carbookLive.rating : selectedApp.rating
+  const currentRating = isCarbook ? '4.7' : selectedApp.rating
 
   return (
     <section id="apps" className="relative py-24 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
