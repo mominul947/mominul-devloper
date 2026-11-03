@@ -143,7 +143,21 @@ export default function AdminPage() {
       }
     }
 
-    fetch('/api/admin/payment')
+    // 1. Hydrate from localStorage first for instant display
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('portfolio_live_settings')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (parsed && (parsed.bkashNumber || parsed.nagadNumber)) {
+            setSettings((prev) => ({ ...prev, ...parsed }))
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 2. Fetch fresh settings from server
+    fetch(`/api/admin/payment?t=${Date.now()}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data && (data.bkashNumber || data.bankAccountNumber)) {
@@ -151,6 +165,9 @@ export default function AdminPage() {
             ...prev,
             ...data,
           }))
+          try {
+            localStorage.setItem('portfolio_live_settings', JSON.stringify(data))
+          } catch (e) {}
         }
       })
       .catch(() => {})
@@ -416,6 +433,9 @@ export default function AdminPage() {
       })
 
       if (res.ok) {
+        try {
+          localStorage.setItem('portfolio_live_settings', JSON.stringify(settings))
+        } catch (e) {}
         setSuccess('পেমেন্ট গেটওয়ের সকল তথ্য সফলভাবে সংরক্ষিত হয়েছে!')
       } else {
         const data = await res.json().catch(() => ({}))

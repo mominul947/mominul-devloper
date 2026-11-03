@@ -14,14 +14,23 @@ export async function POST(request: Request) {
     const recipientEmail = process.env.NOTIFICATION_EMAIL || 'mominulwebwork@gmail.com'
 
     // 1. Send Email Notification via FormSubmit
+    const originHeader = request.headers.get('origin')
+    const hostHeader = request.headers.get('host')
+    const safeOrigin = originHeader && !originHeader.includes('localhost')
+      ? originHeader
+      : hostHeader
+      ? `https://${hostHeader}`
+      : 'https://mominul-portfolio.vercel.app'
+
     try {
       const emailRes = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Origin': request.headers.get('origin') || 'http://localhost:3000',
-          'Referer': request.headers.get('referer') || 'http://localhost:3000/'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Origin': safeOrigin,
+          'Referer': `${safeOrigin}/#contact`
         },
         body: JSON.stringify({
           'Client Name': name,
@@ -30,7 +39,9 @@ export async function POST(request: Request) {
           'Project Category': projectType,
           'Message Details': message,
           '_subject': `🚀 New Portfolio Inquiry: ${name} (${projectType})`,
-          '_template': 'table'
+          '_template': 'table',
+          '_captcha': 'false',
+          '_autoresponse': 'false'
         })
       })
 

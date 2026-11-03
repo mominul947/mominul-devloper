@@ -82,7 +82,21 @@ export default function PaymentPage() {
 
   // Fetch dynamic payment numbers from server
   useEffect(() => {
-    fetch('/api/admin/payment')
+    // 1. Immediately hydrate from localStorage if available (0ms instant sync)
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('portfolio_live_settings')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (parsed && (parsed.bkashNumber || parsed.nagadNumber)) {
+            setLiveSettings((prev) => ({ ...prev, ...parsed }))
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 2. Fetch fresh numbers from server with cache-busting timestamp
+    fetch(`/api/admin/payment?t=${Date.now()}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data && (data.bkashNumber || data.bankAccountNumber || data.cellfinAccountNumber)) {
@@ -90,6 +104,9 @@ export default function PaymentPage() {
             ...prev,
             ...data,
           }))
+          try {
+            localStorage.setItem('portfolio_live_settings', JSON.stringify(data))
+          } catch (e) {}
         }
       })
       .catch(() => {})
