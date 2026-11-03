@@ -119,7 +119,7 @@ export default function BoguraCityTeaser() {
               <div className="flex items-center justify-between px-1 text-xs text-stone-400 font-mono">
                 <span className="flex items-center gap-1 text-stone-300">
                   <span>Video credit by</span>
-                  <span className="text-emerald-400 font-semibold">Utshboe</span>
+                  <span className="text-emerald-400 font-semibold">Uthshobe</span>
                 </span>
                 <span className="text-[11px] text-stone-400">
                   Bogura Sadar, Bangladesh
