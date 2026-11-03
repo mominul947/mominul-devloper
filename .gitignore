@@ -35,3 +35,6 @@ Thumbs.db
 # Sensitive local server secrets
 data/.server-secret
 
+# Large raw video files (>100MB exceeds GitHub limits)
+public/images/video/bogura.mp4
+
