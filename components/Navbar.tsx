@@ -11,7 +11,6 @@ const navItems = [
   { label: 'About', href: '#about' },
   { label: 'Apps', href: '#apps' },
   { label: 'Website', href: '#website' },
-  { label: 'Explore BD', href: '#explore-bd' },
   { label: 'Services', href: '#projects' },
   { label: 'Contact', href: '#contact' },
 ]
