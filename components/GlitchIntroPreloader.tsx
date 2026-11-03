@@ -17,36 +17,36 @@ export default function GlitchIntroPreloader() {
   const cardRef = useRef<HTMLDivElement>(null)
   const splitTriggeredRef = useRef(false)
 
-  // 1. Completely lock page scroll while intro preloader is active
+  // 1. Lock page scroll strictly while intro preloader is active, and unlock 100% when hidden
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const prevOverflow = document.body.style.overflow
-    const prevDocOverflow = document.documentElement.style.overflow
-    const prevTouchAction = document.body.style.touchAction
+    if (phase !== 'hidden') {
+      document.body.style.overflow = 'hidden'
+      document.documentElement.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
 
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.touchAction = 'none'
+      const preventDefaultScroll = (e: Event) => {
+        e.preventDefault()
+      }
 
-    // Force window to top so hero target coordinates are 100% stable
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior })
+      window.addEventListener('wheel', preventDefaultScroll, { passive: false })
+      window.addEventListener('touchmove', preventDefaultScroll, { passive: false })
 
-    const preventDefaultScroll = (e: Event) => {
-      e.preventDefault()
+      return () => {
+        document.body.style.overflow = ''
+        document.documentElement.style.overflow = ''
+        document.body.style.touchAction = ''
+        window.removeEventListener('wheel', preventDefaultScroll)
+        window.removeEventListener('touchmove', preventDefaultScroll)
+      }
+    } else {
+      // 100% Guaranteed scroll unlock once intro is finished
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+      document.body.style.touchAction = ''
     }
-
-    window.addEventListener('wheel', preventDefaultScroll, { passive: false })
-    window.addEventListener('touchmove', preventDefaultScroll, { passive: false })
-
-    return () => {
-      document.body.style.overflow = prevOverflow
-      document.documentElement.style.overflow = prevDocOverflow
-      document.body.style.touchAction = prevTouchAction
-      window.removeEventListener('wheel', preventDefaultScroll)
-      window.removeEventListener('touchmove', preventDefaultScroll)
-    }
-  }, [])
+  }, [phase])
 
   // Calculate pixel-perfect destination to Hero portrait slot
   const getDestination = useCallback(() => {

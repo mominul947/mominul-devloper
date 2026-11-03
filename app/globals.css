@@ -339,7 +339,6 @@ html[lang="bn"] .font-billboard {
     -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    will-change: scroll-position;
   }
 }
 
