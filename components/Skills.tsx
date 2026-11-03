@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useRef, useState, useMemo } from 'react'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 import {
   SiPython, SiJavascript, SiTypescript, SiPhp, SiLaravel, SiFlutter,
-  SiC, SiCplusplus, SiKotlin, SiReact, SiNextdotjs, SiBootstrap,
+  SiC, SiCplusplus, SiKotlin, SiReact, SiNextdotjs,
   SiNodedotjs, SiDjango, SiFlask, SiFastapi, SiTensorflow, SiPytorch,
   SiScikitlearn, SiOpencv, SiNumpy, SiTailwindcss, SiPandas, SiMysql,
   SiPostgresql, SiMongodb, SiFirebase, SiRedis, SiDocker, SiGit,
@@ -13,7 +13,7 @@ import {
 } from 'react-icons/si'
 import { FaHtml5, FaCss3Alt, FaAws } from 'react-icons/fa6'
 import { TbBrandAzure, TbBrandVscode, TbBrandAdobePhotoshop, TbBrandOffice } from 'react-icons/tb'
-import { Sparkles, Terminal } from 'lucide-react'
+import { Sparkles, Terminal, CheckCircle2 } from 'lucide-react'
 import type { IconType } from 'react-icons'
 import TechStack3DBackground from './TechStack3DBackground'
 
@@ -23,6 +23,7 @@ export interface TechItem {
   icon: IconType
   color: string
   category: 'core' | 'frontend' | 'backend' | 'aiml' | 'database' | 'devops' | 'tools'
+  secondaryCategory?: 'backend' | 'frontend'
 }
 
 // 42 High-Impact Colorful Technologies (Including PHP, Laravel, Flutter)
@@ -30,12 +31,12 @@ const ALL_TECH_LIST: TechItem[] = [
   { id: 'python', name: 'Python', icon: SiPython, color: '#387EB8', category: 'core' },
   { id: 'javascript', name: 'JavaScript', icon: SiJavascript, color: '#F7DF1E', category: 'core' },
   { id: 'typescript', name: 'TypeScript', icon: SiTypescript, color: '#3178C6', category: 'core' },
-  { id: 'php', name: 'PHP', icon: SiPhp, color: '#777BB4', category: 'backend' },
+  { id: 'php', name: 'PHP', icon: SiPhp, color: '#777BB4', category: 'core', secondaryCategory: 'backend' },
   { id: 'laravel', name: 'Laravel', icon: SiLaravel, color: '#FF2D20', category: 'backend' },
   { id: 'flutter', name: 'Flutter', icon: SiFlutter, color: '#47C5FB', category: 'frontend' },
   { id: 'c', name: 'C', icon: SiC, color: '#659AD2', category: 'core' },
   { id: 'cpp', name: 'C++', icon: SiCplusplus, color: '#00599C', category: 'core' },
-  { id: 'kotlin', name: 'Kotlin', icon: SiKotlin, color: '#7F52FF', category: 'core' },
+  { id: 'kotlin', name: 'Kotlin', icon: SiKotlin, color: '#7F52FF', category: 'core', secondaryCategory: 'frontend' },
   { id: 'html', name: 'HTML5', icon: FaHtml5, color: '#E34F26', category: 'frontend' },
   { id: 'css', name: 'CSS3', icon: FaCss3Alt, color: '#1572B6', category: 'frontend' },
   { id: 'react', name: 'React', icon: SiReact, color: '#61DAFB', category: 'frontend' },
@@ -78,11 +79,10 @@ const TECH_REGISTRY: Record<string, TechItem> = ALL_TECH_LIST.reduce((acc, item)
 }, {} as Record<string, TechItem>)
 
 // DESKTOP PYRAMID MATRIX: 11 -> 10 -> 8 -> 6 -> 4 -> 2 (41 items)
-// Features PHP and Laravel prominently in the top tiers
 const DESKTOP_ROWS: string[][] = [
-  // Row 1: 11 items (Core Languages & Frontend Foundation)
+  // Row 1: 11 items (Languages & UI Core)
   ['python', 'javascript', 'typescript', 'php', 'c', 'cpp', 'kotlin', 'flutter', 'react', 'nextjs', 'tailwind'],
-  // Row 2: 10 items (Backend Engines & AI Frameworks)
+  // Row 2: 10 items (Backend & AI Engines)
   ['laravel', 'nodejs', 'django', 'fastapi', 'flask', 'tensorflow', 'pytorch', 'scikitlearn', 'opencv', 'numpy'],
   // Row 3: 8 items (Databases & Cloud Architecture)
   ['pandas', 'mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'docker', 'azure'],
@@ -90,29 +90,20 @@ const DESKTOP_ROWS: string[][] = [
   ['git', 'github', 'linux', 'aws', 'vscode', 'vercel'],
   // Row 5: 4 items (Creative Tools & APIs)
   ['jupyter', 'figma', 'postman', 'photoshop'],
-  // Row 6: 2 items (Machine Learning & Productivity)
+  // Row 6: 2 items (Machine Learning Hub & Productivity)
   ['huggingface', 'msoffice']
 ]
 
 // MOBILE PYRAMID CONTOUR: 7 -> 5 -> 7 -> 3 -> 7 -> 1 -> 6 -> 4 -> 2
 const MOBILE_ROWS: string[][] = [
-  // Row 1: 7 items (Includes PHP)
   ['python', 'javascript', 'typescript', 'php', 'c', 'cpp', 'kotlin'],
-  // Row 2: 5 items (Includes Flutter & Frontend)
   ['html', 'css', 'flutter', 'react', 'nextjs'],
-  // Row 3: 7 items (Includes Laravel & Backend)
   ['laravel', 'nodejs', 'django', 'fastapi', 'flask', 'tensorflow', 'pytorch'],
-  // Row 4: 3 items
   ['opencv', 'numpy', 'tailwind'],
-  // Row 5: 7 items
   ['pandas', 'mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'docker'],
-  // Row 6: 1 item
   ['azure'],
-  // Row 7: 6 items
   ['git', 'github', 'linux', 'aws', 'vscode', 'vercel'],
-  // Row 8: 4 items
   ['jupyter', 'figma', 'postman', 'photoshop'],
-  // Row 9: 2 items
   ['huggingface', 'msoffice']
 ]
 
@@ -130,11 +121,9 @@ const CATEGORY_FILTERS = [
 // 100% Crisp, Non-Blurry, 3D Interactive Squircle Card
 function SharpSquircleTechTile({
   tech,
-  isDimmed,
   isDesktop
 }: {
   tech: TechItem
-  isDimmed: boolean
   isDesktop: boolean
 }) {
   const [hovered, setHovered] = useState(false)
@@ -146,7 +135,7 @@ function SharpSquircleTechTile({
       onMouseLeave={() => setHovered(false)}
       className={`relative group flex flex-col items-center justify-center cursor-pointer select-none transition-all duration-200 ${
         isDesktop
-          ? 'w-[66px] h-[74px] sm:w-[72px] sm:h-[82px] md:w-[78px] md:h-[88px] lg:w-[84px] lg:h-[94px] rounded-xl sm:rounded-2xl p-1.5'
+          ? 'w-[68px] h-[76px] sm:w-[74px] sm:h-[84px] md:w-[80px] md:h-[90px] lg:w-[86px] lg:h-[96px] rounded-xl sm:rounded-2xl p-1.5'
           : 'w-[44px] h-[52px] xs:w-[48px] xs:h-[56px] rounded-lg xs:rounded-xl p-1'
       }`}
       style={{
@@ -157,7 +146,6 @@ function SharpSquircleTechTile({
         boxShadow: hovered
           ? `0 0 24px ${tech.color}55, 0 10px 20px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.25)`
           : '0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.06)',
-        opacity: isDimmed ? 0.22 : 1,
         transform: hovered
           ? 'translateZ(28px) translateY(-5px) scale(1.12)'
           : 'translateZ(0px) translateY(0px) scale(1)',
@@ -166,10 +154,8 @@ function SharpSquircleTechTile({
         willChange: 'transform',
       }}
     >
-      {/* Specular crisp top highlight */}
       <div className="absolute inset-x-0 top-0 h-[35%] bg-gradient-to-b from-white/15 to-transparent rounded-t-xl pointer-events-none" />
 
-      {/* Razor-Sharp Brand Icon (100% Vector Crispness) */}
       <div
         className="transition-transform duration-200 group-hover:scale-110 flex items-center justify-center"
         style={{
@@ -188,7 +174,6 @@ function SharpSquircleTechTile({
         />
       </div>
 
-      {/* Crystal Clear High-Contrast Tech Name */}
       <span
         className={`font-mono text-center tracking-tight truncate max-w-full font-bold transition-colors duration-150 ${
           isDesktop
@@ -213,6 +198,26 @@ export default function Skills() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { margin: '-30px' })
   const [activeCategory, setActiveCategory] = useState<string>('ALL')
+
+  // Filter items neatly into a clean cohesive serial row/grid when a specific category is chosen
+  const filteredCategoryItems = useMemo(() => {
+    if (activeCategory === 'ALL') return null
+    return ALL_TECH_LIST.filter(tech => {
+      if (activeCategory === 'core') return tech.category === 'core'
+      if (activeCategory === 'frontend') return tech.category === 'frontend' || tech.secondaryCategory === 'frontend'
+      if (activeCategory === 'backend') return tech.category === 'backend' || tech.secondaryCategory === 'backend'
+      if (activeCategory === 'aiml') return tech.category === 'aiml'
+      if (activeCategory === 'database') return tech.category === 'database'
+      if (activeCategory === 'devops') return tech.category === 'devops'
+      if (activeCategory === 'tools') return tech.category === 'tools'
+      return true
+    })
+  }, [activeCategory])
+
+  // Active category readable label
+  const activeLabel = useMemo(() => {
+    return CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label || 'All Technologies'
+  }, [activeCategory])
 
   // Interactive 3D Perspective Tilt for the entire Matrix Plane
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
@@ -299,7 +304,7 @@ export default function Skills() {
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
           transition={{ duration: 0.35, delay: 0.1 }}
-          className="flex items-center justify-center mb-8 sm:mb-12"
+          className="flex items-center justify-center mb-6 sm:mb-8"
         >
           <div className="flex flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full px-2 py-1 scrollbar-none justify-start sm:justify-center">
             {CATEGORY_FILTERS.map((cat) => {
@@ -323,79 +328,123 @@ export default function Skills() {
         </motion.div>
 
         {/* =========================================================================
-            PYRAMID MATRIX (11 -> 10 -> 8 -> 6 -> 4 -> 2) WITH LARAVEL, PHP & FLUTTER
+            CLEAN CATEGORIZED SERIAL MATRIX
+            - When ALL is active: Shows complete 11 -> 10 -> 8 -> 6 -> 4 -> 2 pyramid with zero gaps
+            - When a Category is active: Clean, tight, orderly serial row/grid with zero scattered items
            ========================================================================= */}
         <div
           onMouseMove={handleMouseMovePlane}
           onMouseLeave={handleMouseLeavePlane}
-          className="relative mx-auto transition-transform duration-300 ease-out"
+          className="relative mx-auto transition-transform duration-300 ease-out min-h-[380px] flex items-center justify-center"
           style={{
             perspective: '1400px',
             transformStyle: 'preserve-3d',
           }}
         >
-          {/* DESKTOP MATRIX: TAPERED PYRAMID (11 -> 10 -> 8 -> 6 -> 4 -> 2) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.5, delay: 0.12 }}
-            className="hidden md:flex flex-col items-center justify-center gap-2.5 lg:gap-3.5 mx-auto relative z-10 transition-transform duration-200 ease-out"
-            style={{
-              transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {DESKTOP_ROWS.map((rowTechIds, rowIndex) => (
-              <div
-                key={`desktop-row-${rowIndex}`}
-                className="flex flex-nowrap items-center justify-center gap-2 lg:gap-2.5"
-                style={{ transformStyle: 'preserve-3d' }}
+          <AnimatePresence mode="wait">
+            {/* ------------------------------------------------------------- */}
+            {/* VIEW A: A SINGLE CATEGORY SELECTED -> CLEAN NEAT SERIAL ORDER */}
+            {/* (Zero scattered cards! Every item sits side-by-side neatly)   */}
+            {/* ------------------------------------------------------------- */}
+            {filteredCategoryItems ? (
+              <motion.div
+                key={`cat-${activeCategory}`}
+                initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.96 }}
+                transition={{ duration: 0.3 }}
+                className="w-full flex flex-col items-center justify-center relative z-10"
               >
-                {rowTechIds.map((id) => {
-                  const tech = TECH_REGISTRY[id]
-                  if (!tech) return null
-                  const isDimmed = activeCategory !== 'ALL' && tech.category !== activeCategory
-                  return (
+                {/* Active Category Indicator Badge */}
+                <div className="mb-6 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
+                  <CheckCircle2 size={13} className="text-emerald-400" />
+                  <span className="font-bold">{filteredCategoryItems.length}</span>
+                  <span>Verified Technologies in {activeLabel}</span>
+                </div>
+
+                {/* Symmetrical, Neatly Ordered Serial Grid (No gaps, perfectly centered) */}
+                <div
+                  className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 max-w-3xl mx-auto px-4"
+                  style={{
+                    transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+                    transformStyle: 'preserve-3d',
+                  }}
+                >
+                  {filteredCategoryItems.map((tech) => (
                     <SharpSquircleTechTile
-                      key={`dt-${tech.id}`}
+                      key={`cat-item-${tech.id}`}
                       tech={tech}
-                      isDimmed={isDimmed}
                       isDesktop={true}
                     />
-                  )
-                })}
-              </div>
-            ))}
-          </motion.div>
-
-          {/* MOBILE MATRIX: HOURGLASS FUNNEL */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.5, delay: 0.12 }}
-            className="flex md:hidden flex-col items-center justify-center gap-1.5 xs:gap-2 mx-auto relative z-10"
-          >
-            {MOBILE_ROWS.map((rowTechIds, rowIndex) => (
-              <div
-                key={`mobile-row-${rowIndex}`}
-                className="flex flex-nowrap items-center justify-center gap-1 xs:gap-1.5 w-full"
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              /* ------------------------------------------------------------- */
+              /* VIEW B: ALL TECHNOLOGIES -> COMPLETE SOLID PYRAMID            */
+              /* (11 -> 10 -> 8 -> 6 -> 4 -> 2, Fully populated with zero gaps)*/
+              /* ------------------------------------------------------------- */
+              <motion.div
+                key="all-pyramid"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.35 }}
+                className="w-full"
               >
-                {rowTechIds.map((id) => {
-                  const tech = TECH_REGISTRY[id]
-                  if (!tech) return null
-                  const isDimmed = activeCategory !== 'ALL' && tech.category !== activeCategory
-                  return (
-                    <SharpSquircleTechTile
-                      key={`mob-${tech.id}`}
-                      tech={tech}
-                      isDimmed={isDimmed}
-                      isDesktop={false}
-                    />
-                  )
-                })}
-              </div>
-            ))}
-          </motion.div>
+                {/* Desktop Pyramid */}
+                <div
+                  className="hidden md:flex flex-col items-center justify-center gap-2.5 lg:gap-3.5 mx-auto relative z-10 transition-transform duration-200 ease-out"
+                  style={{
+                    transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+                    transformStyle: 'preserve-3d',
+                  }}
+                >
+                  {DESKTOP_ROWS.map((rowTechIds, rowIndex) => (
+                    <div
+                      key={`desktop-row-${rowIndex}`}
+                      className="flex flex-nowrap items-center justify-center gap-2 lg:gap-2.5"
+                      style={{ transformStyle: 'preserve-3d' }}
+                    >
+                      {rowTechIds.map((id) => {
+                        const tech = TECH_REGISTRY[id]
+                        if (!tech) return null
+                        return (
+                          <SharpSquircleTechTile
+                            key={`dt-${tech.id}`}
+                            tech={tech}
+                            isDesktop={true}
+                          />
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile Pyramid */}
+                <div className="flex md:hidden flex-col items-center justify-center gap-1.5 xs:gap-2 mx-auto relative z-10">
+                  {MOBILE_ROWS.map((rowTechIds, rowIndex) => (
+                    <div
+                      key={`mobile-row-${rowIndex}`}
+                      className="flex flex-nowrap items-center justify-center gap-1 xs:gap-1.5 w-full"
+                    >
+                      {rowTechIds.map((id) => {
+                        const tech = TECH_REGISTRY[id]
+                        if (!tech) return null
+                        return (
+                          <SharpSquircleTechTile
+                            key={`mob-${tech.id}`}
+                            tech={tech}
+                            isDesktop={false}
+                          />
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Bottom Verification Status */}
