@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
 
 const LINE_1_FULL = 'ERROR 404: Conventional'
@@ -13,18 +13,11 @@ export default function GlitchIntroPreloader() {
   const [typedLine2, setTypedLine2] = useState('')
   const [activeCursor, setActiveCursor] = useState<'line1' | 'line2' | 'done'>('line1')
   const [targetTransform, setTargetTransform] = useState({ x: 0, y: 0, scale: 1 })
-  const [isMobile, setIsMobile] = useState(false)
 
   const cardRef = useRef<HTMLDivElement>(null)
   const splitTriggeredRef = useRef(false)
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsMobile(window.innerWidth < 768)
-    }
-  }, [])
-
-  // 1. Completely lock page scroll while intro preloader is active ("ayi page thaktei scrol kora jacche amn jeno na hoi")
+  // 1. Completely lock page scroll while intro preloader is active
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -81,7 +74,7 @@ export default function GlitchIntroPreloader() {
     }
   }, [])
 
-  // Trigger the 4D/5D Smoke Dispersion & Smooth Card Flight
+  // Trigger the 2-Way Vault Door Split ("majhe je 2 vag hoi")
   const triggerSplit = useCallback(() => {
     if (splitTriggeredRef.current) return
     splitTriggeredRef.current = true
@@ -102,10 +95,10 @@ export default function GlitchIntroPreloader() {
       document.body.style.overflow = ''
       document.documentElement.style.overflow = ''
       document.body.style.touchAction = ''
-    }, 980)
+    }, 950)
   }, [getDestination])
 
-  // Typewriter sequence for the Error text ("ar ayikhane jei ager eror lekha eta ene deo")
+  // Typewriter sequence for the Error text
   useEffect(() => {
     let charIndex1 = 0
     let charIndex2 = 0
@@ -116,10 +109,10 @@ export default function GlitchIntroPreloader() {
       if (charIndex1 < LINE_1_FULL.length) {
         charIndex1++
         setTypedLine1(LINE_1_FULL.slice(0, charIndex1))
-        timeoutId = setTimeout(typeLine1, 32)
+        timeoutId = setTimeout(typeLine1, 30)
       } else {
         setActiveCursor('line2')
-        timeoutId = setTimeout(typeLine2, 120)
+        timeoutId = setTimeout(typeLine2, 110)
       }
     }
 
@@ -128,18 +121,18 @@ export default function GlitchIntroPreloader() {
       if (charIndex2 < LINE_2_FULL.length) {
         charIndex2++
         setTypedLine2(LINE_2_FULL.slice(0, charIndex2))
-        timeoutId = setTimeout(typeLine2, 35)
+        timeoutId = setTimeout(typeLine2, 32)
       } else {
         setActiveCursor('done')
         setPhase('waiting')
-        // Pause to admire the error + portrait card, then smoothly transition
+        // Pause to read, then auto-split
         timeoutId = setTimeout(() => {
           triggerSplit()
-        }, 1200)
+        }, 1300)
       }
     }
 
-    timeoutId = setTimeout(typeLine1, 180)
+    timeoutId = setTimeout(typeLine1, 150)
 
     // Allow user to click or press any key to enter immediately
     const handleKey = () => triggerSplit()
@@ -166,124 +159,97 @@ export default function GlitchIntroPreloader() {
         e.preventDefault()
         e.stopPropagation()
       }}
-      className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono flex flex-col items-center justify-center"
-      style={{ touchAction: 'none' }}
+      className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono flex flex-col items-center justify-center bg-[#020306]"
+      style={{ touchAction: 'none', backgroundColor: '#020306' }}
     >
       {/* =========================================================================
-          4D / 5D VOLUMETRIC SMOKE & MIST BACKDROP ("ota dhuya type kore deo 4d,5d")
-          No hard black bars! Instead, realistic cinematic smoke dissolves into light.
+          TOP HALF SHUTTER (100% Solid Opaque Pitch Black, Slides UP on split)
+          "majhe je 2 vag hoi seita kothay ota add kroo" + "background dekha jabe na"
          ========================================================================= */}
       <motion.div
-        initial={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+        initial={{ y: 0 }}
         animate={
           isSplitting
             ? {
-                opacity: 0,
-                scale: 1.18,
-                filter: 'blur(35px)',
-                transition: { duration: 0.95, ease: [0.16, 1, 0.3, 1] },
+                y: '-105%',
+                transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
               }
-            : { opacity: 1, scale: 1, filter: 'blur(0px)' }
+            : { y: 0 }
         }
-        className="absolute inset-0 pointer-events-none overflow-hidden"
+        className="absolute top-0 left-0 right-0 h-1/2 bg-[#020306] border-b border-emerald-500/20 z-10 flex flex-col justify-start p-4 sm:p-7 shadow-2xl"
+        style={{ backgroundColor: '#020306' }}
       >
-        {/* Base Deep Obsidian Mist Floor */}
-        <div className="absolute inset-0 bg-[#020306]/98 sm:bg-[#020306]/95 sm:backdrop-blur-xl" />
-
-        {/* Dense Swirling Smoke Cloud - Top Center */}
-        <motion.div
-          animate={
-            isSplitting
-              ? { y: -160, scale: 1.5, opacity: 0 }
-              : { y: [0, -15, 0], scale: [1, 1.05, 1], opacity: 0.55 }
-          }
-          transition={
-            isSplitting
-              ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
-              : { duration: 7, repeat: Infinity, ease: 'easeInOut' }
-          }
-          className="absolute -top-1/3 left-1/2 -translate-x-1/2 w-[110vw] h-[70vh] rounded-full pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, rgba(2, 3, 6, 0.85) 75%, transparent 100%)',
-            filter: isMobile ? 'blur(28px)' : 'blur(65px)',
-          }}
-        />
-
-        {/* Dense Swirling Smoke Cloud - Bottom Center */}
-        <motion.div
-          animate={
-            isSplitting
-              ? { y: 160, scale: 1.5, opacity: 0 }
-              : { y: [0, 15, 0], scale: [1, 1.05, 1], opacity: 0.5 }
-          }
-          transition={
-            isSplitting
-              ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
-              : { duration: 8, repeat: Infinity, ease: 'easeInOut' }
-          }
-          className="absolute -bottom-1/3 left-1/2 -translate-x-1/2 w-[110vw] h-[70vh] rounded-full pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, rgba(14, 165, 233, 0.18) 0%, rgba(15, 23, 42, 0.8) 50%, rgba(2, 3, 6, 0.9) 75%, transparent 100%)',
-            filter: isMobile ? 'blur(30px)' : 'blur(70px)',
-          }}
-        />
-
-        {/* Center Dissolving Smoke Ring (clears out the center first as smoke dissipates) */}
-        <motion.div
-          animate={
-            isSplitting
-              ? {
-                  scale: [1, 2.6],
-                  opacity: [0.7, 0],
-                  transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                }
-              : { scale: 1, opacity: 0.4 }
-          }
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(2, 3, 6, 0.6) 45%, transparent 70%)',
-            filter: isMobile ? 'blur(22px)' : 'blur(45px)',
-          }}
-        />
-
-        {/* Micro Cyber Atmospheric Dust Particles */}
+        {/* Subtle Cyber Grid */}
         <div
-          className="absolute inset-0 opacity-[0.035] pointer-events-none"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage:
-              'radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
+              'linear-gradient(to right, rgba(16, 185, 129, 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.5) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
           }}
         />
-      </motion.div>
 
-      {/* =========================================================================
-          TOP HUD TERMINAL (Subtle ambient info)
-         ========================================================================= */}
-      <motion.div
-        animate={isSplitting ? { y: -40, opacity: 0 } : { y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="absolute top-4 sm:top-6 left-5 sm:left-10 right-5 sm:right-10 flex items-center justify-between text-[11px] text-stone-500 font-mono pointer-events-none z-20"
-      >
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="tracking-widest text-emerald-400 font-bold uppercase text-[10px] sm:text-xs">
-            MOMINUL ISLAM // ARCHITECT
+        {/* Top HUD */}
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-stone-400 font-mono">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-emerald-400 font-bold tracking-widest uppercase">
+              MOMINUL ISLAM // ARCHITECT
+            </span>
+          </div>
+          <span className="tracking-wider text-stone-400 hidden sm:inline">
+            CLICK OR TAP TO ENTER ↵
           </span>
         </div>
-        <span className="tracking-wider text-stone-500 hidden sm:inline text-[10px] sm:text-xs">
-          CLICK OR TAP TO ENTER ↵
-        </span>
       </motion.div>
 
       {/* =========================================================================
-          MAIN CENTERSTAGE: ERROR 404 TEXT + PORTRAIT CARD
+          BOTTOM HALF SHUTTER (100% Solid Opaque Pitch Black, Slides DOWN on split)
          ========================================================================= */}
-      <div className="relative z-30 flex flex-col items-center justify-center px-4 w-full max-w-2xl pointer-events-none">
-        {/* Hacker / Glitch Error 404 Headline ("ar ayikhane jei ager eror lekha eta ene deo") */}
+      <motion.div
+        initial={{ y: 0 }}
+        animate={
+          isSplitting
+            ? {
+                y: '105%',
+                transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
+              }
+            : { y: 0 }
+        }
+        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#020306] border-t border-emerald-500/20 z-10 flex flex-col justify-end p-4 sm:p-7 shadow-2xl"
+        style={{ backgroundColor: '#020306' }}
+      >
+        {/* Subtle Cyber Grid */}
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, rgba(16, 185, 129, 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.5) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
+          }}
+        />
+
+        {/* Bottom HUD */}
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-stone-400 font-mono">
+          <span className="text-stone-400 hidden sm:inline">Mobile & Web Engineering Platform</span>
+          <div className="flex items-center gap-2 mx-auto sm:mx-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-emerald-400 font-bold uppercase tracking-widest">
+              PORTAL READY
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* =========================================================================
+          MAIN CENTERSTAGE: LARGE ERROR 404 HEADLINE + PORTRAIT CARD
+          - No red badges ("lal lekha dorkar nai")
+          - Big bold high-impact error typography ("404 eror boro kore lekha thakbe")
+          - Image card flies smoothly straight into Hero slot
+         ========================================================================= */}
+      <div className="relative z-30 flex flex-col items-center justify-center px-4 w-full max-w-3xl pointer-events-none">
+        
+        {/* Big Bold Error Headline */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={
@@ -292,51 +258,44 @@ export default function GlitchIntroPreloader() {
                   opacity: 0,
                   y: -50,
                   scale: 0.92,
-                  filter: 'blur(14px)',
                   transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
                 }
-              : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+              : { opacity: 1, y: 0, scale: 1 }
           }
-          className="text-center mb-3 sm:mb-5 max-w-xl px-2"
+          className="text-center mb-3 sm:mb-5 max-w-2xl px-2"
         >
-          {/* Status Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-mono text-[10px] sm:text-xs tracking-wider mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-            <span className="font-bold uppercase tracking-widest">SYSTEM ALERT // 404</span>
-          </div>
-
-          {/* Line 1: ERROR 404: Conventional */}
+          {/* Line 1: ERROR 404: Conventional (Big Bold High-Contrast White) */}
           <h1
-            className="text-lg xs:text-xl sm:text-3xl md:text-4xl font-extrabold tracking-wider text-white font-mono"
+            className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-wider text-white font-mono"
             style={{
-              letterSpacing: '0.03em',
-              textShadow: '0 0 25px rgba(255, 255, 255, 0.35), 0 2px 10px rgba(0,0,0,1)',
+              letterSpacing: '0.04em',
+              textShadow: '0 0 35px rgba(255, 255, 255, 0.5), 0 4px 15px rgba(0,0,0,1)',
             }}
           >
             <span>{typedLine1}</span>
             {activeCursor === 'line1' && (
-              <span className="inline-block w-2 sm:w-3 h-4 sm:h-7 bg-red-400 ml-1.5 animate-pulse align-middle" />
+              <span className="inline-block w-2.5 sm:w-4 h-6 sm:h-12 bg-white ml-2 animate-pulse align-middle" />
             )}
           </h1>
 
-          {/* Line 2: developer not found. */}
+          {/* Line 2: developer not found. (Big High-Impact Emerald) */}
           {typedLine2 && (
             <p
-              className="text-xs xs:text-sm sm:text-base md:text-lg font-bold tracking-wide text-emerald-400 font-mono mt-1"
+              className="text-base xs:text-lg sm:text-2xl md:text-3xl font-extrabold tracking-wide text-emerald-400 font-mono mt-1 sm:mt-2"
               style={{
-                textShadow: '0 0 20px rgba(16, 185, 129, 0.45)',
+                textShadow: '0 0 25px rgba(16, 185, 129, 0.6)',
               }}
             >
               <span>{typedLine2}</span>
               {(activeCursor === 'line2' || activeCursor === 'done') && (
-                <span className="inline-block w-1.5 sm:w-2.5 h-3 sm:h-5 bg-emerald-400 ml-1.5 animate-pulse align-middle" />
+                <span className="inline-block w-2 sm:w-3.5 h-5 sm:h-8 bg-emerald-400 ml-2 animate-pulse align-middle" />
               )}
             </p>
           )}
         </motion.div>
 
         {/* =========================================================================
-            PORTRAIT CARD: Glides smoothly through smoke straight into Hero slot!
+            PORTRAIT CARD: Glides smoothly into exact Hero slot on split!
            ========================================================================= */}
         <motion.div
           ref={cardRef}
@@ -347,11 +306,11 @@ export default function GlitchIntroPreloader() {
                   x: targetTransform.x,
                   y: targetTransform.y,
                   scale: targetTransform.scale,
-                  opacity: [1, 1, 0.85, 0], // Smooth handoff at destination
+                  opacity: [1, 1, 0.85, 0],
                   transition: {
-                    duration: 0.95,
-                    ease: [0.16, 1, 0.3, 1], // Ultra-smooth Apple-grade cubic-bezier ("oenk sommoth koro")
-                    opacity: { times: [0, 0.75, 0.92, 1], duration: 0.95 },
+                    duration: 0.92,
+                    ease: [0.16, 1, 0.3, 1],
+                    opacity: { times: [0, 0.75, 0.92, 1], duration: 0.92 },
                   },
                 }
               : {
@@ -365,9 +324,9 @@ export default function GlitchIntroPreloader() {
           className="relative w-[190px] xs:w-[215px] sm:w-[270px] md:w-[310px] aspect-[3/4] rounded-2xl sm:rounded-[28px] overflow-hidden flex items-end justify-center pointer-events-auto cursor-pointer"
           style={{
             border: '1.5px solid var(--portrait-border, rgba(16, 185, 129, 0.6))',
-            backgroundColor: 'rgba(10, 12, 18, 0.85)',
+            backgroundColor: '#0c0f17',
             boxShadow:
-              '0 0 50px rgba(16, 185, 129, 0.4), 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.2)',
+              '0 0 50px rgba(16, 185, 129, 0.45), 0 25px 60px rgba(0, 0, 0, 0.95), inset 0 1px 2px rgba(255, 255, 255, 0.2)',
             willChange: 'transform, opacity',
           }}
         >
@@ -403,23 +362,6 @@ export default function GlitchIntroPreloader() {
           </div>
         </motion.div>
       </div>
-
-      {/* =========================================================================
-          BOTTOM HUD STATUS
-         ========================================================================= */}
-      <motion.div
-        animate={isSplitting ? { y: 40, opacity: 0 } : { y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="absolute bottom-4 sm:bottom-6 left-5 sm:left-10 right-5 sm:right-10 flex items-center justify-between text-[10px] sm:text-xs text-stone-500 font-mono pointer-events-none z-20"
-      >
-        <span className="text-stone-400 hidden sm:inline">Mobile & Web Engineering Platform</span>
-        <div className="flex items-center gap-2 mx-auto sm:mx-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-emerald-400 font-bold uppercase tracking-widest text-[10px] sm:text-xs">
-            CLICK ANYWHERE TO ENTER
-          </span>
-        </div>
-      </motion.div>
     </div>
   )
 }
