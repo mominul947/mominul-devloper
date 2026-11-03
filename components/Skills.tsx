@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useMemo } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import {
   SiPython, SiJavascript, SiTypescript, SiC, SiCplusplus, SiKotlin,
@@ -12,8 +12,9 @@ import {
 } from 'react-icons/si'
 import { FaHtml5, FaCss3Alt, FaAws } from 'react-icons/fa6'
 import { TbBrandAzure, TbBrandVscode, TbBrandAdobePhotoshop, TbBrandOffice } from 'react-icons/tb'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Terminal } from 'lucide-react'
 import type { IconType } from 'react-icons'
+import TechStack3DBackground from './TechStack3DBackground'
 
 interface TechItem {
   id: string
@@ -70,7 +71,7 @@ const TECH_REGISTRY: Record<string, TechItem> = {
 }
 
 // DESKTOP TAPERED MATRIX: 11 -> 10 -> 8 -> 6 -> 4 -> 2 (41 items)
-// Exactly matching user reference photo media_1793719195230_77d5e227.jpg
+// Matching user desktop reference photo media_1793719195230_77d5e227.jpg
 const DESKTOP_ROWS: string[][] = [
   // Row 1: 11 items
   ['python', 'javascript', 'typescript', 'c', 'cpp', 'kotlin', 'html', 'css', 'react', 'nextjs', 'bootstrap'],
@@ -87,7 +88,7 @@ const DESKTOP_ROWS: string[][] = [
 ]
 
 // MOBILE CONTOUR MATRIX: 7 -> 5 -> 7 -> 3 -> 7 -> 1 -> 6 -> 4 -> 2 (42 items)
-// Exactly matching user mobile reference photo media_1793719196340_e25caa9f.jpg
+// Matching user mobile reference photo media_1793719196340_e25caa9f.jpg
 const MOBILE_ROWS: string[][] = [
   // Row 1: 7 items
   ['python', 'javascript', 'typescript', 'c', 'cpp', 'kotlin', 'html'],
@@ -136,25 +137,27 @@ function SquircleTechTile({
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`relative group flex flex-col items-center justify-center transition-all duration-300 cursor-pointer select-none ${
+      className={`relative group flex flex-col items-center justify-center transition-all duration-200 cursor-pointer select-none ${
         isDesktop
           ? 'w-[64px] h-[72px] sm:w-[70px] sm:h-[80px] md:w-[76px] md:h-[86px] lg:w-[82px] lg:h-[92px] rounded-xl sm:rounded-2xl p-1.5'
           : 'w-[42px] h-[50px] xs:w-[46px] xs:h-[54px] rounded-lg xs:rounded-xl p-1'
       }`}
       style={{
         backgroundColor: hovered
-          ? 'rgba(24, 26, 42, 0.95)'
-          : 'rgba(14, 16, 26, 0.85)',
-        backdropFilter: 'blur(10px)',
+          ? 'rgba(18, 22, 34, 0.95)'
+          : 'rgba(10, 12, 19, 0.85)',
+        backdropFilter: 'blur(8px)',
         border: hovered
           ? `1px solid ${tech.color}`
           : '1px solid rgba(255, 255, 255, 0.08)',
         boxShadow: hovered
-          ? `0 0 22px ${tech.color}40, 0 8px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.2)`
-          : '0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255,255,255,0.05)',
-        opacity: isDimmed ? 0.28 : 1,
-        transform: hovered ? 'scale(1.12) translateY(-4px)' : 'scale(1) translateY(0)',
+          ? `0 0 20px ${tech.color}45, 0 8px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.2)`
+          : '0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255,255,255,0.04)',
+        opacity: isDimmed ? 0.25 : 1,
+        transform: hovered ? 'scale(1.1) translateY(-3px)' : 'scale(1) translateY(0)',
         zIndex: hovered ? 30 : 10,
+        contain: 'paint layout',
+        willChange: 'transform',
       }}
     >
       {/* Specular glare shine on top */}
@@ -162,11 +165,11 @@ function SquircleTechTile({
 
       {/* Brand Colorful Icon */}
       <div
-        className="transition-transform duration-300 group-hover:scale-110 flex items-center justify-center"
+        className="transition-transform duration-200 group-hover:scale-105 flex items-center justify-center"
         style={{
           filter: hovered
             ? `drop-shadow(0 0 8px ${tech.color})`
-            : `drop-shadow(0 1px 3px rgba(0,0,0,0.5))`,
+            : `drop-shadow(0 1px 2px rgba(0,0,0,0.5))`,
         }}
       >
         <Icon
@@ -181,7 +184,7 @@ function SquircleTechTile({
 
       {/* Tech Name Label Underneath */}
       <span
-        className={`font-mono text-center tracking-tight truncate max-w-full font-medium transition-colors duration-200 ${
+        className={`font-mono text-center tracking-tight truncate max-w-full font-medium transition-colors duration-150 ${
           isDesktop
             ? 'mt-1 text-[9px] sm:text-[10px] md:text-[11px]'
             : 'mt-0.5 text-[6.5px] xs:text-[7.5px]'
@@ -199,54 +202,59 @@ function SquircleTechTile({
 
 export default function Skills() {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-50px' })
+  const inView = useInView(ref, { margin: '-30px' })
   const [activeCategory, setActiveCategory] = useState<string>('ALL')
 
   return (
     <section
       id="skills"
-      className="py-16 sm:py-24 relative overflow-hidden bg-[#07070e] text-white border-t border-white/5 select-none"
+      ref={ref}
+      className="py-16 sm:py-24 relative overflow-hidden bg-[#06080d] text-white border-t border-white/5 select-none"
     >
-      {/* ATMOSPHERIC BACKGROUND (Matching reference images) */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Central glowing violet spherical orb behind the matrix */}
+      {/* 3D INTERACTIVE WIREFRAME GLOBE / CYBER MESH (Zero-lag on mobile) */}
+      <TechStack3DBackground inView={inView} />
+
+      {/* ATMOSPHERIC BACKGROUND MATCHING USER'S PORTFOLIO PALETTE (Emerald + Cyan + Deep Space) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Central emerald & cyan atmospheric orb behind the 3D globe */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[900px] h-[500px] sm:h-[700px] rounded-full blur-[110px] sm:blur-[150px] opacity-40"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[850px] h-[450px] sm:h-[650px] rounded-full blur-[120px] sm:blur-[160px] opacity-35"
           style={{
-            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(139,92,246,0.18) 40%, rgba(59,130,246,0.08) 70%, transparent 100%)'
+            background:
+              'radial-gradient(circle, rgba(16,185,129,0.3) 0%, rgba(6,182,212,0.18) 40%, rgba(99,102,241,0.08) 70%, transparent 100%)'
           }}
         />
 
-        {/* Outer deep purple ambience */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[80vw] h-[350px] bg-purple-600/10 blur-[130px] rounded-full" />
-        <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[80vw] h-[350px] bg-violet-800/15 blur-[140px] rounded-full" />
+        {/* Outer ambient glow */}
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[80vw] h-[300px] bg-emerald-500/10 blur-[130px] rounded-full" />
+        <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[80vw] h-[300px] bg-cyan-600/10 blur-[140px] rounded-full" />
 
-        {/* Perspective curved grid lines fanning outward / downward (matching Redoyan's screenshot) */}
+        {/* Curved perspective wireframe tunnel grid lines */}
         <div
-          className="absolute inset-0 opacity-[0.16] mix-blend-screen"
+          className="absolute inset-0 opacity-[0.14] mix-blend-screen"
           style={{
             backgroundImage: `
-              radial-gradient(ellipse 90% 60% at 50% 45%, transparent 35%, rgba(168, 85, 247, 0.4) 75%, transparent 100%),
-              repeating-radial-gradient(ellipse 90% 60% at 50% 45%, transparent 0, transparent 40px, rgba(255, 255, 255, 0.12) 41px, transparent 42px)
+              radial-gradient(ellipse 90% 60% at 50% 45%, transparent 35%, rgba(16, 185, 129, 0.35) 75%, transparent 100%),
+              repeating-radial-gradient(ellipse 90% 60% at 50% 45%, transparent 0, transparent 40px, rgba(255, 255, 255, 0.1) 41px, transparent 42px)
             `
           }}
         />
 
         {/* Subtle Cyber Dust Particles */}
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 relative z-10" ref={ref}>
-        {/* SECTION HEADER: "TECH STACK" (Matching reference images) */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 relative z-10">
+        {/* SECTION HEADER: MATCHING USER'S WEBSITE AESTHETICS (Emerald/Cyan Theme) */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="flex flex-col items-center justify-center text-center mb-6 sm:mb-8"
         >
-          {/* Subtle Top Glowing Pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] sm:text-xs font-mono font-medium tracking-wider uppercase mb-3">
-            <Sparkles size={12} className="text-purple-400 animate-pulse" />
+          {/* Neon Emerald Top Badge (Matching site's navbar style) */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] sm:text-xs font-mono font-medium tracking-wider uppercase mb-3 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+            <Sparkles size={12} className="text-emerald-400 animate-pulse" />
             <span>Interactive Brand Ecosystem</span>
           </div>
 
@@ -254,11 +262,11 @@ export default function Skills() {
             className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-widest uppercase"
             style={{
               fontFamily: 'var(--font-outfit), sans-serif',
-              letterSpacing: '0.18em',
-              background: 'linear-gradient(180deg, #FFFFFF 0%, #A5B4FC 60%, #818CF8 100%)',
+              letterSpacing: '0.16em',
+              background: 'linear-gradient(180deg, #FFFFFF 0%, #A7F3D0 55%, #10B981 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 35px rgba(168, 85, 247, 0.45)'
+              textShadow: '0 0 30px rgba(16, 185, 129, 0.35)'
             }}
           >
             TECH STACK
@@ -268,11 +276,11 @@ export default function Skills() {
           </p>
         </motion.div>
 
-        {/* CATEGORY FILTER PILLS (Swipeable on mobile) */}
+        {/* CATEGORY FILTER PILLS (Matching site's emerald theme, swipeable on mobile) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
           className="flex items-center justify-center mb-8 sm:mb-12"
         >
           <div className="flex flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full px-2 py-1 scrollbar-none justify-start sm:justify-center">
@@ -283,10 +291,10 @@ export default function Skills() {
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
                   type="button"
-                  className={`px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium tracking-wide transition-all duration-200 cursor-pointer flex-shrink-0 border ${
+                  className={`px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium tracking-wide transition-all duration-150 cursor-pointer flex-shrink-0 border ${
                     isActive
-                      ? 'bg-purple-600/30 text-purple-200 border-purple-400/60 shadow-[0_0_15px_rgba(168,85,247,0.35)] font-bold'
-                      : 'bg-white/[0.03] text-stone-400 border-white/10 hover:border-white/20 hover:text-white'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/60 shadow-[0_0_15px_rgba(16,185,129,0.3)] font-bold'
+                      : 'bg-white/[0.03] text-stone-400 border-white/10 hover:border-emerald-500/30 hover:text-white'
                   }`}
                 >
                   {cat.label}
@@ -301,10 +309,10 @@ export default function Skills() {
         {/* (Hidden on mobile screens, strictly visible on md and up)           */}
         {/* ------------------------------------------------------------------ */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="hidden md:flex flex-col items-center justify-center gap-2.5 lg:gap-3.5 mx-auto"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="hidden md:flex flex-col items-center justify-center gap-2.5 lg:gap-3.5 mx-auto relative z-10"
         >
           {DESKTOP_ROWS.map((rowTechIds, rowIndex) => (
             <div
@@ -330,13 +338,13 @@ export default function Skills() {
 
         {/* ------------------------------------------------------------------ */}
         {/* MOBILE MATRIX: HOURGLASS FUNNEL (7->5->7->3->7->1->6->4->2)        */}
-        {/* (Visible strictly on mobile & tablets below md)                    */}
+        {/* (Zero-lag hardware-accelerated for touch phones)                   */}
         {/* ------------------------------------------------------------------ */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="flex md:hidden flex-col items-center justify-center gap-1.5 xs:gap-2 mx-auto"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="flex md:hidden flex-col items-center justify-center gap-1.5 xs:gap-2 mx-auto relative z-10"
         >
           {MOBILE_ROWS.map((rowTechIds, rowIndex) => (
             <div
@@ -360,9 +368,9 @@ export default function Skills() {
           ))}
         </motion.div>
 
-        {/* Subtitle / Verification Bar at the bottom */}
-        <div className="mt-10 sm:mt-14 flex items-center justify-center gap-2 text-xs font-mono text-stone-500">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+        {/* Bottom Verification Status */}
+        <div className="mt-10 sm:mt-14 flex items-center justify-center gap-2 text-xs font-mono text-emerald-400/80">
+          <Terminal size={14} className="text-emerald-400" />
           <span>42 Core Production Technologies Indexed & Verified</span>
         </div>
 
