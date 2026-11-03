@@ -26,7 +26,7 @@ export default function GlitchIntroPreloader() {
   const [typedLine1, setTypedLine1] = useState('')
   const [typedLine2, setTypedLine2] = useState('')
   const [activeCursor, setActiveCursor] = useState<'line1' | 'line2' | 'done'>('line1')
-  const [phase, setPhase] = useState<'typing' | 'waiting' | 'splitting' | 'hidden'>('typing')
+  const [phase, setPhase] = useState<'entering' | 'peeking' | 'waiting' | 'splitting' | 'hidden'>('entering')
   const [visibleLogs, setVisibleLogs] = useState<string[]>([])
 
   const splitTriggeredRef = useRef(false)
@@ -48,7 +48,7 @@ export default function GlitchIntroPreloader() {
     }, 950)
   }, [])
 
-  // 1. 3D Perspective Matrix Digital Rain Canvas (Zero Lag, High FPS)
+  // 1. 3D Perspective Matrix Digital Rain Canvas
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -66,7 +66,7 @@ export default function GlitchIntroPreloader() {
     const drops = new Array(columns).fill(1).map(() => Math.floor(Math.random() * -50))
 
     let lastTime = 0
-    const fpsInterval = 1000 / 30 // Lock to smooth 30-40fps for authentic retro hacker terminal
+    const fpsInterval = 1000 / 30
 
     const draw = (currentTime: number) => {
       animationId = requestAnimationFrame(draw)
@@ -75,7 +75,6 @@ export default function GlitchIntroPreloader() {
       if (elapsed < fpsInterval) return
       lastTime = currentTime - (elapsed % fpsInterval)
 
-      // Translucent black overlay creates fading green trailing effect
       ctx.fillStyle = 'rgba(4, 5, 8, 0.15)'
       ctx.fillRect(0, 0, width, height)
 
@@ -86,13 +85,12 @@ export default function GlitchIntroPreloader() {
         const x = i * fontSize
         const y = drops[i] * fontSize
 
-        // Head of the drop is bright white/cyan, tail is emerald green
         if (Math.random() > 0.88) {
-          ctx.fillStyle = '#67e8f9' // Bright Cyan Head
+          ctx.fillStyle = '#67e8f9'
         } else if (Math.random() > 0.7) {
-          ctx.fillStyle = '#ffffff' // Pure White Glint
+          ctx.fillStyle = '#ffffff'
         } else {
-          ctx.fillStyle = '#10b981' // Cyber Emerald Tail
+          ctx.fillStyle = '#10b981'
         }
 
         ctx.fillText(text, x, y)
@@ -136,21 +134,26 @@ export default function GlitchIntroPreloader() {
     return () => clearInterval(logInterval)
   }, [])
 
-  // 3. Typewriter Effect for Main 404 Headline
+  // 3. Open center aperture slit + Typewriter Effect
   useEffect(() => {
     let charIndex1 = 0
     let charIndex2 = 0
     let timeoutId: NodeJS.Timeout
+
+    // First crack open the center aperture slit ("majhe faka hoye website er aktu dekha jabe")
+    const crackAperture = setTimeout(() => {
+      setPhase('peeking')
+    }, 200)
 
     const typeLine1 = () => {
       if (splitTriggeredRef.current) return
       if (charIndex1 < LINE_1_FULL.length) {
         charIndex1++
         setTypedLine1(LINE_1_FULL.slice(0, charIndex1))
-        timeoutId = setTimeout(typeLine1, 40)
+        timeoutId = setTimeout(typeLine1, 38)
       } else {
         setActiveCursor('line2')
-        timeoutId = setTimeout(typeLine2, 160)
+        timeoutId = setTimeout(typeLine2, 150)
       }
     }
 
@@ -159,22 +162,23 @@ export default function GlitchIntroPreloader() {
       if (charIndex2 < LINE_2_FULL.length) {
         charIndex2++
         setTypedLine2(LINE_2_FULL.slice(0, charIndex2))
-        timeoutId = setTimeout(typeLine2, 45)
+        timeoutId = setTimeout(typeLine2, 42)
       } else {
         setActiveCursor('done')
         setPhase('waiting')
         timeoutId = setTimeout(() => {
           triggerSplit()
-        }, 1500) // Comfortable 1.5s reading window
+        }, 1500) // Comfortable reading pause
       }
     }
 
-    timeoutId = setTimeout(typeLine1, 250)
+    timeoutId = setTimeout(typeLine1, 350)
 
     const handleKey = () => triggerSplit()
     window.addEventListener('keydown', handleKey, { once: true })
 
     return () => {
+      clearTimeout(crackAperture)
       clearTimeout(timeoutId)
       window.removeEventListener('keydown', handleKey)
     }
@@ -183,22 +187,20 @@ export default function GlitchIntroPreloader() {
   if (phase === 'hidden') return null
 
   const isSplitting = phase === 'splitting'
+  const isPeeking = phase === 'peeking' || phase === 'waiting'
 
   return (
     <div
       onClick={triggerSplit}
-      className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono bg-[#030407]"
+      className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono"
     >
       {/* =========================================================================
-          BACKGROUND LAYER: 3D PERSPECTIVE HACKER CODE RAIN & CYBER GRID
+          BACKGROUND LAYER: 3D PERSPECTIVE HACKER CODE RAIN
          ========================================================================= */}
       <div
         className="absolute inset-0 pointer-events-none overflow-hidden z-0"
-        style={{
-          perspective: '900px',
-        }}
+        style={{ perspective: '900px' }}
       >
-        {/* Tilted 3D Matrix Digital Rain */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full opacity-35"
@@ -207,8 +209,6 @@ export default function GlitchIntroPreloader() {
             transformOrigin: 'center center',
           }}
         />
-
-        {/* 3D Cyan/Emerald Floor Grid Horizon */}
         <div
           className="absolute inset-x-0 bottom-0 h-[45%] opacity-20 pointer-events-none"
           style={{
@@ -219,14 +219,14 @@ export default function GlitchIntroPreloader() {
             transformOrigin: 'bottom center',
           }}
         />
-
-        {/* Central Atmospheric Vignette & Underglow */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(3,4,7,0.85)_80%)]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(3,4,7,0.85)_80%)]" />
       </div>
 
       {/* =========================================================================
-          TOP HALF SHUTTER DOOR (Slides UP and LEFT: "2 ta 2 dike jabe")
+          TOP HALF SHUTTER DOOR
+          - Enters closed
+          - Cracks open UP by 22px ("majhe faka hoye website aktu dekha jabe")
+          - Splits all the way UP to -100% on exit
          ========================================================================= */}
       <motion.div
         initial={{ y: 0 }}
@@ -236,11 +236,16 @@ export default function GlitchIntroPreloader() {
                 y: '-100%',
                 transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
               }
+            : isPeeking
+            ? {
+                y: '-22px',
+                transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+              }
             : { y: 0 }
         }
-        className="absolute top-0 left-0 right-0 h-1/2 bg-[#040508]/92 backdrop-blur-xs border-b border-emerald-500/25 flex flex-col justify-end items-center pb-3 px-4 shadow-2xl z-20"
+        className="absolute top-0 left-0 right-0 h-1/2 bg-[#040508]/94 backdrop-blur-xs border-b border-emerald-400 flex flex-col justify-end items-center pb-3 px-4 shadow-[0_4px_25px_rgba(16,185,129,0.35)] z-20"
       >
-        {/* Subtle Scanlines */}
+        {/* Top Scanlines */}
         <div
           className="absolute inset-0 pointer-events-none opacity-25"
           style={{
@@ -250,7 +255,7 @@ export default function GlitchIntroPreloader() {
           }}
         />
 
-        {/* TOP TERMINAL HEADER (Cyber Hacker Details) */}
+        {/* TOP TERMINAL HEADER */}
         <div className="absolute top-4 sm:top-6 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between text-[10px] sm:text-[11px] text-stone-400 font-mono">
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
@@ -269,7 +274,7 @@ export default function GlitchIntroPreloader() {
           </div>
         </div>
 
-        {/* LIVE STREAMING HACKER LOGS (Top Left Floating Feed) */}
+        {/* LIVE STREAMING HACKER LOGS */}
         <div className="absolute top-14 left-4 sm:left-8 max-w-sm hidden sm:flex flex-col gap-1 text-[9.5px] font-mono text-emerald-400/60 pointer-events-none select-none">
           {visibleLogs.slice(0, 4).map((log, index) => (
             <div key={`log-top-${index}`} className="truncate flex items-center gap-1.5">
@@ -297,7 +302,7 @@ export default function GlitchIntroPreloader() {
                 }
               : { x: 0, opacity: 1 }
           }
-          className="relative z-10 text-center"
+          className="relative z-10 text-center mb-1"
         >
           <h1
             className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-stone-100 font-mono whitespace-nowrap inline-flex items-center"
@@ -314,7 +319,33 @@ export default function GlitchIntroPreloader() {
       </motion.div>
 
       {/* =========================================================================
-          BOTTOM HALF SHUTTER DOOR (Slides DOWN and RIGHT: "2 ta 2 dike jabe")
+          CENTER PEEK HORIZON APERTURE (Website reveals through this crack!)
+          - Glowing laser borders
+          - Visual slit showing underlying website
+         ========================================================================= */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <div
+          className={`w-full transition-all duration-700 ease-out flex items-center justify-center ${
+            isPeeking ? 'h-[44px]' : 'h-0'
+          }`}
+        >
+          {/* Neon laser glow beam shining out of the aperture */}
+          <div className="w-full h-full bg-emerald-400/5 backdrop-blur-[0.5px] border-y border-emerald-400/40 shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center justify-between px-6">
+            <span className="text-[9px] font-mono text-emerald-400/70 tracking-widest hidden sm:inline">
+              // PEEKING_PORTAL_ACTIVE: 443
+            </span>
+            <span className="text-[9px] font-mono text-cyan-400/70 tracking-widest hidden sm:inline">
+              VIEWPORT_EXPOSURE: 44px //
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          BOTTOM HALF SHUTTER DOOR
+          - Enters closed
+          - Cracks open DOWN by 22px ("majhe faka hoye website aktu dekha jabe")
+          - Splits all the way DOWN to 100% on exit
          ========================================================================= */}
       <motion.div
         initial={{ y: 0 }}
@@ -324,11 +355,16 @@ export default function GlitchIntroPreloader() {
                 y: '100%',
                 transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
               }
+            : isPeeking
+            ? {
+                y: '22px',
+                transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+              }
             : { y: 0 }
         }
-        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#040508]/92 backdrop-blur-xs border-t border-emerald-500/25 flex flex-col justify-start items-center pt-3 px-4 shadow-2xl z-20"
+        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#040508]/94 backdrop-blur-xs border-t border-emerald-400 flex flex-col justify-start items-center pt-3 px-4 shadow-[0_-4px_25px_rgba(16,185,129,0.35)] z-20"
       >
-        {/* Subtle Scanlines */}
+        {/* Bottom Scanlines */}
         <div
           className="absolute inset-0 pointer-events-none opacity-25"
           style={{
@@ -349,7 +385,7 @@ export default function GlitchIntroPreloader() {
                 }
               : { x: 0, opacity: 1 }
           }
-          className="relative z-10 text-center"
+          className="relative z-10 text-center mt-1"
         >
           <h1
             className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-emerald-300 font-mono whitespace-nowrap inline-flex items-center"
@@ -364,7 +400,7 @@ export default function GlitchIntroPreloader() {
           </h1>
         </motion.div>
 
-        {/* LIVE STREAMING HACKER LOGS (Bottom Left Floating Feed) */}
+        {/* LIVE STREAMING HACKER LOGS */}
         <div className="absolute bottom-12 left-4 sm:left-8 max-w-sm hidden sm:flex flex-col gap-1 text-[9.5px] font-mono text-emerald-400/60 pointer-events-none select-none">
           {visibleLogs.slice(4).map((log, index) => (
             <div key={`log-bottom-${index}`} className="truncate flex items-center gap-1.5">
@@ -380,11 +416,6 @@ export default function GlitchIntroPreloader() {
           <span className="text-stone-300 font-mono">Click anywhere or tap screen to enter portal</span>
         </div>
       </motion.div>
-
-      {/* Central Horizon Glow during split */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <div className="w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent blur-xs shadow-[0_0_20px_#10b981]" />
-      </div>
     </div>
   )
 }
