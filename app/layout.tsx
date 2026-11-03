@@ -5,6 +5,16 @@ import AnalyticsTracker from '@/components/AnalyticsTracker'
 export const metadata: Metadata = {
   title: 'Md. Mominul Islam | Full-Stack & Mobile App Developer',
   description: 'Portfolio of Md. Mominul Islam – Full-Stack & Mobile App Developer based in Bogura Sadar, Bogura, Bangladesh. Next.js, Node.js, React Native.',
+  icons: {
+    icon: [
+      { url: '/images/hero-portrait-01.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    shortcut: ['/images/hero-portrait-01.png'],
+    apple: [
+      { url: '/images/hero-portrait-01.png' },
+    ],
+  },
 }
 
 export default function RootLayout({
@@ -15,6 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="md:scroll-smooth" data-theme="neon-growth">
       <head>
+        <link rel="icon" type="image/png" href="/images/hero-portrait-01.png" />
+        <link rel="shortcut icon" href="/images/hero-portrait-01.png" />
+        <link rel="apple-touch-icon" href="/images/hero-portrait-01.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
