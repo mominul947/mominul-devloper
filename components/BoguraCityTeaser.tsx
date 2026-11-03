@@ -1,16 +1,16 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import Link from 'next/link'
 import {
-  Compass,
-  Sparkles,
-  Building,
-  Gamepad2,
-  ArrowUpRight,
+  MapPin,
+  Heart,
   Volume2,
   VolumeX,
   Maximize2,
+  Compass,
+  Sparkles,
+  Building,
+  Quote,
 } from 'lucide-react'
 
 export default function BoguraCityTeaser() {
@@ -54,24 +54,35 @@ export default function BoguraCityTeaser() {
   }
 
   return (
-    <section id="bogura" className="relative py-12 sm:py-16 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
-      {/* Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-emerald-500/10 blur-[110px] pointer-events-none" />
+    <section id="hometown" className="relative py-16 sm:py-20 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
+      {/* Ambient Radial Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] rounded-full bg-emerald-500/10 blur-[130px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-b from-[#090d0b] via-[#0d1612] to-[#090d0b] p-5 sm:p-8 xl:p-9 shadow-2xl relative overflow-hidden">
+        
+        {/* Main Showcase Container */}
+        <div className="rounded-3xl border border-emerald-500/25 bg-gradient-to-b from-[#090e0b] via-[#0d1612] to-[#090e0b] p-6 sm:p-10 shadow-2xl relative overflow-hidden">
           
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          {/* Subtle Accent Background Grid */}
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle, #10b981 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
+
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             
-            {/* Left Column: Clean Video Player with Hover-to-Play-Audio */}
-            <div className="lg:col-span-7 space-y-2">
+            {/* Left Column: Clean Video Player with Hover Audio (7 Cols) */}
+            <div className="lg:col-span-7 space-y-3">
               
               {/* Clean Video Container */}
               <div
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onClick={toggleSound}
-                className="relative rounded-2xl overflow-hidden border border-emerald-500/30 bg-black shadow-2xl group aspect-video cursor-pointer"
+                className="relative rounded-2xl overflow-hidden border border-emerald-500/35 bg-black shadow-2xl group aspect-video cursor-pointer"
               >
                 <video
                   ref={videoRef}
@@ -83,7 +94,7 @@ export default function BoguraCityTeaser() {
                   className="w-full h-full object-cover"
                 />
 
-                {/* Subtle Sound Status Indicator in Top-Right */}
+                {/* Video Controls Overlay */}
                 <div className="absolute top-3 right-3 flex items-center gap-2 z-20 pointer-events-auto">
                   <button
                     type="button"
@@ -91,14 +102,14 @@ export default function BoguraCityTeaser() {
                       e.stopPropagation()
                       toggleSound()
                     }}
-                    className={`px-2.5 py-1 rounded-full backdrop-blur-md text-xs font-mono flex items-center gap-1.5 transition-all shadow-md border ${
+                    className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-mono flex items-center gap-1.5 transition-all shadow-md border ${
                       isMuted
-                        ? 'bg-black/70 text-stone-300 border-white/10 hover:border-emerald-500/40'
+                        ? 'bg-black/75 text-stone-300 border-white/15 hover:border-emerald-500/40'
                         : 'bg-emerald-500 text-black border-emerald-400 font-bold animate-pulse'
                     }`}
                   >
                     {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                    <span>{isMuted ? 'Muted (Hover for sound)' : 'Sound Playing'}</span>
+                    <span>{isMuted ? 'Muted (Hover for Sound)' : 'Sound Playing'}</span>
                   </button>
 
                   <button
@@ -107,71 +118,88 @@ export default function BoguraCityTeaser() {
                       e.stopPropagation()
                       handleFullscreen()
                     }}
-                    className="w-7 h-7 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-emerald-500 hover:text-black transition-colors shadow-md"
+                    className="w-8 h-8 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-white flex items-center justify-center hover:bg-emerald-500 hover:text-black transition-colors shadow-md"
                     title="Fullscreen"
                   >
-                    <Maximize2 size={12} />
+                    <Maximize2 size={13} />
                   </button>
                 </div>
               </div>
 
-              {/* Clean Video Credit */}
-              <div className="flex items-center justify-between px-1 pt-1 text-xs text-stone-400 font-mono">
-                <span>Video credit by Utshboe</span>
-                <span className="text-[11px] text-emerald-400/80">Bogura, Bangladesh</span>
+              {/* Video Credit & Sub-caption */}
+              <div className="flex items-center justify-between px-1 text-xs text-stone-400 font-mono">
+                <span className="flex items-center gap-1.5 text-stone-300">
+                  <span>Video credit by</span>
+                  <span className="text-emerald-400 font-semibold">Utshboe</span>
+                </span>
+                <span className="text-[11px] text-stone-400">
+                  Bogura Sadar &amp; Mahasthangarh, Bangladesh
+                </span>
               </div>
             </div>
 
-            {/* Right Column: Information & 3D Game Link */}
-            <div className="lg:col-span-5 space-y-4">
+            {/* Right Column: Heartfelt Story & Hometown Pride (5 Cols) */}
+            <div className="lg:col-span-5 space-y-5">
+              
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 font-bold flex items-center gap-1.5">
-                    <Gamepad2 size={14} />
-                    <span>BOGURA DISTRICT • 3D VIRTUAL CITY</span>
-                  </span>
+                {/* Hometown Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold tracking-wider mb-3">
+                  <Heart size={13} className="text-rose-500 fill-rose-500 animate-pulse" />
+                  <span>MY HOMETOWN • BOGURA, BANGLADESH</span>
                 </div>
 
-                <h3 className="font-billboard text-2xl xs:text-3xl sm:text-4xl text-white tracking-wide leading-tight">
-                  EXPLORE BOGURA: THE 3D VIRTUAL CITY
+                <h3 className="font-billboard text-3xl sm:text-4xl text-white tracking-wide leading-tight">
+                  WELCOME TO BOGURA
                 </h3>
+                <h4 className="text-emerald-400 font-medium text-base sm:text-lg mt-1">
+                  আমার প্রাণের শহর বগুড়া
+                </h4>
 
-                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed mt-2">
-                  Drone showcase of Bogura district above. Experience the interactive 3D virtual simulation featuring Mahasthangarh, Satmatha zero point &amp; cyber waterways.
+                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed mt-3">
+                  বগুড়া শুধু আমার জন্মস্থান নয়, এটি আমার ভালোবাসা ও অনুপ্রেরণার উৎস। উত্তরবঙ্গের প্রবেশদ্বার, আড়াই হাজার বছরের প্রাচীন ইতিহাস ও ঐতিহ্যের এই সুন্দর শহর থেকেই প্রযুক্তি ও সফটওয়্যার ইঞ্জিনিয়ারিংয়ে আমার পথচলা শুরু।
                 </p>
               </div>
 
-              {/* Highlights */}
-              <div className="space-y-2 pt-1">
-                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2.5 text-xs text-stone-200">
-                  <Building size={14} className="text-emerald-400 flex-shrink-0" />
-                  <span>3rd Century BC Ancient Pundranagar Citadel</span>
+              {/* Cultural & Historic Highlights */}
+              <div className="space-y-2.5">
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 transition-all flex items-start gap-3 text-xs text-stone-200">
+                  <Building size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-white block">আড়াই হাজার বছরের মহাস্থানগড় (Pundranagar)</span>
+                    <span className="text-stone-400 text-[11px]">খ্রিস্টপূর্ব ৩য় শতকের বাংলার প্রাচীনতম রাজধানী ও প্রত্নতাত্ত্বিক দুর্গ।</span>
+                  </div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2.5 text-xs text-stone-200">
-                  <Compass size={14} className="text-teal-300 flex-shrink-0" />
-                  <span>Satmatha 7-Way Highway Convergence Plaza</span>
+
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 transition-all flex items-start gap-3 text-xs text-stone-200">
+                  <Compass size={16} className="text-teal-300 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-white block">ঐতিহাসিক সাতমাথা (Satmatha Zero Point)</span>
+                    <span className="text-stone-400 text-[11px]">বীরশ্রেষ্ঠ স্কয়ার ও ৭টি মহাসড়কের মিলনস্থল—দিনরাত ২৪ ঘণ্টার প্রাণবন্ত আড্ডা ও চায়ের সংস্কৃতি।</span>
+                  </div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2.5 text-xs text-stone-200">
-                  <Sparkles size={14} className="text-amber-300 flex-shrink-0" />
-                  <span>GI-Certified World Famous Bogura Curd (Doi)</span>
+
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 transition-all flex items-start gap-3 text-xs text-stone-200">
+                  <Sparkles size={16} className="text-amber-300 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-white block">বিশ্ববিখ্যাত বগুড়ার দই (GI-Certified Curd)</span>
+                    <span className="text-stone-400 text-[11px]">মাটির হাঁড়ির খাঁটি ক্ষীরসার স্বাদ, যা বিশ্বজুড়ে বাংলাদেশের পরিচয় বহন করে।</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Action Button: Launch 3D Game City */}
-              <div className="pt-2">
-                <Link
-                  href="/bogura"
-                  target="_blank"
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-500/30 transition-all hover:scale-[1.02] cursor-pointer group"
-                >
-                  <Gamepad2 size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-                  <span>ENTER 3D GAME CITY (/bogura)</span>
-                  <ArrowUpRight size={16} />
-                </Link>
-                <p className="text-[10px] font-mono text-stone-400 text-center mt-2">
-                  Interactive 3D WebGL Metaverse • Click to enter in new tab
-                </p>
+              {/* Personal Quote Note */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-black/60 border border-emerald-500/20 relative">
+                <div className="flex items-start gap-2.5">
+                  <Quote size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs text-stone-300 italic leading-relaxed">
+                      &quot;প্রযুক্তির দুনিয়ায় আমি যত দূরেই যাই না কেন, আমার শেকড় ও হৃদয় সর্বদা আমার প্রিয় বগুড়ার সাথেই থাকবে।&quot;
+                    </p>
+                    <span className="text-[11px] font-mono font-bold text-emerald-400 block mt-1.5">
+                      — মোঃ মোমিনুল ইসলাম (Md. Mominul Islam)
+                    </span>
+                  </div>
+                </div>
               </div>
 
             </div>
@@ -179,6 +207,7 @@ export default function BoguraCityTeaser() {
           </div>
 
         </div>
+
       </div>
     </section>
   )
