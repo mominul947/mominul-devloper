@@ -15,11 +15,13 @@ import Footer from '@/components/Footer'
 import ScrollProgress from '@/components/ScrollProgress'
 import SmoothMotionBackdrop from '@/components/SmoothMotionBackdrop'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
+import GlitchIntroPreloader from '@/components/GlitchIntroPreloader'
 
 export default function Home() {
   return (
     <ThemeProvider>
       <LanguageProvider>
+        <GlitchIntroPreloader />
         <div className="relative theme-main-bg theme-text-main min-h-screen">
           <SmoothMotionBackdrop />
           <ScrollProgress />
