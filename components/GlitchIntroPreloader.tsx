@@ -95,7 +95,7 @@ export default function GlitchIntroPreloader() {
       document.body.style.overflow = ''
       document.documentElement.style.overflow = ''
       document.body.style.touchAction = ''
-    }, 950)
+    }, 1480)
   }, [getDestination])
 
   // Typewriter sequence for the Error text
@@ -109,10 +109,10 @@ export default function GlitchIntroPreloader() {
       if (charIndex1 < LINE_1_FULL.length) {
         charIndex1++
         setTypedLine1(LINE_1_FULL.slice(0, charIndex1))
-        timeoutId = setTimeout(typeLine1, 30)
+        timeoutId = setTimeout(typeLine1, 32)
       } else {
         setActiveCursor('line2')
-        timeoutId = setTimeout(typeLine2, 110)
+        timeoutId = setTimeout(typeLine2, 120)
       }
     }
 
@@ -121,14 +121,14 @@ export default function GlitchIntroPreloader() {
       if (charIndex2 < LINE_2_FULL.length) {
         charIndex2++
         setTypedLine2(LINE_2_FULL.slice(0, charIndex2))
-        timeoutId = setTimeout(typeLine2, 32)
+        timeoutId = setTimeout(typeLine2, 35)
       } else {
         setActiveCursor('done')
         setPhase('waiting')
-        // Pause to read, then auto-split
+        // Pause to read comfortably, then smoothly split ("animetion er time ta barao")
         timeoutId = setTimeout(() => {
           triggerSplit()
-        }, 1300)
+        }, 2200)
       }
     }
 
@@ -172,7 +172,7 @@ export default function GlitchIntroPreloader() {
           isSplitting
             ? {
                 y: '-105%',
-                transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
+                transition: { duration: 1.4, ease: [0.22, 1, 0.36, 1] },
               }
             : { y: 0 }
         }
@@ -212,7 +212,7 @@ export default function GlitchIntroPreloader() {
           isSplitting
             ? {
                 y: '105%',
-                transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
+                transition: { duration: 1.4, ease: [0.22, 1, 0.36, 1] },
               }
             : { y: 0 }
         }
@@ -258,7 +258,7 @@ export default function GlitchIntroPreloader() {
                   opacity: 0,
                   y: -50,
                   scale: 0.92,
-                  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                  transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
                 }
               : { opacity: 1, y: 0, scale: 1 }
           }
@@ -308,9 +308,9 @@ export default function GlitchIntroPreloader() {
                   scale: targetTransform.scale,
                   opacity: [1, 1, 0.85, 0],
                   transition: {
-                    duration: 0.92,
-                    ease: [0.16, 1, 0.3, 1],
-                    opacity: { times: [0, 0.75, 0.92, 1], duration: 0.92 },
+                    duration: 1.45,
+                    ease: [0.22, 1, 0.36, 1], // Extended smooth Apple-grade curve ("animetion er time ta barao")
+                    opacity: { times: [0, 0.82, 0.95, 1], duration: 1.45 },
                   },
                 }
               : {
