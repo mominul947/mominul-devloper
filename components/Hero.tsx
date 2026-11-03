@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { getExperience, useLiveExperience } from '@/utils/experience'
 
 import DhakaTime from '@/components/DhakaTime'
+import { useLanguage } from '@/context/LanguageContext'
 
 const portraits = [
   {
@@ -26,11 +27,12 @@ const portraits = [
 export default function Hero() {
   const [activePhoto, setActivePhoto] = useState(0)
   const liveExp = useLiveExperience()
+  const { t, language } = useLanguage()
 
   const stats = [
-    { value: liveExp.yearsFormatted, label: 'YEARS EXP', live: true },
-    { value: '50+', label: 'PROJECTS', live: false },
-    { value: '25+', label: 'CLIENTS', live: false },
+    { value: liveExp.yearsFormatted, label: t.hero.yearsExp, live: true },
+    { value: '50+', label: t.hero.projectsCount, live: false },
+    { value: '25+', label: t.hero.clientsCount, live: false },
   ]
 
   const scrollTo = (id: string) => {
@@ -48,7 +50,7 @@ export default function Hero() {
             style={{ backgroundColor: 'var(--accent)' }}
           />
           <span className="font-bold theme-text-accent truncate">
-            FULL-STACK &amp; MOBILE APP DEVELOPER
+            {t.hero.roleBadge}
           </span>
         </div>
         <div className="hidden sm:flex items-center gap-3 theme-text-muted">
@@ -56,7 +58,7 @@ export default function Hero() {
           <span className="opacity-40">•</span>
           <div className="flex items-center gap-1.5">
             <Sparkles size={12} className="theme-text-accent" />
-            <span>AVAILABLE FOR FREELANCE &amp; CONTRACTS</span>
+            <span>{t.hero.availableBadge}</span>
           </div>
         </div>
       </div>
@@ -101,13 +103,13 @@ export default function Hero() {
                 <span className="theme-text-accent">ISLAM</span>
               </h2>
               <p className="text-[9px] xs:text-[10px] font-bold tracking-wider theme-text-accent font-mono uppercase">
-                FULL-STACK &amp; MOBILE ARCHITECT
+                {t.nav.role}
               </p>
 
               {/* Location Tag */}
               <div className="flex items-center gap-1.5 text-[9px] xs:text-[10px] font-mono uppercase tracking-wider">
                 <MapPin size={11} className="theme-text-accent flex-shrink-0" />
-                <span className="font-semibold theme-text-main truncate">BOGURA SADAR, BOGURA</span>
+                <span className="font-semibold theme-text-main truncate">{t.hero.location}</span>
               </div>
 
               {/* Action Buttons */}
@@ -116,7 +118,7 @@ export default function Hero() {
                   onClick={() => scrollTo('apps')}
                   className="btn-theme-primary px-3 py-2 rounded-xl text-[10px] xs:text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-1 cursor-pointer shadow-md"
                 >
-                  <span>Works</span>
+                  <span>{language === 'bn' ? 'প্রজেক্ট' : 'Works'}</span>
                   <ArrowUpRight size={12} />
                 </button>
 
@@ -347,16 +349,16 @@ export default function Hero() {
               className="space-y-4"
             >
               <p className="text-sm font-bold tracking-widest theme-text-accent font-mono uppercase">
-                FULL-STACK, MOBILE &amp; BACKEND ARCHITECT
+                {t.hero.title1} {t.hero.title2}
               </p>
               <p className="text-sm theme-text-muted leading-relaxed font-normal">
-                Engineering high-performance mobile applications (Flutter, Kotlin, React Native), scalable backends (Laravel, Node.js, Golang, Python, MongoDB), Next.js platforms, and Linux VPS cloud hosting.
+                {t.hero.bio}
               </p>
 
               {/* Location Tag */}
               <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider pt-1">
                 <MapPin size={14} className="theme-text-accent flex-shrink-0" />
-                <span className="font-semibold theme-text-main">BOGURA SADAR, BOGURA, BANGLADESH</span>
+                <span className="font-semibold theme-text-main">{t.hero.location}</span>
               </div>
             </motion.div>
 
@@ -372,7 +374,7 @@ export default function Hero() {
                 onClick={() => scrollTo('apps')}
                 className="btn-theme-primary px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg"
               >
-                <span>View Selected Works</span>
+                <span>{t.hero.viewWork}</span>
                 <ArrowUpRight size={14} />
               </button>
 

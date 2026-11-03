@@ -1,6 +1,7 @@
 'use client'
 
 import { ThemeProvider } from '@/context/ThemeContext'
+import { LanguageProvider } from '@/context/LanguageContext'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import About from '@/components/About'
@@ -18,21 +19,23 @@ import ThemeSwitcher from '@/components/ThemeSwitcher'
 export default function Home() {
   return (
     <ThemeProvider>
-      <main className="relative theme-main-bg theme-text-main overflow-x-hidden min-h-screen">
-        <SmoothMotionBackdrop />
-        <ScrollProgress />
-        <Navbar />
-        <Hero />
-        <About />
-        <AppShowcase />
-        <WebsiteShowcase />
-        <BoguraCityTeaser />
-        <Projects />
-        <Skills />
-        <Contact />
-        <Footer />
-        <ThemeSwitcher />
-      </main>
+      <LanguageProvider>
+        <main className="relative theme-main-bg theme-text-main overflow-x-hidden min-h-screen">
+          <SmoothMotionBackdrop />
+          <ScrollProgress />
+          <Navbar />
+          <Hero />
+          <About />
+          <AppShowcase />
+          <WebsiteShowcase />
+          <BoguraCityTeaser />
+          <Projects />
+          <Skills />
+          <Contact />
+          <Footer />
+          <ThemeSwitcher />
+        </main>
+      </LanguageProvider>
     </ThemeProvider>
   )
 }

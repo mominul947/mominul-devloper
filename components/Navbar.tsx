@@ -3,28 +3,30 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowUpRight, CreditCard } from 'lucide-react'
+import { Menu, X, ArrowUpRight, CreditCard, Languages } from 'lucide-react'
 import FiverrLogo from '@/components/FiverrLogo'
-
-const navItems = [
-  { label: 'Home', href: '#hero' },
-  { label: 'About', href: '#about' },
-  { label: 'Apps', href: '#apps' },
-  { label: 'Website', href: '#website' },
-  { label: 'Services', href: '#projects' },
-  { label: 'Contact', href: '#contact' },
-]
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
+  const { language, toggleLanguage, t } = useLanguage()
+
+  const navItems = [
+    { label: t.nav.home, href: '#hero' },
+    { label: t.nav.about, href: '#about' },
+    { label: t.nav.apps, href: '#apps' },
+    { label: t.nav.website, href: '#website' },
+    { label: t.nav.services, href: '#projects' },
+    { label: t.nav.contact, href: '#contact' },
+  ]
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 30)
 
-      const sections = navItems.map((item) => item.href.slice(1))
+      const sections = ['hero', 'about', 'apps', 'website', 'projects', 'contact']
       for (let i = sections.length - 1; i >= 0; i--) {
         const el = document.getElementById(sections[i])
         if (el && el.getBoundingClientRect().top <= 140) {
@@ -70,11 +72,11 @@ export default function Navbar() {
               />
             </div>
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm font-bold tracking-wider theme-text-main truncate max-w-[150px] xs:max-w-[190px] sm:max-w-none">
+              <p className="text-xs sm:text-sm font-bold tracking-wider theme-text-main truncate max-w-[140px] xs:max-w-[180px] sm:max-w-none">
                 Md. Mominul Islam
               </p>
               <p className="text-[9px] sm:text-[10px] font-mono tracking-widest uppercase theme-text-muted truncate">
-                MOBILE &amp; WEB ARCHITECT
+                {t.nav.role}
               </p>
             </div>
           </button>
@@ -99,15 +101,26 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Action CTAs (Clean spacing, zero wrap, zero overlap) */}
+          {/* Action CTAs & Language Switcher */}
           <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+            {/* Language Switcher Pill */}
+            <button
+              onClick={toggleLanguage}
+              type="button"
+              className="px-3 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all font-bold cursor-pointer shadow-xs whitespace-nowrap flex-shrink-0"
+              title={language === 'en' ? 'বাংলা ভাষায় পরিবর্তন করুন' : 'Switch to English'}
+            >
+              <Languages size={14} />
+              <span>{language === 'en' ? 'বাংলা' : 'English'}</span>
+            </button>
+
             {/* Online Payment Portal Link */}
             <Link
               href="/pay"
               className="px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-black transition-all font-bold shadow-xs whitespace-nowrap flex-shrink-0 group"
             >
               <CreditCard size={14} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
-              <span>PAY ONLINE</span>
+              <span>{t.nav.payOnline}</span>
             </Link>
 
             <a
@@ -125,13 +138,24 @@ export default function Navbar() {
               onClick={() => scrollTo('#contact')}
               className="hidden xl:flex px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider cursor-pointer bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-md items-center gap-1.5 whitespace-nowrap flex-shrink-0"
             >
-              <span>LET&apos;S TALK</span>
+              <span>{t.nav.letsTalk}</span>
               <ArrowUpRight size={12} />
             </button>
           </div>
 
-          {/* Mobile Right Bar: Pay Link & Hamburger (Visible when sm/lg hidden) */}
-          <div className="flex lg:hidden items-center gap-2 flex-shrink-0">
+          {/* Mobile Right Bar: Language Switcher, Pay Link & Hamburger */}
+          <div className="flex lg:hidden items-center gap-1.5 xs:gap-2 flex-shrink-0">
+            {/* Mobile Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              type="button"
+              className="px-2.5 py-1 rounded-full text-[11px] font-mono flex items-center gap-1 border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-bold whitespace-nowrap"
+              title={language === 'en' ? 'বাংলা' : 'EN'}
+            >
+              <Languages size={12} />
+              <span>{language === 'en' ? 'বাং' : 'EN'}</span>
+            </button>
+
             <Link
               href="/pay"
               className="sm:hidden px-2.5 py-1 rounded-full text-[11px] font-mono flex items-center gap-1 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap"
@@ -181,6 +205,22 @@ export default function Navbar() {
                 borderColor: 'var(--border-subtle)',
               }}
             >
+              {/* Language Switcher Bar in Mobile Drawer */}
+              <div className="flex items-center justify-between pb-3 border-b theme-border">
+                <span className="text-xs font-mono text-stone-400 flex items-center gap-1.5">
+                  <Languages size={14} className="text-emerald-400" />
+                  <span>Language / ভাষা</span>
+                </span>
+                <button
+                  onClick={() => {
+                    toggleLanguage()
+                  }}
+                  className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500 text-black shadow-xs"
+                >
+                  {language === 'en' ? 'বাংলায় দেখুন' : 'Switch to English'}
+                </button>
+              </div>
+
               <div className="flex flex-col space-y-1">
                 {navItems.map((item) => {
                   const isActive = activeSection === item.href.slice(1)
@@ -214,7 +254,7 @@ export default function Navbar() {
                   className="w-full py-3 rounded-full text-center text-xs font-mono bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 font-bold shadow-md transition-colors"
                 >
                   <CreditCard size={15} />
-                  <span>Online Payment Portal</span>
+                  <span>{t.nav.payOnline}</span>
                   <ArrowUpRight size={13} />
                 </Link>
 
@@ -232,7 +272,7 @@ export default function Navbar() {
                   onClick={() => scrollTo('#contact')}
                   className="btn-theme-primary w-full py-3 rounded-full text-xs font-mono uppercase tracking-wider cursor-pointer"
                 >
-                  Contact Md. Mominul Islam
+                  {t.nav.letsTalk}
                 </button>
               </div>
             </motion.div>

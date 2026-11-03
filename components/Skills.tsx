@@ -13,6 +13,7 @@ import {
 } from 'react-icons/si'
 import { FaAws } from 'react-icons/fa'
 import { Sparkles, CheckCircle2 } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 const categories = [
   'ALL',
@@ -105,9 +106,17 @@ function SkillCard({ skill, inView }: { skill: typeof skills[0]; inView: boolean
 
 export default function Skills() {
   const ref = useRef<HTMLDivElement>(null)
-  // once: true ensures animations run smoothly ONCE and don't re-trigger on every mobile scroll event!
   const inView = useInView(ref, { once: true, margin: '-40px' })
   const [activeCategory, setActiveCategory] = useState('ALL')
+  const { t } = useLanguage()
+
+  const categoryLabels: Record<string, string> = {
+    'ALL': t.skills.all,
+    'MOBILE & FRONTEND': t.skills.mobileFrontend,
+    'BACKEND & APIS': t.skills.backendApis,
+    'DATABASES & ORM': t.skills.databasesOrm,
+    'DEVOPS & CLOUD': t.skills.devopsCloud,
+  }
 
   const filtered = useMemo(() => {
     return activeCategory === 'ALL'
@@ -129,15 +138,15 @@ export default function Skills() {
           <div>
             <p className="text-xs font-mono uppercase tracking-widest theme-text-accent font-bold mb-1 flex items-center gap-1.5">
               <Sparkles size={13} />
-              <span>PRODUCTION TESTED CAPABILITIES</span>
+              <span>{t.skills.badge}</span>
             </p>
             <h2 className="font-billboard text-3xl xs:text-4xl sm:text-5xl theme-text-main tracking-wide">
-              TECH STACK &amp; SKILLS
+              {t.skills.heading}
             </h2>
           </div>
           <div className="flex items-center gap-2 text-xs font-mono text-emerald-500 font-bold">
             <CheckCircle2 size={13} />
-            <span>BENCHMARKED ON PRODUCTION LINUX VPS</span>
+            <span>{t.skills.sub}</span>
           </div>
         </motion.div>
 
@@ -158,7 +167,7 @@ export default function Skills() {
                   fontWeight: isActive ? 700 : 500,
                 }}
               >
-                {cat}
+                {categoryLabels[cat] || cat}
               </button>
             )
           })}

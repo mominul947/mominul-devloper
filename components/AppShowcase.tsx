@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { FaGooglePlay } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface AppProject {
   id: string
@@ -203,6 +204,7 @@ export default function AppShowcase() {
 
   const currentMobileAppIdx = apps.findIndex((a) => a.id === selectedMobileApp.id)
   const nextMobileApp = apps[(currentMobileAppIdx + 1) % apps.length]
+  const { language, t } = useLanguage()
 
   return (
     <section id="apps" className="relative py-20 sm:py-24 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
@@ -212,22 +214,22 @@ export default function AppShowcase() {
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, margin: '-50px' }}
+          viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.5 }}
           className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-12 border-b theme-border pb-4 sm:pb-6"
         >
           <div>
             <p className="text-xs font-mono uppercase tracking-widest theme-text-accent font-bold mb-1 flex items-center gap-1.5">
               <Sparkles size={13} />
-              <span>CLIENT APPLICATIONS &amp; MOBILE SHOWCASE</span>
+              <span>{t.apps.badge}</span>
             </p>
             <h2 className="font-billboard text-3xl xs:text-4xl sm:text-5xl theme-text-main tracking-wide">
-              FEATURED APPLICATIONS
+              {t.apps.heading}
             </h2>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono px-3 py-1 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-bold">
-              3 LIVE BUILDS • 60FPS NATIVE ANDROID
+              {language === 'bn' ? '৩টি লাইভ অ্যাপ • ৬০ এফপিএস অ্যান্ড্রয়েড' : '3 LIVE BUILDS • 60FPS NATIVE ANDROID'}
             </span>
           </div>
         </motion.div>

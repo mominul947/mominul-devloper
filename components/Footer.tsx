@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { ArrowUp, Mail, Phone, MapPin, CreditCard } from 'lucide-react'
 import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
-import BkashLogo from '@/components/BkashLogo'
+import { useLanguage } from '@/context/LanguageContext'
 
 const socials = [
   {
@@ -41,6 +41,8 @@ const socials = [
 ]
 
 export default function Footer() {
+  const { language, t } = useLanguage()
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -50,7 +52,7 @@ export default function Footer() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, amount: 0.15 }}
+        viewport={{ once: true, amount: 0.15 }}
         transition={{ duration: 0.6 }}
         className="max-w-7xl mx-auto px-4 sm:px-8"
       >
@@ -76,18 +78,18 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-xs sm:text-sm theme-text-muted max-w-md leading-relaxed font-normal">
-              Full-Stack, Mobile (Flutter &amp; Kotlin), and Backend Engineer (Laravel, Node.js, Golang, Python, Next.js, VPS &amp; App Hosting). Engineering scalable digital solutions from Bogura, Bangladesh.
+              {t.footer.tagline}
             </p>
             <div className="flex items-center gap-2 text-xs font-mono">
               <MapPin size={14} className="theme-text-accent" />
-              <span className="font-semibold theme-text-main">BOGURA SADAR, BOGURA, BANGLADESH</span>
+              <span className="font-semibold theme-text-main">{t.footer.location}</span>
             </div>
           </div>
 
           {/* Direct Channels (3 cols) */}
           <div className="md:col-span-3 space-y-3">
             <p className="text-xs font-mono uppercase tracking-widest theme-text-main font-bold">
-              DIRECT REACH
+              {language === 'bn' ? 'সরাসরি যোগাযোগ' : 'DIRECT REACH'}
             </p>
             <div className="space-y-2 text-xs font-mono">
               <a
@@ -121,16 +123,16 @@ export default function Footer() {
           {/* Quick Nav (3 cols) */}
           <div className="md:col-span-3 space-y-3">
             <p className="text-xs font-mono uppercase tracking-widest theme-text-main font-bold">
-              SECTIONS
+              {t.footer.navigation}
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               {[
-                { label: 'Hero', href: '#hero' },
-                { label: 'About', href: '#about' },
-                { label: 'Apps', href: '#apps' },
-                { label: 'Website', href: '#website' },
-                { label: 'Services', href: '#projects' },
-                { label: 'Contact', href: '#contact' },
+                { label: t.nav.home, href: '#hero' },
+                { label: t.nav.about, href: '#about' },
+                { label: t.nav.apps, href: '#apps' },
+                { label: t.nav.website, href: '#website' },
+                { label: t.nav.services, href: '#projects' },
+                { label: t.nav.contact, href: '#contact' },
               ].map((item) => (
                 <a
                   key={item.label}
@@ -145,7 +147,7 @@ export default function Footer() {
                 className="hover:theme-text-main transition-colors text-emerald-500 font-bold flex items-center gap-1.5 col-span-2 pt-1 border-t theme-border text-xs"
               >
                 <CreditCard size={14} />
-                <span>Online Payment Portal (bKash, Nagad, Bank) ↗</span>
+                <span>{language === 'bn' ? 'অনলাইন পেমেন্ট পোর্টাল (বিকাশ, নগদ, ব্যাংক) ↗' : 'Online Payment Portal (bKash, Nagad, Bank) ↗'}</span>
               </Link>
             </div>
           </div>
@@ -155,7 +157,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
           <p className="theme-text-muted">
-            © {new Date().getFullYear()} Md. Mominul Islam. All Rights Reserved.
+            © {new Date().getFullYear()} Md. Mominul Islam. {t.footer.copyright}
           </p>
 
           <div className="flex items-center gap-2">
@@ -183,7 +185,7 @@ export default function Footer() {
                 backgroundColor: 'var(--accent)',
                 color: 'var(--btn-primary-text)',
               }}
-              aria-label="Back to top"
+              title={t.common.backToTop}
             >
               <ArrowUp size={14} />
             </button>

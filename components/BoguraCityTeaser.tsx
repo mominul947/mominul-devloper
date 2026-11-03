@@ -10,10 +10,12 @@ import {
   Sparkles,
   Building,
 } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function BoguraCityTeaser() {
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const { t } = useLanguage()
 
   // Cursor hover on video -> Sound turns ON
   const handleMouseEnter = () => {
@@ -98,7 +100,7 @@ export default function BoguraCityTeaser() {
                     }`}
                   >
                     {isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
-                    <span>{isMuted ? 'Muted (Hover for Sound)' : 'Sound On'}</span>
+                    <span>{isMuted ? t.hometown.hoverSound : t.hometown.soundOn}</span>
                   </button>
 
                   <button
@@ -118,31 +120,30 @@ export default function BoguraCityTeaser() {
               {/* Video Credit & Sub-caption */}
               <div className="flex items-center justify-between px-1 text-xs text-stone-400 font-mono">
                 <span className="flex items-center gap-1 text-stone-300">
-                  <span>Video credit by</span>
-                  <span className="text-emerald-400 font-semibold">Uthshobe</span>
+                  <span>{t.hometown.videoCredit}</span>
                 </span>
                 <span className="text-[11px] text-stone-400">
-                  Bogura Sadar, Bangladesh
+                  {t.hometown.subcaption}
                 </span>
               </div>
             </div>
 
-            {/* Right Column: Balanced English Presentation (5 Cols) */}
+            {/* Right Column: Balanced Presentation (5 Cols) */}
             <div className="lg:col-span-5 space-y-4">
               
               <div>
                 {/* Hometown Badge */}
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold tracking-wider mb-2">
                   <Heart size={12} className="text-rose-500 fill-rose-500" />
-                  <span>MY HOMETOWN • BOGURA, BANGLADESH</span>
+                  <span>{t.hometown.badge}</span>
                 </div>
 
                 <h3 className="font-billboard text-3xl sm:text-4xl text-white tracking-wide leading-tight">
-                  WELCOME TO BOGURA
+                  {t.hometown.title}
                 </h3>
 
                 <p className="text-xs sm:text-sm text-stone-300 leading-relaxed mt-2">
-                  The historic heart of North Bengal. Where 2,500 years of civilization meet modern energy. Proudly born and raised here, crafting software for the world.
+                  {t.hometown.desc}
                 </p>
               </div>
 
@@ -150,24 +151,24 @@ export default function BoguraCityTeaser() {
               <div className="space-y-2">
                 <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-2.5 text-xs text-stone-200">
                   <Building size={14} className="text-emerald-400 flex-shrink-0" />
-                  <span><strong className="text-white">Mahasthangarh</strong> — Ancient 3rd Century BC Citadel</span>
+                  <span>{t.hometown.mahasthan}</span>
                 </div>
 
                 <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-2.5 text-xs text-stone-200">
                   <Compass size={14} className="text-teal-300 flex-shrink-0" />
-                  <span><strong className="text-white">Satmatha Zero Point</strong> — 7-Way Highway Convergence</span>
+                  <span>{t.hometown.satmatha}</span>
                 </div>
 
                 <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-2.5 text-xs text-stone-200">
                   <Sparkles size={14} className="text-amber-300 flex-shrink-0" />
-                  <span><strong className="text-white">Bogura Curd</strong> — World-Famous GI-Certified Delicacy</span>
+                  <span>{t.hometown.curd}</span>
                 </div>
               </div>
 
               {/* Bottom Tagline */}
               <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-stone-400">
-                <span>Rooted in Bogura</span>
-                <span className="text-emerald-400">Building Worldwide ↗</span>
+                <span>{t.hometown.tagline1}</span>
+                <span className="text-emerald-400">{t.hometown.tagline2}</span>
               </div>
 
             </div>

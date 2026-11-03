@@ -16,6 +16,7 @@ import {
   Box,
 } from 'lucide-react'
 import { FaAndroid } from 'react-icons/fa6'
+import { useLanguage } from '@/context/LanguageContext'
 
 type DeviceMode = '3d-studio' | 'phone' | 'laptop' | 'tablet'
 
@@ -23,6 +24,7 @@ export default function WebsiteShowcase() {
   const [activeMode, setActiveMode] = useState<DeviceMode>('3d-studio')
   const [iframeKey, setIframeKey] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const { language, t } = useLanguage()
 
   // Dynamic Scale calculation for pixel-perfect non-clipped responsiveness
   const laptopRef = useRef<HTMLDivElement>(null)
@@ -105,11 +107,11 @@ export default function WebsiteShowcase() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <p className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold flex items-center gap-1.5">
                 <Globe size={13} />
-                <span>PRODUCTION WEB ARCHITECTURE • LIVE DEMO</span>
+                <span>{t.website.badge} • LIVE DEMO</span>
               </p>
             </div>
             <h2 className="font-billboard text-3xl xs:text-4xl sm:text-5xl theme-text-main tracking-wide">
-              CARBOOK WEB PLATFORM
+              {language === 'bn' ? 'কারবুক ওয়েব প্ল্যাটফর্ম' : 'CARBOOK WEB PLATFORM'}
             </h2>
           </div>
 
@@ -120,7 +122,7 @@ export default function WebsiteShowcase() {
               rel="noopener noreferrer"
               className="btn-theme-primary px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center gap-1.5 shadow-lg group cursor-pointer"
             >
-              <span>Visit Live Website</span>
+              <span>{t.website.visitSite}</span>
               <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
 
@@ -130,7 +132,7 @@ export default function WebsiteShowcase() {
               title="Refresh Live Preview"
             >
               <RotateCw size={13} className={isLoading ? 'animate-spin' : ''} />
-              <span className="hidden xs:inline">Reload</span>
+              <span className="hidden xs:inline">{language === 'bn' ? 'রিফ্রেশ' : 'Reload'}</span>
             </button>
           </div>
         </motion.div>
