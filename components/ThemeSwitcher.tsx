@@ -32,8 +32,9 @@ export default function ThemeSwitcher() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 350)
+      setShowScrollTop(window.scrollY > 250)
     }
+    handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -61,7 +62,7 @@ export default function ThemeSwitcher() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2.5">
+    <div className="fixed bottom-4 right-3.5 sm:bottom-6 sm:right-6 z-[999] flex flex-col items-end gap-2 sm:gap-2.5 pointer-events-none">
       {/* ------------------------------------------------------------------ */}
       {/* 1. CONTACT POPUP MODAL                                              */}
       {/* ------------------------------------------------------------------ */}
@@ -72,7 +73,7 @@ export default function ThemeSwitcher() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="mb-1 p-3.5 sm:p-4 rounded-3xl bg-white/95 dark:bg-[#121216]/95 backdrop-blur-2xl border border-stone-200/80 dark:border-white/10 shadow-2xl w-[calc(100vw-32px)] max-w-[320px] sm:max-w-[340px] space-y-3"
+            className="pointer-events-auto mb-1 p-3.5 sm:p-4 rounded-3xl bg-[#0e1015]/95 backdrop-blur-2xl border border-white/15 shadow-2xl w-[calc(100vw-28px)] max-w-[320px] sm:max-w-[340px] space-y-3"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-stone-200/70 dark:border-white/10">
@@ -276,14 +277,14 @@ export default function ThemeSwitcher() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="mb-1 p-3.5 rounded-3xl bg-white/95 dark:bg-[#121216]/95 backdrop-blur-2xl border border-stone-200/80 dark:border-white/10 shadow-2xl w-[calc(100vw-32px)] max-w-[280px] space-y-2"
+            className="pointer-events-auto mb-1 p-3.5 rounded-3xl bg-[#0e1015]/95 backdrop-blur-2xl border border-white/15 shadow-2xl w-[calc(100vw-28px)] max-w-[280px] space-y-2"
           >
-            <div className="px-2 py-1 border-b border-stone-200/60 dark:border-white/10 flex items-center justify-between">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-stone-500 dark:text-stone-400 font-bold flex items-center gap-1.5">
+            <div className="px-2 py-1 border-b border-white/10 flex items-center justify-between">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-stone-400 font-bold flex items-center gap-1.5">
                 <Palette size={13} />
                 <span>CHOOSE DESIGN THEME</span>
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-stone-100 dark:bg-white/10 text-stone-600 dark:text-stone-300">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-stone-300">
                 5 THEMES
               </span>
             </div>
@@ -300,13 +301,13 @@ export default function ThemeSwitcher() {
                     }}
                     className={`w-full flex items-center justify-between p-2.5 rounded-2xl text-left transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-stone-100 dark:bg-white/15 text-stone-900 dark:text-white font-bold shadow-xs'
-                        : 'hover:bg-stone-50 dark:hover:bg-white/5 text-stone-600 dark:text-stone-300'
+                        ? 'bg-white/15 text-white font-bold shadow-xs'
+                        : 'hover:bg-white/5 text-stone-300'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <div
-                        className="w-6 h-6 rounded-full border border-black/20 dark:border-white/20 shadow-xs flex items-center justify-center flex-shrink-0"
+                        className="w-6 h-6 rounded-full border border-white/20 shadow-xs flex items-center justify-center flex-shrink-0"
                         style={{ background: t.primaryColor }}
                       >
                         <div
@@ -315,15 +316,15 @@ export default function ThemeSwitcher() {
                         />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold leading-tight">{t.name}</p>
-                        <p className="text-[10px] font-mono opacity-60 leading-tight mt-0.5">
+                        <p className="text-xs font-semibold leading-tight text-white">{t.name}</p>
+                        <p className="text-[10px] font-mono opacity-60 leading-tight mt-0.5 text-stone-400">
                           {t.label}
                         </p>
                       </div>
                     </div>
 
                     {isSelected && (
-                      <Check size={15} className="text-emerald-500" />
+                      <Check size={15} className="text-emerald-400" />
                     )}
                   </button>
                 )
@@ -346,11 +347,11 @@ export default function ThemeSwitcher() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 dark:bg-[#16181f]/90 backdrop-blur-md border border-stone-300 dark:border-white/15 text-stone-800 dark:text-stone-200 shadow-lg hover:shadow-xl hover:border-emerald-500/50 transition-all cursor-pointer group"
+            className="pointer-events-auto flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#12141a]/95 backdrop-blur-xl border border-white/20 text-white shadow-xl hover:shadow-2xl hover:border-emerald-500/60 hover:text-emerald-400 transition-all cursor-pointer group"
             title="Scroll to Top"
             aria-label="Scroll to Top"
           >
-            <ArrowUp size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+            <ArrowUp size={16} className="sm:w-[18px] sm:h-[18px] group-hover:-translate-y-0.5 transition-transform" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -362,15 +363,15 @@ export default function ThemeSwitcher() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         onClick={toggleTheme}
-        className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 dark:bg-[#16181f]/90 backdrop-blur-md border border-stone-300 dark:border-white/15 text-stone-800 dark:text-stone-200 shadow-lg hover:shadow-xl transition-all cursor-pointer group"
+        className="pointer-events-auto relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#12141a]/95 backdrop-blur-xl border border-white/20 text-white shadow-xl hover:shadow-2xl hover:border-emerald-500/60 transition-all cursor-pointer group"
         title={`Theme: ${currentMeta.name}`}
         aria-label="Toggle theme selector"
       >
-        <Palette size={18} className="group-hover:rotate-12 transition-transform" />
+        <Palette size={16} className="sm:w-[18px] sm:h-[18px] group-hover:rotate-12 transition-transform" />
         
         {/* Active Theme Color Dot Indicator */}
         <span
-          className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#16181f] shadow-xs"
+          className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-[#12141a] shadow-xs"
           style={{ backgroundColor: currentMeta.accentColor }}
         />
 
@@ -381,24 +382,24 @@ export default function ThemeSwitcher() {
       </motion.button>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 4. FLOATING CONTACT BUTTON (Opens all contact options)              */}
+      {/* 5. FLOATING CONTACT BUTTON (Opens all contact options)              */}
       {/* ------------------------------------------------------------------ */}
       <motion.button
         onClick={toggleContact}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
-        className="relative group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 shadow-xl shadow-black/25 dark:shadow-white/10 hover:shadow-2xl transition-all cursor-pointer"
+        className="pointer-events-auto relative group flex items-center justify-center w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 shadow-xl shadow-emerald-500/30 transition-all cursor-pointer"
         aria-label="Open contact channels"
       >
         {/* Animated Live Dot */}
-        <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping opacity-75 pointer-events-none" />
-        <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-stone-900" />
+        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-400 animate-ping opacity-75 pointer-events-none" />
+        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-300 border-2 border-stone-950" />
 
         <span className="relative z-10">
           {isContactOpen ? (
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
           ) : (
-            <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
+            <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
           )}
         </span>
 

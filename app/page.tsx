@@ -20,21 +20,23 @@ export default function Home() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <main className="relative theme-main-bg theme-text-main overflow-x-hidden min-h-screen">
+        <div className="relative theme-main-bg theme-text-main min-h-screen">
           <SmoothMotionBackdrop />
           <ScrollProgress />
           <Navbar />
-          <Hero />
-          <About />
-          <AppShowcase />
-          <WebsiteShowcase />
-          <BoguraCityTeaser />
-          <Projects />
-          <Skills />
-          <Contact />
-          <Footer />
+          <main className="relative overflow-x-hidden">
+            <Hero />
+            <About />
+            <AppShowcase />
+            <WebsiteShowcase />
+            <BoguraCityTeaser />
+            <Projects />
+            <Skills />
+            <Contact />
+            <Footer />
+          </main>
           <ThemeSwitcher />
-        </main>
+        </div>
       </LanguageProvider>
     </ThemeProvider>
   )
