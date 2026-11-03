@@ -14,27 +14,32 @@ export async function POST(request: Request) {
     const data = await request.json()
     const { clientName, clientPhone, clientEmail, senderBkash, trxId, amount, selectedPackage, paymentMethod } = data
 
-    if (!clientName || !senderBkash || !trxId || !amount) {
+    const senderNum = (senderBkash || clientPhone || '').toString().trim()
+    const transactionId = (trxId || '').toString().trim().toUpperCase()
+    const cleanAmount = String(amount || '').replace(/[^0-9.]/g, '')
+
+    if (!senderNum || !transactionId || !cleanAmount) {
       return NextResponse.json(
-        { error: 'Client name, sender number/account, TrxID, and amount are required' },
+        { error: 'প্রেরকের নম্বর, Transaction ID (TrxID) এবং টাকার পরিমাণ প্রদান করা আবশ্যক।' },
         { status: 400 }
       )
     }
 
+    const finalClientName = (clientName && clientName.trim()) || 'Valued Client'
     const currentMethod = paymentMethod || 'bKash Personal'
     const methodPrefix = currentMethod.split(' ')[0].toUpperCase()
     const recipientEmail = process.env.NOTIFICATION_EMAIL || 'mominulwebwork@gmail.com'
     const receiptId = `${methodPrefix}-${Date.now().toString().slice(-6)}`
 
-    // 1. Save payment record locally to data/payments.json
+    // 1. Save payment record locally
     const newRecord = {
       id: receiptId,
-      clientName: clientName.trim(),
-      clientPhone: clientPhone || senderBkash,
+      clientName: finalClientName,
+      clientPhone: clientPhone || senderNum,
       clientEmail: clientEmail || '',
-      senderNumber: senderBkash.trim(),
-      trxId: trxId.trim().toUpperCase(),
-      amount: Number(amount) || 0,
+      senderNumber: senderNum,
+      trxId: transactionId,
+      amount: Number(cleanAmount) || 0,
       method: currentMethod,
       package: selectedPackage || 'Online Service Payment',
       status: 'pending', // 'pending' | 'verified' | 'rejected'
@@ -46,37 +51,49 @@ export async function POST(request: Request) {
     const existingPayments = getStoredPayments()
     // Prepend newest first
     existingPayments.unshift(newRecord)
-    // Keep max 500 recent transactions
     if (existingPayments.length > 500) {
       existingPayments.length = 500
     }
     saveStoredPayments(existingPayments)
 
     // 2. Dispatch Email notification to owner
+    const originHeader = request.headers.get('origin')
+    const hostHeader = request.headers.get('host')
+    const safeOrigin = originHeader && !originHeader.includes('localhost')
+      ? originHeader
+      : hostHeader
+      ? `https://${hostHeader}`
+      : 'https://mominul-portfolio.vercel.app'
+
     try {
-      await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
+      const emailResponse = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Origin': request.headers.get('origin') || 'http://localhost:3000',
-          'Referer': request.headers.get('referer') || 'http://localhost:3000/'
+          'Origin': safeOrigin,
+          'Referer': `${safeOrigin}/pay`
         },
         body: JSON.stringify({
           'PAYMENT STATUS': 'VERIFICATION PENDING',
           'Receipt ID': receiptId,
           'Payment Gateway': currentMethod,
-          'Transaction ID (TrxID)': trxId,
-          'Amount (BDT)': `৳${amount} BDT`,
-          'Sender Number/Bank': senderBkash,
-          'Client Name': clientName,
-          'Client Phone/WhatsApp': clientPhone || 'N/A',
+          'Transaction ID (TrxID)': transactionId,
+          'Amount (BDT)': `৳${cleanAmount} BDT`,
+          'Sender Number/Account': senderNum,
+          'Client Name': finalClientName,
+          'Client Phone/WhatsApp': clientPhone || senderNum,
           'Client Email': clientEmail || 'N/A',
           'Package / Service': selectedPackage || 'Custom Order',
-          '_subject': `💰 ${currentMethod.toUpperCase()} PAYMENT: TrxID ${trxId} (৳${amount} BDT)`,
-          '_template': 'table'
+          '_subject': `💰 ${currentMethod.toUpperCase()} PAYMENT: TrxID ${transactionId} (৳${cleanAmount} BDT)`,
+          '_template': 'table',
+          '_captcha': 'false',
+          '_autoresponse': 'false'
         })
       })
+
+      const emailResult = await emailResponse.json().catch(() => null)
+      console.log('Payment email dispatch result:', emailResult)
     } catch (emailErr) {
       console.error('Payment email dispatch error:', emailErr)
     }
@@ -88,10 +105,10 @@ export async function POST(request: Request) {
     const alertMessage = 
 `💰 *NEW ${currentMethod.toUpperCase()} PAYMENT ALERT!*
 ━━━━━━━━━━━━━━━━━━
-🆔 *TrxID:* ${trxId}
-💵 *Amount:* ৳${amount} BDT
-📱 *Sender:* ${senderBkash}
-👤 *Client:* ${clientName}
+🆔 *TrxID:* ${transactionId}
+💵 *Amount:* ৳${cleanAmount} BDT
+📱 *Sender:* ${senderNum}
+👤 *Client:* ${finalClientName}
 📞 *Phone:* ${clientPhone || 'N/A'}
 📦 *Package:* ${selectedPackage || 'Custom'}
 🧾 *Receipt ID:* ${receiptId}
@@ -104,6 +121,25 @@ _Verify on your ${currentMethod} account and confirm with client._`
         await fetch(`https://api.callmebot.com/whatsapp.php?phone=${ownerPhone}&text=${encoded}&apikey=${apiKey}`)
       } catch (waErr) {
         console.error('WhatsApp payment alert error:', waErr)
+      }
+    }
+
+    // 4. Telegram Alert (if configured)
+    const telegramToken = process.env.TELEGRAM_BOT_TOKEN
+    const telegramChatId = process.env.TELEGRAM_CHAT_ID
+    if (telegramToken && telegramChatId) {
+      try {
+        await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: telegramChatId,
+            text: alertMessage,
+            parse_mode: 'Markdown'
+          })
+        })
+      } catch (tgErr) {
+        console.error('Telegram payment alert error:', tgErr)
       }
     }
 

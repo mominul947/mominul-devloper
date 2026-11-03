@@ -36,6 +36,8 @@ import {
   Radio,
   Timer,
   Compass,
+  Plus,
+  X,
 } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 
@@ -93,6 +95,19 @@ export default function AdminPage() {
   })
   const [paymentSearch, setPaymentSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all')
+  const [showManualModal, setShowManualModal] = useState(false)
+  const [manualForm, setManualForm] = useState({
+    clientName: '',
+    clientPhone: '',
+    senderNumber: '',
+    trxId: '',
+    amount: '',
+    method: 'bKash Personal',
+    package: 'Online Service Payment',
+    status: 'verified',
+    notes: '',
+  })
+  const [manualLoading, setManualLoading] = useState(false)
 
   // 3. Analytics Data State
   const [analytics, setAnalytics] = useState<any>({
@@ -181,9 +196,50 @@ export default function AdminPage() {
     try {
       const res = await authFetch('/api/admin/payments')
       const data = await res.json()
-      if (data && data.payments) {
-        setPayments(data.payments)
-        if (data.stats) setPaymentsStats(data.stats)
+      let serverPayments = (data && data.payments) ? data.payments : []
+
+      // Synchronize with locally cached / offline client submissions
+      try {
+        const localSubmitted = JSON.parse(localStorage.getItem('portfolio_submitted_payments') || '[]')
+        const adminCached = JSON.parse(localStorage.getItem('admin_cached_payments') || '[]')
+        const merged = [...serverPayments]
+
+        for (const item of [...localSubmitted, ...adminCached]) {
+          const itemTrx = (item.trxId || '').toString().trim().toUpperCase()
+          if (itemTrx && !merged.some((p: any) => (p.trxId || '').toString().trim().toUpperCase() === itemTrx)) {
+            merged.push({
+              id: item.id || `PAY-${Date.now()}`,
+              clientName: item.name || item.clientName || 'Valued Client',
+              clientPhone: item.senderPhone || item.clientPhone || item.senderNumber || '',
+              senderNumber: item.senderPhone || item.senderNumber || '',
+              trxId: itemTrx,
+              amount: Number(item.amount) || 0,
+              method: item.method || 'BKASH',
+              package: item.package || 'Online Service Payment',
+              status: item.status || 'pending',
+              createdAt: item.date || item.createdAt || new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              notes: item.notes || 'দাখিলকৃত ট্রানজেকশন',
+            })
+          }
+        }
+        serverPayments = merged
+        localStorage.setItem('admin_cached_payments', JSON.stringify(serverPayments.slice(0, 100)))
+      } catch (e) {}
+
+      setPayments(serverPayments)
+
+      if (data && data.stats) {
+        setPaymentsStats(data.stats)
+      } else {
+        setPaymentsStats({
+          totalCount: serverPayments.length,
+          pendingCount: serverPayments.filter((p: any) => p.status === 'pending').length,
+          verifiedCount: serverPayments.filter((p: any) => p.status === 'verified').length,
+          rejectedCount: serverPayments.filter((p: any) => p.status === 'rejected').length,
+          totalVolume: serverPayments.filter((p: any) => p.status === 'verified').reduce((a: number, c: any) => a + (Number(c.amount) || 0), 0),
+          pendingVolume: serverPayments.filter((p: any) => p.status === 'pending').reduce((a: number, c: any) => a + (Number(c.amount) || 0), 0),
+        })
       }
     } catch (e) {
       console.error(e)
@@ -453,6 +509,48 @@ export default function AdminPage() {
       }
     } catch (e) {
       console.error(e)
+    }
+  }
+
+  // 6.1 Create Manual Payment (Direct Admin Logging)
+  const handleCreateManualPayment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!manualForm.senderNumber || !manualForm.trxId || !manualForm.amount) {
+      alert('প্রেরকের নম্বর, TrxID এবং টাকার পরিমাণ আবশ্যক!')
+      return
+    }
+
+    setManualLoading(true)
+    try {
+      const res = await authFetch('/api/admin/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(manualForm),
+      })
+      const data = await res.json()
+      if (res.ok && data.payment) {
+        setPayments((prev) => [data.payment, ...prev])
+        setShowManualModal(false)
+        setManualForm({
+          clientName: '',
+          clientPhone: '',
+          senderNumber: '',
+          trxId: '',
+          amount: '',
+          method: 'bKash Personal',
+          package: 'Online Service Payment',
+          status: 'verified',
+          notes: '',
+        })
+        loadPayments(true)
+      } else {
+        alert(data.error || 'পেমেন্ট রেকর্ড ব্যর্থ হয়েছে!')
+      }
+    } catch (e: any) {
+      console.error(e)
+      alert('ত্রুটি ঘটেছে! আবার চেষ্টা করুন।')
+    } finally {
+      setManualLoading(false)
     }
   }
 
@@ -1038,17 +1136,29 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* Search & Filter Bar */}
+                {/* Search, Filter & Manual Add Bar */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                  <div className="relative w-full sm:w-72">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input
-                      type="text"
-                      value={paymentSearch}
-                      onChange={(e) => setPaymentSearch(e.target.value)}
-                      placeholder="TrxID, নম্বর বা নাম দিয়ে খুঁজুন..."
-                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
-                    />
+                  <div className="flex items-center gap-2 w-full sm:w-auto flex-1">
+                    <div className="relative w-full sm:w-72">
+                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input
+                        type="text"
+                        value={paymentSearch}
+                        onChange={(e) => setPaymentSearch(e.target.value)}
+                        placeholder="TrxID, নম্বর বা নাম দিয়ে খুঁজুন..."
+                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowManualModal(true)}
+                      className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0 shadow-lg shadow-emerald-500/20"
+                    >
+                      <Plus size={14} />
+                      <span className="hidden sm:inline">নতুন পেমেন্ট যোগ করুন</span>
+                      <span className="sm:hidden">পেমেন্ট যোগ</span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-1.5 self-start sm:self-auto overflow-x-auto w-full sm:w-auto">
@@ -1074,6 +1184,159 @@ export default function AdminPage() {
                     ))}
                   </div>
                 </div>
+
+                {/* Manual Payment Entry Modal */}
+                {showManualModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="w-full max-w-lg bg-[#0e121a] border border-white/15 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+                      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                        <div className="flex items-center gap-2">
+                          <CreditCard size={18} className="text-emerald-400" />
+                          <h3 className="text-sm font-bold text-white">নতুন পেমেন্ট ট্রানজেকশন যুক্ত করুন</h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowManualModal(false)}
+                          className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      <form onSubmit={handleCreateManualPayment} className="space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-mono text-slate-300">পেমেন্ট মাধ্যম *</label>
+                            <select
+                              value={manualForm.method}
+                              onChange={(e) => setManualForm({ ...manualForm, method: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500"
+                            >
+                              <option value="bKash Personal">bKash (বিকাশ)</option>
+                              <option value="Nagad Personal">Nagad (নগদ)</option>
+                              <option value="Cellfin / Islami Bank">Cellfin (সেলফিন / ইসলামী ব্যাংক)</option>
+                              <option value="Mercantile Bank">Mercantile Bank (মার্কেন্টাইল ব্যাংক)</option>
+                              <option value="Direct Cash / Hand">Direct Cash / নগদ গ্রহণ</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-mono text-slate-300">Transaction ID (TrxID) *</label>
+                            <input
+                              type="text"
+                              required
+                              value={manualForm.trxId}
+                              onChange={(e) => setManualForm({ ...manualForm, trxId: e.target.value.toUpperCase() })}
+                              placeholder="e.g. BKT9823412"
+                              className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-mono text-slate-300">টাকার পরিমাণ (BDT) *</label>
+                            <input
+                              type="number"
+                              required
+                              value={manualForm.amount}
+                              onChange={(e) => setManualForm({ ...manualForm, amount: e.target.value })}
+                              placeholder="e.g. 5000"
+                              className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-mono text-slate-300">প্রেরকের নম্বর / একাউন্ট *</label>
+                            <input
+                              type="text"
+                              required
+                              value={manualForm.senderNumber}
+                              onChange={(e) => setManualForm({ ...manualForm, senderNumber: e.target.value })}
+                              placeholder="e.g. 01700000000"
+                              className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-mono text-slate-300">গ্রাহকের নাম (ঐচ্ছিক)</label>
+                            <input
+                              type="text"
+                              value={manualForm.clientName}
+                              onChange={(e) => setManualForm({ ...manualForm, clientName: e.target.value })}
+                              placeholder="e.g. John Doe"
+                              className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-mono text-slate-300">স্ট্যাটাস</label>
+                            <select
+                              value={manualForm.status}
+                              onChange={(e) => setManualForm({ ...manualForm, status: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500"
+                            >
+                              <option value="verified">অনুমোদিত (Verified)</option>
+                              <option value="pending">অপেক্ষমান (Pending)</option>
+                              <option value="rejected">বাতিল (Rejected)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-mono text-slate-300">প্যাকেজ / সেবার বিবরণ</label>
+                          <input
+                            type="text"
+                            value={manualForm.package}
+                            onChange={(e) => setManualForm({ ...manualForm, package: e.target.value })}
+                            placeholder="e.g. Mobile App Development / Website Starter"
+                            className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-mono text-slate-300">অ্যাডমিন নোটস</label>
+                          <input
+                            type="text"
+                            value={manualForm.notes}
+                            onChange={(e) => setManualForm({ ...manualForm, notes: e.target.value })}
+                            placeholder="e.g. bKash SMS থেকে যাচাইকৃত"
+                            className="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div className="pt-2 flex gap-2">
+                          <button
+                            type="submit"
+                            disabled={manualLoading}
+                            className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 disabled:opacity-60"
+                          >
+                            {manualLoading ? (
+                              <>
+                                <Loader size={14} className="animate-spin" />
+                                <span>রেকর্ড হচ্ছে...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check size={14} />
+                                <span>পেমেন্ট সংরক্ষণ করুন</span>
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowManualModal(false)}
+                            className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 font-bold transition-colors cursor-pointer"
+                          >
+                            বাতিল
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
 
                 {/* Payments Table / Feed */}
                 {filteredPayments.length === 0 ? (

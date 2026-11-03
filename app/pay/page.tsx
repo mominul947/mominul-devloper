@@ -20,6 +20,7 @@ import {
   Lock,
   ArrowRight,
   Package,
+  AlertCircle,
 } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { paymentConfig } from '@/config/payment'
@@ -157,9 +158,15 @@ export default function PaymentPage() {
     setForm((prev) => ({ ...prev, amount: val }))
   }
 
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.senderNumber || !form.trxId || !form.amount) return
+    setSubmitError(null)
+    if (!form.senderNumber || !form.trxId || !form.amount) {
+      setSubmitError('অনুগ্রহ করে প্রেরকের নম্বর, TrxID এবং টাকার পরিমাণ সঠিকভাবে পূরণ করুন।')
+      return
+    }
 
     setLoading(true)
 
@@ -179,7 +186,12 @@ export default function PaymentPage() {
       })
 
       const data = await res.json()
-      setReceipt({
+
+      if (!res.ok) {
+        throw new Error(data.error || 'পেমেন্ট জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।')
+      }
+
+      const newReceipt = {
         id: data.receiptId || `${brandName.toUpperCase().replace(/[^A-Z0-9]/g, '-')}-${Date.now().toString().slice(-6)}`,
         name: form.clientName || 'Valued Client',
         trxId: form.trxId.toUpperCase(),
@@ -191,19 +203,19 @@ export default function PaymentPage() {
           dateStyle: 'medium',
           timeStyle: 'short',
         }),
-      })
-    } catch (err) {
+      }
+
+      setReceipt(newReceipt)
+
+      // Cache locally so admin or client can access receipt even if network drops
+      try {
+        const stored = JSON.parse(localStorage.getItem('portfolio_submitted_payments') || '[]')
+        stored.unshift(newReceipt)
+        localStorage.setItem('portfolio_submitted_payments', JSON.stringify(stored.slice(0, 50)))
+      } catch (e) {}
+    } catch (err: any) {
       console.error(err)
-      setReceipt({
-        id: `${brandName.toUpperCase().replace(/[^A-Z0-9]/g, '-')}-${Date.now().toString().slice(-6)}`,
-        name: form.clientName || 'Valued Client',
-        trxId: form.trxId.toUpperCase(),
-        amount: form.amount,
-        senderPhone: form.senderNumber,
-        method: brandName.toUpperCase(),
-        package: selectedPackage || 'Online Service Payment',
-        date: new Date().toLocaleString(),
-      })
+      setSubmitError(err.message || 'পেমেন্ট তথ্য প্রক্রিয়াকরণে সমস্যা হয়েছে।')
     } finally {
       setLoading(false)
     }
@@ -1109,6 +1121,14 @@ export default function PaymentPage() {
                 />
               </div>
             </div>
+
+            {/* Error Message */}
+            {submitError && (
+              <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+                <AlertCircle size={15} className="flex-shrink-0" />
+                <span>{submitError}</span>
+              </div>
+            )}
 
             {/* Submit Action */}
             <div className="pt-2">

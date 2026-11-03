@@ -42,6 +42,66 @@ export async function GET(request: Request) {
   })
 }
 
+// POST: Manually create a payment record from Admin Panel (Protected)
+export async function POST(request: Request) {
+  if (!verifyAdminRequest(request)) {
+    return NextResponse.json(
+      { error: 'অননুমোদিত অ্যাক্সেস! অনুগ্রহ করে প্রথমে লগইন করুন।' },
+      { status: 401 }
+    )
+  }
+
+  try {
+    const body = await request.json()
+    const { clientName, clientPhone, clientEmail, senderNumber, trxId, amount, method, package: pkg, status, notes } = body
+
+    const senderNum = (senderNumber || clientPhone || '').toString().trim()
+    const transactionId = (trxId || '').toString().trim().toUpperCase()
+    const cleanAmount = String(amount || '').replace(/[^0-9.]/g, '')
+
+    if (!senderNum || !transactionId || !cleanAmount) {
+      return NextResponse.json(
+        { error: 'প্রেরকের নম্বর, Transaction ID (TrxID) এবং টাকার পরিমাণ প্রদান করা আবশ্যক।' },
+        { status: 400 }
+      )
+    }
+
+    const currentMethod = method || 'BKASH PERSONAL'
+    const methodPrefix = currentMethod.split(' ')[0].toUpperCase()
+    const receiptId = `${methodPrefix}-${Date.now().toString().slice(-6)}`
+
+    const newRecord = {
+      id: receiptId,
+      clientName: (clientName || 'Valued Client').trim(),
+      clientPhone: clientPhone || senderNum,
+      clientEmail: clientEmail || '',
+      senderNumber: senderNum,
+      trxId: transactionId,
+      amount: Number(cleanAmount) || 0,
+      method: currentMethod,
+      package: pkg || 'Online Service Payment',
+      status: status || 'verified',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      notes: notes || 'অ্যাডমিন প্যানেল থেকে ম্যানুয়ালি রেকর্ডকৃত',
+    }
+
+    const payments = getStoredPayments()
+    payments.unshift(newRecord)
+    if (payments.length > 500) payments.length = 500
+    saveStoredPayments(payments)
+
+    return NextResponse.json({
+      success: true,
+      payment: newRecord,
+      message: 'পেমেন্ট সফলভাবে রেকর্ড করা হয়েছে',
+    })
+  } catch (error) {
+    console.error('Error creating manual payment:', error)
+    return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })
+  }
+}
+
 // PATCH: Update status (pending, verified, rejected) or notes (Protected)
 export async function PATCH(request: Request) {
   if (!verifyAdminRequest(request)) {
