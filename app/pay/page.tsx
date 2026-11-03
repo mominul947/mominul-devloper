@@ -222,18 +222,15 @@ export default function PaymentPage() {
         }),
       }
 
-      setReceipt(newReceipt)
-
-      // Cache locally so admin or client can access receipt even if network drops
+      // Cache locally so admin or client can access receipt
       try {
         const stored = JSON.parse(localStorage.getItem('portfolio_submitted_payments') || '[]')
         stored.unshift(newReceipt)
         localStorage.setItem('portfolio_submitted_payments', JSON.stringify(stored.slice(0, 50)))
       } catch (e) {}
 
-      // Direct WhatsApp dispatch with payment confirmation message
-      try {
-        const waText = `হ্যালো মোঃ মোমিনুল ইসলাম,
+      // Directly open WhatsApp immediately with full payment details pre-filled
+      const waText = `হ্যালো মোঃ মোমিনুল ইসলাম,
 আমি একটি পেমেন্ট সম্পন্ন করেছি:
 💳 মেথড: ${brandName.toUpperCase()}
 🆔 TrxID: ${form.trxId.toUpperCase()}
@@ -243,16 +240,29 @@ export default function PaymentPage() {
 📦 প্যাকেজ: ${selectedPackage || 'Online Service Payment'}
 🧾 রিসিপ্ট আইডি: ${newReceipt.id}
 
-অনুগ্রহ করে যাচাই করে কনফার্ম করুন!`
+অনুগ্রহ করে ভেরিফাই করুন!`
 
-        const waUrl = `https://wa.me/8801303482412?text=${encodeURIComponent(waText)}`
-        if (typeof window !== 'undefined') {
-          window.open(waUrl, '_blank')
-        }
-      } catch (e) {}
+      const waUrl = `https://wa.me/8801303482412?text=${encodeURIComponent(waText)}`
+
+      if (typeof window !== 'undefined') {
+        window.location.href = waUrl
+      }
     } catch (err: any) {
       console.error(err)
-      setSubmitError(err.message || 'পেমেন্ট তথ্য প্রক্রিয়াকরণে সমস্যা হয়েছে।')
+      // Even if network API failed, still redirect directly to WhatsApp with user details
+      const fallbackText = `হ্যালো মোঃ মোমিনুল ইসলাম,
+আমি একটি পেমেন্ট সম্পন্ন করেছি:
+💳 মেথড: ${brandName.toUpperCase()}
+🆔 TrxID: ${form.trxId.toUpperCase()}
+💵 পরিমাণ: ৳${form.amount} BDT
+📱 প্রেরক নম্বর: ${form.senderNumber}
+👤 গ্রাহক: ${form.clientName || 'Valued Client'}
+
+অনুগ্রহ করে ভেরিফাই করুন!`
+      const waUrl = `https://wa.me/8801303482412?text=${encodeURIComponent(fallbackText)}`
+      if (typeof window !== 'undefined') {
+        window.location.href = waUrl
+      }
     } finally {
       setLoading(false)
     }
