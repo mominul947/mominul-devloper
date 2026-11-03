@@ -6,28 +6,11 @@ import { motion } from 'framer-motion'
 const LINE_1_FULL = 'ERROR 404: Conventional'
 const LINE_2_FULL = 'developer not found.'
 
-// Realistic professional hacker system logs
-const HACKER_BOOT_LOGS = [
-  '[00.012] KERNEL_INIT: Booting Quantum Architecture v4.2...',
-  '[00.045] SECURITY_OVERRIDE: Root privileges unlocked (UID: 0)',
-  '[00.089] SCANNING_TALENT_POOL: Looking for conventional developer...',
-  '[00.142] MEMORY_MAP: 0x7FFF8A49... 0xFFFFFFFC [OK]',
-  '[00.210] EXCEPTION: Conventional methods failed validation',
-  '[00.285] STACK_TRACE: ConventionalEngineer.execute() -> null',
-  '[00.340] ALERT: Conventional developer not found in database',
-  '[00.412] INJECTING_PAYLOAD: Deploying Mominul Full-Stack Core...',
-  '[00.490] COMPILING: Next.js 14, Flutter, FastAPIs, 3D WebGL...',
-  '[00.560] ENCRYPTION_ESTABLISHED: AES-256-GCM Handshake verified',
-  '[00.630] ALLOCATING_NEURAL_NODES: 42 technologies in spatial orbit',
-  '[00.710] PROTOCOL_STATUS: Ready to breach main viewport',
-]
-
 export default function GlitchIntroPreloader() {
   const [typedLine1, setTypedLine1] = useState('')
   const [typedLine2, setTypedLine2] = useState('')
   const [activeCursor, setActiveCursor] = useState<'line1' | 'line2' | 'done'>('line1')
-  const [phase, setPhase] = useState<'entering' | 'peeking' | 'waiting' | 'splitting' | 'hidden'>('entering')
-  const [visibleLogs, setVisibleLogs] = useState<string[]>([])
+  const [phase, setPhase] = useState<'typing' | 'waiting' | 'splitting' | 'hidden'>('typing')
 
   const splitTriggeredRef = useRef(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -37,7 +20,6 @@ export default function GlitchIntroPreloader() {
     if (splitTriggeredRef.current) return
     splitTriggeredRef.current = true
 
-    // Show full text immediately if skipped early
     setTypedLine1(LINE_1_FULL)
     setTypedLine2(LINE_2_FULL)
     setActiveCursor('done')
@@ -45,10 +27,10 @@ export default function GlitchIntroPreloader() {
 
     setTimeout(() => {
       setPhase('hidden')
-    }, 950)
+    }, 900)
   }, [])
 
-  // 1. 3D Perspective Matrix Digital Rain Canvas
+  // 1. Subtle, Elegant Background 3D Cyber Code Rain (Subtle, Dark, Ultra-Premium)
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -59,11 +41,10 @@ export default function GlitchIntroPreloader() {
     let width = (canvas.width = window.innerWidth)
     let height = (canvas.height = window.innerHeight)
 
-    const characters =
-      '01010101ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz<>{}[]/*+=~$_#@&0123456789'
-    const fontSize = 14
+    const characters = '01ABCDEF0123456789{}[]/*+=~$_#@&<>'
+    const fontSize = 13
     const columns = Math.floor(width / fontSize)
-    const drops = new Array(columns).fill(1).map(() => Math.floor(Math.random() * -50))
+    const drops = new Array(columns).fill(1).map(() => Math.floor(Math.random() * -40))
 
     let lastTime = 0
     const fpsInterval = 1000 / 30
@@ -75,27 +56,26 @@ export default function GlitchIntroPreloader() {
       if (elapsed < fpsInterval) return
       lastTime = currentTime - (elapsed % fpsInterval)
 
-      ctx.fillStyle = 'rgba(4, 5, 8, 0.15)'
+      // Solid pitch black overlay for ultra-crisp contrast
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.18)'
       ctx.fillRect(0, 0, width, height)
 
-      ctx.font = `${fontSize}px "JetBrains Mono", monospace`
+      ctx.font = `${fontSize}px monospace`
 
       for (let i = 0; i < drops.length; i++) {
         const text = characters.charAt(Math.floor(Math.random() * characters.length))
         const x = i * fontSize
         const y = drops[i] * fontSize
 
-        if (Math.random() > 0.88) {
-          ctx.fillStyle = '#67e8f9'
-        } else if (Math.random() > 0.7) {
-          ctx.fillStyle = '#ffffff'
+        if (Math.random() > 0.94) {
+          ctx.fillStyle = '#67e8f9' // Subtle cyan head
         } else {
-          ctx.fillStyle = '#10b981'
+          ctx.fillStyle = '#059669' // Deep emerald tail
         }
 
         ctx.fillText(text, x, y)
 
-        if (y > height && Math.random() > 0.975) {
+        if (y > height && Math.random() > 0.98) {
           drops[i] = 0
         }
         drops[i]++
@@ -118,32 +98,11 @@ export default function GlitchIntroPreloader() {
     }
   }, [])
 
-  // 2. Real-time Live Hacker Logs Feed
-  useEffect(() => {
-    let logIndex = 0
-    const logInterval = setInterval(() => {
-      if (logIndex < HACKER_BOOT_LOGS.length) {
-        const nextLog = HACKER_BOOT_LOGS[logIndex]
-        setVisibleLogs((prev) => [...prev.slice(-7), nextLog])
-        logIndex++
-      } else {
-        clearInterval(logInterval)
-      }
-    }, 140)
-
-    return () => clearInterval(logInterval)
-  }, [])
-
-  // 3. Open center aperture slit + Typewriter Effect
+  // 2. Sequential Typewriter Effect with comfortable reading pause
   useEffect(() => {
     let charIndex1 = 0
     let charIndex2 = 0
     let timeoutId: NodeJS.Timeout
-
-    // First crack open the center aperture slit ("majhe faka hoye website er aktu dekha jabe")
-    const crackAperture = setTimeout(() => {
-      setPhase('peeking')
-    }, 200)
 
     const typeLine1 = () => {
       if (splitTriggeredRef.current) return
@@ -153,7 +112,7 @@ export default function GlitchIntroPreloader() {
         timeoutId = setTimeout(typeLine1, 38)
       } else {
         setActiveCursor('line2')
-        timeoutId = setTimeout(typeLine2, 150)
+        timeoutId = setTimeout(typeLine2, 160)
       }
     }
 
@@ -168,17 +127,16 @@ export default function GlitchIntroPreloader() {
         setPhase('waiting')
         timeoutId = setTimeout(() => {
           triggerSplit()
-        }, 1500) // Comfortable reading pause
+        }, 1300)
       }
     }
 
-    timeoutId = setTimeout(typeLine1, 350)
+    timeoutId = setTimeout(typeLine1, 250)
 
     const handleKey = () => triggerSplit()
     window.addEventListener('keydown', handleKey, { once: true })
 
     return () => {
-      clearTimeout(crackAperture)
       clearTimeout(timeoutId)
       window.removeEventListener('keydown', handleKey)
     }
@@ -187,7 +145,6 @@ export default function GlitchIntroPreloader() {
   if (phase === 'hidden') return null
 
   const isSplitting = phase === 'splitting'
-  const isPeeking = phase === 'peeking' || phase === 'waiting'
 
   return (
     <div
@@ -195,38 +152,8 @@ export default function GlitchIntroPreloader() {
       className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono"
     >
       {/* =========================================================================
-          BACKGROUND LAYER: 3D PERSPECTIVE HACKER CODE RAIN
-         ========================================================================= */}
-      <div
-        className="absolute inset-0 pointer-events-none overflow-hidden z-0"
-        style={{ perspective: '900px' }}
-      >
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full opacity-35"
-          style={{
-            transform: 'perspective(900px) rotateX(20deg) scale(1.15)',
-            transformOrigin: 'center center',
-          }}
-        />
-        <div
-          className="absolute inset-x-0 bottom-0 h-[45%] opacity-20 pointer-events-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, rgba(16, 185, 129, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.3) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-            transform: 'perspective(600px) rotateX(65deg)',
-            transformOrigin: 'bottom center',
-          }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(3,4,7,0.85)_80%)]" />
-      </div>
-
-      {/* =========================================================================
-          TOP HALF SHUTTER DOOR
-          - Enters closed
-          - Cracks open UP by 22px ("majhe faka hoye website aktu dekha jabe")
-          - Splits all the way UP to -100% on exit
+          TOP HALF SOLID SHUTTER DOOR (100% Solid Black — Zero Muddy Bleed-through)
+          - Slides UP on split to unveil website
          ========================================================================= */}
       <motion.div
         initial={{ y: 0 }}
@@ -236,62 +163,41 @@ export default function GlitchIntroPreloader() {
                 y: '-100%',
                 transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
               }
-            : isPeeking
-            ? {
-                y: '-22px',
-                transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+            : {
+                // Sleek, razor-sharp 16px aperture gap in center ("majhe faka hoye website dekha jabe")
+                y: '-16px',
+                transition: { duration: 0.5, ease: 'easeOut' },
               }
-            : { y: 0 }
         }
-        className="absolute top-0 left-0 right-0 h-1/2 bg-[#040508]/94 backdrop-blur-xs border-b border-emerald-400 flex flex-col justify-end items-center pb-3 px-4 shadow-[0_4px_25px_rgba(16,185,129,0.35)] z-20"
+        className="absolute top-0 left-0 right-0 h-1/2 bg-[#000000] border-b-2 border-emerald-400/90 flex flex-col justify-end items-center pb-3 px-4 z-20"
+        style={{
+          boxShadow: '0 6px 30px rgba(16, 185, 129, 0.45)',
+        }}
       >
-        {/* Top Scanlines */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-25"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 2px)',
-            backgroundSize: '100% 2px',
-          }}
-        />
+        {/* Subtle Ambient 3D Code Rain inside the Door */}
+        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full"
+            style={{
+              transform: 'perspective(800px) rotateX(25deg) scale(1.1)',
+              transformOrigin: 'center center',
+            }}
+          />
+        </div>
 
-        {/* TOP TERMINAL HEADER */}
-        <div className="absolute top-4 sm:top-6 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between text-[10px] sm:text-[11px] text-stone-400 font-mono">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-emerald-400 font-bold tracking-widest uppercase">
-              TERMINAL // ROOT_ACCESS_GRANTED
-            </span>
-            <span className="hidden md:inline px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[9px]">
-              ENCRYPT: SHA-512
-            </span>
+        {/* Minimalist Professional Terminal Top Header (Matching Reference Image) */}
+        <div className="absolute top-5 sm:top-7 left-6 sm:left-10 right-6 sm:right-10 flex items-center justify-between text-[11px] text-stone-500">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="tracking-widest font-bold text-stone-400">SYSTEM ALERT // 404</span>
           </div>
-          <div className="flex items-center gap-4 text-stone-500">
-            <span className="hidden sm:inline text-emerald-400/80">NODE: MOMINUL-ARCHITECT</span>
-            <span className="text-[10px] tracking-wider text-emerald-400/60 hidden xs:inline border border-emerald-500/20 px-2 py-0.5 rounded">
-              PRESS ANY KEY TO BYPASS ↵
-            </span>
-          </div>
+          <span className="text-[10px] tracking-wider text-stone-500 hidden sm:inline">
+            CLICK OR PRESS ANY KEY TO ENTER
+          </span>
         </div>
 
-        {/* LIVE STREAMING HACKER LOGS */}
-        <div className="absolute top-14 left-4 sm:left-8 max-w-sm hidden sm:flex flex-col gap-1 text-[9.5px] font-mono text-emerald-400/60 pointer-events-none select-none">
-          {visibleLogs.slice(0, 4).map((log, index) => (
-            <div key={`log-top-${index}`} className="truncate flex items-center gap-1.5">
-              <span className="text-cyan-400">&gt;</span>
-              <span className="text-emerald-300/80">{log}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* TOP RIGHT TELEMETRY HUD */}
-        <div className="absolute top-14 right-4 sm:right-8 text-right hidden sm:flex flex-col gap-0.5 text-[9px] font-mono text-stone-500 pointer-events-none">
-          <span className="text-cyan-400">FPS: 60.0 // LATENCY: 0.8ms</span>
-          <span>MEM: 64TB // ARCHITECT_CORE: ACTIVE</span>
-          <span className="text-emerald-400">STATUS: OVERRIDE IN PROGRESS</span>
-        </div>
-
-        {/* LINE 1: "ERROR 404: Conventional" (Typewriter + Moves LEFT on split) */}
+        {/* LINE 1: "ERROR 404: Conventional" (Crisp, High-Contrast Typography) */}
         <motion.div
           animate={
             isSplitting
@@ -305,9 +211,10 @@ export default function GlitchIntroPreloader() {
           className="relative z-10 text-center mb-1"
         >
           <h1
-            className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-stone-100 font-mono whitespace-nowrap inline-flex items-center"
+            className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-white font-mono whitespace-nowrap inline-flex items-center"
             style={{
-              textShadow: '0 0 25px rgba(16, 185, 129, 0.5), 0 2px 8px rgba(0,0,0,0.9)',
+              letterSpacing: '0.04em',
+              textShadow: '0 0 30px rgba(255, 255, 255, 0.4), 0 2px 10px rgba(0,0,0,1)',
             }}
           >
             <span>{typedLine1}</span>
@@ -319,33 +226,15 @@ export default function GlitchIntroPreloader() {
       </motion.div>
 
       {/* =========================================================================
-          CENTER PEEK HORIZON APERTURE (Website reveals through this crack!)
-          - Glowing laser borders
-          - Visual slit showing underlying website
+          CENTER APERTURE (Website reveals directly through this glowing crack)
          ========================================================================= */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <div
-          className={`w-full transition-all duration-700 ease-out flex items-center justify-center ${
-            isPeeking ? 'h-[44px]' : 'h-0'
-          }`}
-        >
-          {/* Neon laser glow beam shining out of the aperture */}
-          <div className="w-full h-full bg-emerald-400/5 backdrop-blur-[0.5px] border-y border-emerald-400/40 shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center justify-between px-6">
-            <span className="text-[9px] font-mono text-emerald-400/70 tracking-widest hidden sm:inline">
-              // PEEKING_PORTAL_ACTIVE: 443
-            </span>
-            <span className="text-[9px] font-mono text-cyan-400/70 tracking-widest hidden sm:inline">
-              VIEWPORT_EXPOSURE: 44px //
-            </span>
-          </div>
-        </div>
+        <div className="w-full h-[32px] bg-gradient-to-r from-transparent via-emerald-400/10 to-transparent blur-xs shadow-[0_0_35px_rgba(16,185,129,0.7)]" />
       </div>
 
       {/* =========================================================================
-          BOTTOM HALF SHUTTER DOOR
-          - Enters closed
-          - Cracks open DOWN by 22px ("majhe faka hoye website aktu dekha jabe")
-          - Splits all the way DOWN to 100% on exit
+          BOTTOM HALF SOLID SHUTTER DOOR (100% Solid Black — Zero Muddy Bleed-through)
+          - Slides DOWN on split to unveil website
          ========================================================================= */}
       <motion.div
         initial={{ y: 0 }}
@@ -355,26 +244,30 @@ export default function GlitchIntroPreloader() {
                 y: '100%',
                 transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
               }
-            : isPeeking
-            ? {
-                y: '22px',
-                transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+            : {
+                // Sleek, razor-sharp 16px aperture gap in center ("majhe faka hoye website dekha jabe")
+                y: '16px',
+                transition: { duration: 0.5, ease: 'easeOut' },
               }
-            : { y: 0 }
         }
-        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#040508]/94 backdrop-blur-xs border-t border-emerald-400 flex flex-col justify-start items-center pt-3 px-4 shadow-[0_-4px_25px_rgba(16,185,129,0.35)] z-20"
+        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#000000] border-t-2 border-emerald-400/90 flex flex-col justify-start items-center pt-3 px-4 z-20"
+        style={{
+          boxShadow: '0 -6px 30px rgba(16, 185, 129, 0.45)',
+        }}
       >
-        {/* Bottom Scanlines */}
+        {/* Subtle Cyber Floor Grid Horizon inside Bottom Door */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-25"
+          className="absolute inset-x-0 bottom-0 h-[60%] opacity-15 pointer-events-none"
           style={{
             backgroundImage:
-              'repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 2px)',
-            backgroundSize: '100% 2px',
+              'linear-gradient(to right, rgba(16, 185, 129, 0.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.25) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            transform: 'perspective(500px) rotateX(65deg)',
+            transformOrigin: 'bottom center',
           }}
         />
 
-        {/* LINE 2: "developer not found." (Typewriter + Moves RIGHT on split) */}
+        {/* LINE 2: "developer not found." (Crisp, High-Contrast Typography) */}
         <motion.div
           animate={
             isSplitting
@@ -388,9 +281,10 @@ export default function GlitchIntroPreloader() {
           className="relative z-10 text-center mt-1"
         >
           <h1
-            className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-emerald-300 font-mono whitespace-nowrap inline-flex items-center"
+            className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-stone-200 font-mono whitespace-nowrap inline-flex items-center"
             style={{
-              textShadow: '0 0 25px rgba(16, 185, 129, 0.6), 0 2px 8px rgba(0,0,0,0.9)',
+              letterSpacing: '0.04em',
+              textShadow: '0 0 30px rgba(255, 255, 255, 0.3), 0 2px 10px rgba(0,0,0,1)',
             }}
           >
             <span>{typedLine2}</span>
@@ -400,20 +294,10 @@ export default function GlitchIntroPreloader() {
           </h1>
         </motion.div>
 
-        {/* LIVE STREAMING HACKER LOGS */}
-        <div className="absolute bottom-12 left-4 sm:left-8 max-w-sm hidden sm:flex flex-col gap-1 text-[9.5px] font-mono text-emerald-400/60 pointer-events-none select-none">
-          {visibleLogs.slice(4).map((log, index) => (
-            <div key={`log-bottom-${index}`} className="truncate flex items-center gap-1.5">
-              <span className="text-cyan-400">&gt;</span>
-              <span className="text-emerald-300/80">{log}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* BOTTOM HUD / HINT */}
-        <div className="absolute bottom-5 flex items-center gap-2 text-[11px] text-stone-400 tracking-wider">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-stone-300 font-mono">Click anywhere or tap screen to enter portal</span>
+        {/* Minimalist Bottom Status */}
+        <div className="absolute bottom-6 flex items-center gap-2 text-[11px] text-stone-500 tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+          <span className="font-mono text-stone-400">Click anywhere to open website</span>
         </div>
       </motion.div>
     </div>
