@@ -159,8 +159,8 @@ export default function GlitchIntroPreloader() {
         e.preventDefault()
         e.stopPropagation()
       }}
-      className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono flex flex-col items-center justify-center bg-[#020306]"
-      style={{ touchAction: 'none', backgroundColor: '#020306' }}
+      className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono flex flex-col items-center justify-center bg-transparent"
+      style={{ touchAction: 'none' }}
     >
       {/* =========================================================================
           TOP HALF SHUTTER (100% Solid Opaque Pitch Black, Slides UP on split)
