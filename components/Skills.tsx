@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { useRef, useState, useMemo } from 'react'
+import { motion, useInView } from 'framer-motion'
 import {
   SiReact, SiNextdotjs, SiTypescript, SiTailwindcss,
   SiNodedotjs,
@@ -57,25 +57,29 @@ const skills = [
   { name: 'GitHub CI/CD', icon: SiGithubactions, color: '#2088FF', level: 91, category: 'DEVOPS & CLOUD' },
 ]
 
-function SkillCard({ skill, index, inView }: { skill: typeof skills[0]; index: number; inView: boolean }) {
+// High-Performance Mobile-Optimized Skill Card (No layout reflows, hardware-accelerated)
+function SkillCard({ skill, inView }: { skill: typeof skills[0]; inView: boolean }) {
   const Icon = skill.icon
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={inView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 16 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ delay: Math.min(index * 0.025, 0.4), duration: 0.3 }}
-      className="p-3 sm:p-3.5 rounded-2xl neu-card neu-card-hover border theme-border transition-all duration-200 group cursor-default flex items-center gap-3 shadow-xs hover:border-emerald-500/40"
+    <div
+      className="p-3 sm:p-3.5 rounded-2xl border theme-border transition-colors duration-150 group cursor-default flex items-center gap-3 shadow-xs hover:border-emerald-500/40 relative overflow-hidden"
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        contain: 'paint layout',
+      }}
     >
       {/* Skill Icon */}
-      <div className="w-10 h-10 rounded-xl neu-card flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform border theme-border">
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border theme-border transition-transform group-hover:scale-105"
+        style={{ backgroundColor: 'var(--bg-surface)' }}
+      >
         <Icon size={20} style={{ color: skill.color }} />
       </div>
 
       {/* Info & Progress */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-1 mb-1">
+        <div className="flex items-center justify-between gap-1 mb-1.5">
           <h3 className="font-bold theme-text-main text-xs sm:text-sm truncate">
             {skill.name}
           </h3>
@@ -84,39 +88,42 @@ function SkillCard({ skill, index, inView }: { skill: typeof skills[0]; index: n
           </span>
         </div>
 
-        {/* Compact Progress Bar with Scroll Triggered Fill */}
-        <div className="w-full h-1 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
-            initial={{ width: 0 }}
-            animate={inView ? { width: `${skill.level}%` } : { width: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut', delay: Math.min(index * 0.02, 0.35) }}
+        {/* Hardware-Accelerated Progress Bar */}
+        <div className="w-full h-1 rounded-full bg-black/15 dark:bg-white/10 overflow-hidden relative">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 origin-left transition-transform duration-700 ease-out"
+            style={{
+              transform: inView ? `scaleX(${skill.level / 100})` : 'scaleX(0)',
+              willChange: inView ? 'auto' : 'transform',
+            }}
           />
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
 export default function Skills() {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: false, margin: '-60px' })
+  const ref = useRef<HTMLDivElement>(null)
+  // once: true ensures animations run smoothly ONCE and don't re-trigger on every mobile scroll event!
+  const inView = useInView(ref, { once: true, margin: '-40px' })
   const [activeCategory, setActiveCategory] = useState('ALL')
 
-  const filtered =
-    activeCategory === 'ALL'
+  const filtered = useMemo(() => {
+    return activeCategory === 'ALL'
       ? skills
       : skills.filter((s) => s.category === activeCategory)
+  }, [activeCategory])
 
   return (
     <section id="skills" className="py-12 sm:py-20 theme-main-bg theme-text-main border-t theme-border relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10" ref={ref}>
         
-        {/* Section Header with Scroll Reveal */}
+        {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 25 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+          transition={{ duration: 0.4 }}
           className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 border-b theme-border pb-3 sm:pb-4"
         >
           <div>
@@ -135,23 +142,19 @@ export default function Skills() {
         </motion.div>
 
         {/* Category Filters (Swipeable on mobile) */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="-mx-4 px-4 sm:mx-0 sm:px-0 flex flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none"
-        >
+        <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none">
           {categories.map((cat) => {
             const isActive = activeCategory === cat
             return (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setActiveCategory(cat)}
-                className="px-3.5 py-1.5 rounded-full text-xs font-mono transition-all duration-200 cursor-pointer border flex-shrink-0"
+                className="px-3.5 py-1.5 rounded-full text-xs font-mono transition-all duration-150 cursor-pointer border flex-shrink-0"
                 style={{
                   backgroundColor: isActive ? 'var(--accent)' : 'var(--bg-card)',
                   color: isActive ? 'var(--btn-primary-text)' : 'var(--text-muted)',
-                  borderColor: 'var(--border-subtle)',
+                  borderColor: isActive ? 'var(--accent)' : 'var(--border-subtle)',
                   fontWeight: isActive ? 700 : 500,
                 }}
               >
@@ -159,15 +162,13 @@ export default function Skills() {
               </button>
             )
           })}
-        </motion.div>
+        </div>
 
-        {/* Compact 4-Column Skills Grid */}
+        {/* Compact 4-Column High-Performance Skills Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((skill, i) => (
-              <SkillCard key={skill.name} skill={skill} index={i} inView={inView} />
-            ))}
-          </AnimatePresence>
+          {filtered.map((skill) => (
+            <SkillCard key={skill.name} skill={skill} inView={inView} />
+          ))}
         </div>
 
       </div>
