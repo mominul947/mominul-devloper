@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ArrowUpRight, CreditCard, Languages } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -114,14 +115,20 @@ export default function Navbar() {
               <span>{language === 'en' ? 'বাংলা' : 'English'}</span>
             </button>
 
-            {/* Online Payment Portal Link */}
-            <Link
-              href="/pay"
-              className="px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-black transition-all font-bold shadow-xs whitespace-nowrap flex-shrink-0 group"
+            {/* Online Payment Link (Opens directly in WhatsApp) */}
+            <a
+              href={`https://wa.me/8801303482412?text=${encodeURIComponent(
+                language === 'bn'
+                  ? 'হ্যালো মোঃ মোমিনুল ইসলাম, আমি আপনার প্রজেক্ট / সার্ভিসের পেমেন্ট করতে চাই।'
+                  : 'Hello Md. Mominul Islam, I would like to make a payment for your service.'
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-black transition-all font-bold shadow-xs whitespace-nowrap flex-shrink-0 group cursor-pointer"
             >
-              <CreditCard size={14} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
+              <FaWhatsapp size={14} className="flex-shrink-0 text-[#25D366] group-hover:text-current group-hover:scale-110 transition-transform" />
               <span>{t.nav.payOnline}</span>
-            </Link>
+            </a>
 
             <a
               href="https://www.fiverr.com/s/WebEmax"
@@ -156,13 +163,19 @@ export default function Navbar() {
               <span>{language === 'en' ? 'বাং' : 'EN'}</span>
             </button>
 
-            <Link
-              href="/pay"
+            <a
+              href={`https://wa.me/8801303482412?text=${encodeURIComponent(
+                language === 'bn'
+                  ? 'হ্যালো মোঃ মোমিনুল ইসলাম, আমি আপনার প্রজেক্ট / সার্ভিসের পেমেন্ট করতে চাই।'
+                  : 'Hello Md. Mominul Islam, I would like to make a payment for your service.'
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="sm:hidden px-2.5 py-1 rounded-full text-[11px] font-mono flex items-center gap-1 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap"
             >
-              <CreditCard size={12} />
+              <FaWhatsapp size={12} className="text-[#25D366]" />
               <span>PAY</span>
-            </Link>
+            </a>
 
             <button
               className="p-2 rounded-full border theme-border cursor-pointer transition-colors"
@@ -248,15 +261,21 @@ export default function Navbar() {
               </div>
 
               <div className="pt-3 border-t theme-border flex flex-col gap-2.5">
-                <Link
-                  href="/pay"
+                <a
+                  href={`https://wa.me/8801303482412?text=${encodeURIComponent(
+                    language === 'bn'
+                      ? 'হ্যালো মোঃ মোমিনুল ইসলাম, আমি আপনার প্রজেক্ট / সার্ভিসের পেমেন্ট করতে চাই।'
+                      : 'Hello Md. Mominul Islam, I would like to make a payment for your service.'
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => setMobileOpen(false)}
                   className="w-full py-3 rounded-full text-center text-xs font-mono bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 font-bold shadow-md transition-colors"
                 >
-                  <CreditCard size={15} />
+                  <FaWhatsapp size={16} />
                   <span>{t.nav.payOnline}</span>
                   <ArrowUpRight size={13} />
-                </Link>
+                </a>
 
                 <a
                   href="https://www.fiverr.com/s/WebEmax"

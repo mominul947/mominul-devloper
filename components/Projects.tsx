@@ -13,6 +13,7 @@ import {
   Terminal,
   CreditCard,
 } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import CodePlayground from '@/components/CodePlayground'
 import { useLanguage } from '@/context/LanguageContext'
@@ -293,13 +294,19 @@ export default function Projects() {
                     <ArrowUpRight size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
 
-                  <Link
-                    href={`/pay?package=${encodeURIComponent(currentPkg.title)}&tier=${currentPkg.id}`}
-                    className="w-full py-3 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-black font-mono text-xs uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                  <a
+                    href={`https://wa.me/8801303482412?text=${encodeURIComponent(
+                      language === 'bn'
+                        ? `হ্যালো মোঃ মোমিনুল ইসলাম, আমি আপনার "${currentPkg.tabLabel}" (${currentPkg.titleBn}) প্যাকেজে কাজ শুরু করতে ও পেমেন্ট করতে চাই।`
+                        : `Hello Md. Mominul Islam, I would like to order your "${currentPkg.tabLabel}" (${currentPkg.title}) package and make a payment.`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-black font-mono text-xs uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs group"
                   >
-                    <CreditCard size={14} />
-                    <span>{language === 'bn' ? `${currentPkg.tabLabel} প্যাকেজ পে করুন (বিকাশ/নগদ)` : `Pay for ${currentPkg.tabLabel} Package`}</span>
-                  </Link>
+                    <FaWhatsapp size={16} className="text-[#25D366] group-hover:text-current" />
+                    <span>{language === 'bn' ? `${currentPkg.tabLabel} প্যাকেজ পে করুন (WhatsApp)` : `Pay for ${currentPkg.tabLabel} Package (WhatsApp)`}</span>
+                  </a>
                 </div>
 
               </div>

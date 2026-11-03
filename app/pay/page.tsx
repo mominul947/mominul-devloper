@@ -230,6 +230,26 @@ export default function PaymentPage() {
         stored.unshift(newReceipt)
         localStorage.setItem('portfolio_submitted_payments', JSON.stringify(stored.slice(0, 50)))
       } catch (e) {}
+
+      // Direct WhatsApp dispatch with payment confirmation message
+      try {
+        const waText = `হ্যালো মোঃ মোমিনুল ইসলাম,
+আমি একটি পেমেন্ট সম্পন্ন করেছি:
+💳 মেথড: ${brandName.toUpperCase()}
+🆔 TrxID: ${form.trxId.toUpperCase()}
+💵 পরিমাণ: ৳${form.amount} BDT
+📱 প্রেরক নম্বর: ${form.senderNumber}
+👤 গ্রাহক: ${form.clientName || 'Valued Client'}
+📦 প্যাকেজ: ${selectedPackage || 'Online Service Payment'}
+🧾 রিসিপ্ট আইডি: ${newReceipt.id}
+
+অনুগ্রহ করে যাচাই করে কনফার্ম করুন!`
+
+        const waUrl = `https://wa.me/8801303482412?text=${encodeURIComponent(waText)}`
+        if (typeof window !== 'undefined') {
+          window.open(waUrl, '_blank')
+        }
+      } catch (e) {}
     } catch (err: any) {
       console.error(err)
       setSubmitError(err.message || 'পেমেন্ট তথ্য প্রক্রিয়াকরণে সমস্যা হয়েছে।')
