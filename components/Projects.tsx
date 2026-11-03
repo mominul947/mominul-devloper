@@ -294,19 +294,14 @@ export default function Projects() {
                     <ArrowUpRight size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
 
-                  <a
-                    href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-                      language === 'bn'
-                        ? `হ্যালো মোঃ মোমিনুল ইসলাম, আমি আপনার "${currentPkg.tabLabel}" (${currentPkg.titleBn}) প্যাকেজে কাজ শুরু করতে ও পেমেন্ট করতে চাই।`
-                        : `Hello Md. Mominul Islam, I would like to order your "${currentPkg.tabLabel}" (${currentPkg.title}) package and make a payment.`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={`/pay?package=${encodeURIComponent(currentPkg.title)}`}
                     className="w-full py-3 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:text-black font-mono text-xs uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs group"
                   >
-                    <FaWhatsapp size={16} className="text-[#25D366] group-hover:text-current" />
-                    <span>{language === 'bn' ? `${currentPkg.tabLabel} প্যাকেজ পে করুন (WhatsApp)` : `Pay for ${currentPkg.tabLabel} Package (WhatsApp)`}</span>
-                  </a>
+                    <CreditCard size={16} className="text-emerald-500 group-hover:text-current" />
+                    <span>{language === 'bn' ? `${currentPkg.tabLabel} প্যাকেজ অর্ডার ও পে করুন` : `Order & Pay for ${currentPkg.tabLabel}`}</span>
+                    <ArrowUpRight size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </Link>
                 </div>
 
               </div>

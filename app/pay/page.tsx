@@ -1191,12 +1191,12 @@ export default function PaymentPage() {
                 {loading ? (
                   <>
                     <Loader size={16} className="animate-spin" />
-                    <span>Verifying Payment...</span>
+                    <span>ভেরিফাই হচ্ছে ও হোয়াটসঅ্যাপ ওপেন হচ্ছে...</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 size={16} />
-                    <span>VERIFY &amp; CONFIRM PAYMENT</span>
+                    <FaWhatsapp size={18} className="text-[#25D366]" />
+                    <span>VERIFY &amp; CONFIRM ON WHATSAPP (ভেরিফাই করুন)</span>
                   </>
                 )}
               </button>

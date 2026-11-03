@@ -142,19 +142,13 @@ export default function Footer() {
                   {item.label}
                 </a>
               ))}
-              <a
-                href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-                  language === 'bn'
-                    ? 'হ্যালো মোঃ মোমিনুল ইসলাম, আমি সরাসরি পেমেন্ট করতে চাই (বিকাশ / নগদ / ব্যাংক)।'
-                    : 'Hello Md. Mominul Islam, I would like to make a payment directly via WhatsApp.'
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/pay"
                 className="hover:theme-text-main transition-colors text-emerald-500 font-bold flex items-center gap-1.5 col-span-2 pt-1 border-t theme-border text-xs"
               >
-                <FaWhatsapp size={14} className="text-[#25D366]" />
-                <span>{language === 'bn' ? 'সরাসরি পেমেন্ট করুন (WhatsApp) ↗' : 'Pay Directly via WhatsApp ↗'}</span>
-              </a>
+                <CreditCard size={14} className="text-emerald-500" />
+                <span>{language === 'bn' ? 'অনলাইন পেমেন্ট পোর্টাল (বিকাশ, নগদ, ব্যাংক) ↗' : 'Online Payment Portal (bKash, Nagad, Bank) ↗'}</span>
+              </Link>
             </div>
           </div>
 
