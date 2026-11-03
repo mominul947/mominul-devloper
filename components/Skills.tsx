@@ -1,105 +1,198 @@
 'use client'
 
-import { useRef, useState, useMemo } from 'react'
+import React, { useRef, useState, useMemo } from 'react'
 import { motion, useInView } from 'framer-motion'
 import {
-  SiReact, SiNextdotjs, SiTypescript, SiTailwindcss,
+  SiPython,
+  SiJavascript,
+  SiTypescript,
+  SiC,
+  SiCplusplus,
+  SiKotlin,
+  SiHtml5,
+  SiReact,
+  SiNextdotjs,
+  SiTailwindcss,
+  SiFlutter,
+  SiJetpackcompose,
+  SiAndroidstudio,
   SiNodedotjs,
-  SiMongodb, SiPostgresql, SiRedis, SiPrisma, SiSupabase, SiFirebase,
+  SiFastapi,
+  SiGo,
+  SiLaravel,
+  SiDjango,
+  SiFlask,
+  SiPostgresql,
+  SiMongodb,
+  SiMysql,
+  SiFirebase,
+  SiSupabase,
+  SiRedis,
+  SiPrisma,
+  SiGraphql,
   SiDocker,
-  SiFlutter, SiKotlin, SiJetpackcompose, SiLaravel,
-  SiPython, SiFastapi, SiGo, SiSocketdotio, SiGraphql,
-  SiLinux, SiNginx, SiGithubactions
+  SiLinux,
+  SiNginx,
+  SiGit,
+  SiGithub,
+  SiFigma,
+  SiPostman,
+  SiVercel,
+  SiSocketdotio,
 } from 'react-icons/si'
-import { FaAws } from 'react-icons/fa'
-import { Sparkles, CheckCircle2 } from 'lucide-react'
+import { FaCss3Alt, FaAws } from 'react-icons/fa6'
+import { TbBrandVscode } from 'react-icons/tb'
+import { Sparkles, Network } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
-const categories = [
+type Category =
+  | 'ALL'
+  | 'MOBILE & FRONTEND'
+  | 'BACKEND & APIS'
+  | 'DATABASES & ORM'
+  | 'DEVOPS & CLOUD'
+
+interface TechItem {
+  name: string
+  icon: React.ComponentType<any>
+  color: string
+  category: Category
+}
+
+// 6-Tier Tapered Matrix (11 -> 10 -> 8 -> 6 -> 4 -> 2)
+const techRows: TechItem[][] = [
+  // Row 1: Core Languages & Web (11 items)
+  [
+    { name: 'Python', icon: SiPython, color: '#3776AB', category: 'BACKEND & APIS' },
+    { name: 'JavaScript', icon: SiJavascript, color: '#F7DF1E', category: 'MOBILE & FRONTEND' },
+    { name: 'TypeScript', icon: SiTypescript, color: '#3178C6', category: 'MOBILE & FRONTEND' },
+    { name: 'C', icon: SiC, color: '#659AD2', category: 'BACKEND & APIS' },
+    { name: 'C++', icon: SiCplusplus, color: '#00599C', category: 'BACKEND & APIS' },
+    { name: 'Kotlin', icon: SiKotlin, color: '#7F52FF', category: 'MOBILE & FRONTEND' },
+    { name: 'HTML5', icon: SiHtml5, color: '#E34F26', category: 'MOBILE & FRONTEND' },
+    { name: 'CSS3', icon: FaCss3Alt, color: '#1572B6', category: 'MOBILE & FRONTEND' },
+    { name: 'React', icon: SiReact, color: '#61DAFB', category: 'MOBILE & FRONTEND' },
+    { name: 'Next.js', icon: SiNextdotjs, color: '#ffffff', category: 'MOBILE & FRONTEND' },
+    { name: 'Tailwind', icon: SiTailwindcss, color: '#06B6D4', category: 'MOBILE & FRONTEND' },
+  ],
+
+  // Row 2: Mobile & Backend Frameworks (10 items)
+  [
+    { name: 'Flutter', icon: SiFlutter, color: '#47C5FB', category: 'MOBILE & FRONTEND' },
+    { name: 'Compose', icon: SiJetpackcompose, color: '#4285F4', category: 'MOBILE & FRONTEND' },
+    { name: 'React Native', icon: SiReact, color: '#61DAFB', category: 'MOBILE & FRONTEND' },
+    { name: 'Android', icon: SiAndroidstudio, color: '#3DDC84', category: 'MOBILE & FRONTEND' },
+    { name: 'Node.js', icon: SiNodedotjs, color: '#68A063', category: 'BACKEND & APIS' },
+    { name: 'FastAPI', icon: SiFastapi, color: '#009688', category: 'BACKEND & APIS' },
+    { name: 'Golang', icon: SiGo, color: '#00ADD8', category: 'BACKEND & APIS' },
+    { name: 'Laravel', icon: SiLaravel, color: '#FF2D20', category: 'BACKEND & APIS' },
+    { name: 'Django', icon: SiDjango, color: '#00b86b', category: 'BACKEND & APIS' },
+    { name: 'Flask', icon: SiFlask, color: '#e0e0e0', category: 'BACKEND & APIS' },
+  ],
+
+  // Row 3: Databases & ORM (8 items)
+  [
+    { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1', category: 'DATABASES & ORM' },
+    { name: 'MongoDB', icon: SiMongodb, color: '#47A248', category: 'DATABASES & ORM' },
+    { name: 'MySQL', icon: SiMysql, color: '#4479A1', category: 'DATABASES & ORM' },
+    { name: 'Firebase', icon: SiFirebase, color: '#FFCA28', category: 'DATABASES & ORM' },
+    { name: 'Supabase', icon: SiSupabase, color: '#3ECF8E', category: 'DATABASES & ORM' },
+    { name: 'Redis', icon: SiRedis, color: '#DC382D', category: 'DATABASES & ORM' },
+    { name: 'Prisma', icon: SiPrisma, color: '#5a67d8', category: 'DATABASES & ORM' },
+    { name: 'GraphQL', icon: SiGraphql, color: '#E10098', category: 'BACKEND & APIS' },
+  ],
+
+  // Row 4: DevOps & Cloud (6 items)
+  [
+    { name: 'Docker', icon: SiDocker, color: '#2496ED', category: 'DEVOPS & CLOUD' },
+    { name: 'Linux VPS', icon: SiLinux, color: '#FCC624', category: 'DEVOPS & CLOUD' },
+    { name: 'AWS Cloud', icon: FaAws, color: '#FF9900', category: 'DEVOPS & CLOUD' },
+    { name: 'Nginx', icon: SiNginx, color: '#009639', category: 'DEVOPS & CLOUD' },
+    { name: 'Git', icon: SiGit, color: '#F05032', category: 'DEVOPS & CLOUD' },
+    { name: 'GitHub', icon: SiGithub, color: '#f0f6fc', category: 'DEVOPS & CLOUD' },
+  ],
+
+  // Row 5: Developer Tools & Design (4 items)
+  [
+    { name: 'VS Code', icon: TbBrandVscode, color: '#007ACC', category: 'DEVOPS & CLOUD' },
+    { name: 'Figma', icon: SiFigma, color: '#F24E1E', category: 'MOBILE & FRONTEND' },
+    { name: 'Postman', icon: SiPostman, color: '#FF6C37', category: 'BACKEND & APIS' },
+    { name: 'Vercel', icon: SiVercel, color: '#ffffff', category: 'DEVOPS & CLOUD' },
+  ],
+
+  // Row 6: Real-Time Protocols (2 items)
+  [
+    { name: 'WebSockets', icon: SiSocketdotio, color: '#38bdf8', category: 'BACKEND & APIS' },
+    { name: 'REST APIs', icon: Network, color: '#10B981', category: 'BACKEND & APIS' },
+  ],
+]
+
+const categories: Category[] = [
   'ALL',
   'MOBILE & FRONTEND',
   'BACKEND & APIS',
   'DATABASES & ORM',
-  'DEVOPS & CLOUD'
+  'DEVOPS & CLOUD',
 ]
 
-const skills = [
-  // Mobile & Frontend
-  { name: 'Flutter', icon: SiFlutter, color: '#02569B', level: 95, category: 'MOBILE & FRONTEND' },
-  { name: 'Kotlin', icon: SiKotlin, color: '#7F52FF', level: 94, category: 'MOBILE & FRONTEND' },
-  { name: 'Jetpack Compose', icon: SiJetpackcompose, color: '#4285F4', level: 92, category: 'MOBILE & FRONTEND' },
-  { name: 'Next.js 14', icon: SiNextdotjs, color: '#e2e8f0', level: 96, category: 'MOBILE & FRONTEND' },
-  { name: 'React Native', icon: SiReact, color: '#0284c7', level: 92, category: 'MOBILE & FRONTEND' },
-  { name: 'TypeScript', icon: SiTypescript, color: '#3178C6', level: 95, category: 'MOBILE & FRONTEND' },
-  { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#06B6D4', level: 96, category: 'MOBILE & FRONTEND' },
-
-  // Backend & APIs
-  { name: 'Node.js', icon: SiNodedotjs, color: '#16a34a', level: 94, category: 'BACKEND & APIS' },
-  { name: 'FastAPI', icon: SiFastapi, color: '#009688', level: 93, category: 'BACKEND & APIS' },
-  { name: 'Python', icon: SiPython, color: '#3776AB', level: 92, category: 'BACKEND & APIS' },
-  { name: 'Golang', icon: SiGo, color: '#00ADD8', level: 88, category: 'BACKEND & APIS' },
-  { name: 'Laravel', icon: SiLaravel, color: '#FF2D20', level: 95, category: 'BACKEND & APIS' },
-  { name: 'GraphQL', icon: SiGraphql, color: '#E10098', level: 90, category: 'BACKEND & APIS' },
-  { name: 'WebSockets', icon: SiSocketdotio, color: '#38bdf8', level: 92, category: 'BACKEND & APIS' },
-
-  // Databases & ORM
-  { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1', level: 94, category: 'DATABASES & ORM' },
-  { name: 'MongoDB', icon: SiMongodb, color: '#059669', level: 94, category: 'DATABASES & ORM' },
-  { name: 'Redis', icon: SiRedis, color: '#dc2626', level: 90, category: 'DATABASES & ORM' },
-  { name: 'Prisma ORM', icon: SiPrisma, color: '#38bdf8', level: 92, category: 'DATABASES & ORM' },
-  { name: 'Supabase', icon: SiSupabase, color: '#3ECF8E', level: 91, category: 'DATABASES & ORM' },
-  { name: 'Firebase', icon: SiFirebase, color: '#FFCA28', level: 92, category: 'DATABASES & ORM' },
-
-  // DevOps & Cloud
-  { name: 'Docker', icon: SiDocker, color: '#0284c7', level: 90, category: 'DEVOPS & CLOUD' },
-  { name: 'Linux VPS', icon: SiLinux, color: '#FCC624', level: 93, category: 'DEVOPS & CLOUD' },
-  { name: 'Nginx Proxy', icon: SiNginx, color: '#009639', level: 92, category: 'DEVOPS & CLOUD' },
-  { name: 'AWS Cloud', icon: FaAws, color: '#FF9900', level: 88, category: 'DEVOPS & CLOUD' },
-  { name: 'GitHub CI/CD', icon: SiGithubactions, color: '#2088FF', level: 91, category: 'DEVOPS & CLOUD' },
-]
-
-// High-Performance Mobile-Optimized Skill Card (No layout reflows, hardware-accelerated)
-function SkillCard({ skill, inView }: { skill: typeof skills[0]; inView: boolean }) {
-  const Icon = skill.icon
+// Single Tech Squircle Glass Tile Component
+function TechTile({
+  item,
+  isDimmed,
+}: {
+  item: TechItem
+  isDimmed: boolean
+}) {
+  const Icon = item.icon
+  const [hovered, setHovered] = useState(false)
 
   return (
     <div
-      className="p-3 sm:p-3.5 rounded-2xl border theme-border transition-colors duration-150 group cursor-default flex items-center gap-3 shadow-xs hover:border-emerald-500/40 relative overflow-hidden"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`group relative flex flex-col items-center justify-center 
+        w-[68px] h-[68px] xs:w-[74px] xs:h-[74px] sm:w-[86px] sm:h-[86px] md:w-[92px] md:h-[92px]
+        rounded-2xl sm:rounded-3xl border 
+        transition-all duration-200 cursor-pointer select-none
+        ${
+          hovered
+            ? 'scale-105 -translate-y-1 z-20 border-white/40'
+            : isDimmed
+            ? 'opacity-25 grayscale scale-95 border-white/5 bg-white/[0.01]'
+            : 'border-white/10 dark:border-white/[0.08] bg-[#12131b]/80 dark:bg-[#0c0d14]/80 hover:border-white/30'
+        }
+      `}
       style={{
-        backgroundColor: 'var(--bg-card)',
-        contain: 'paint layout',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        boxShadow: hovered
+          ? `0 14px 28px -6px ${item.color}50, 0 0 16px ${item.color}30`
+          : '0 4px 14px rgba(0, 0, 0, 0.35)',
       }}
     >
-      {/* Skill Icon */}
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border theme-border transition-transform group-hover:scale-105"
-        style={{ backgroundColor: 'var(--bg-surface)' }}
-      >
-        <Icon size={20} style={{ color: skill.color }} />
+      {/* Ambient Top Glow on Hover */}
+      {hovered && (
+        <span
+          className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-1 rounded-full blur-xs pointer-events-none"
+          style={{ backgroundColor: item.color }}
+        />
+      )}
+
+      {/* Colorful Icon */}
+      <div className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
+        <Icon
+          size={26}
+          style={{
+            color: item.color,
+            filter: hovered ? `drop-shadow(0 0 8px ${item.color}80)` : undefined,
+          }}
+        />
       </div>
 
-      {/* Info & Progress */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-1 mb-1.5">
-          <h3 className="font-bold theme-text-main text-xs sm:text-sm truncate">
-            {skill.name}
-          </h3>
-          <span className="text-[10px] font-mono font-bold text-emerald-500 flex-shrink-0">
-            {skill.level}%
-          </span>
-        </div>
-
-        {/* Hardware-Accelerated Progress Bar */}
-        <div className="w-full h-1 rounded-full bg-black/15 dark:bg-white/10 overflow-hidden relative">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 origin-left transition-transform duration-700 ease-out"
-            style={{
-              transform: inView ? `scaleX(${skill.level / 100})` : 'scaleX(0)',
-              willChange: inView ? 'auto' : 'transform',
-            }}
-          />
-        </div>
-      </div>
+      {/* Clean Technology Label */}
+      <span className="mt-1 text-[9px] sm:text-[10.5px] font-medium text-stone-200 tracking-tight text-center truncate max-w-full px-1.5 transition-colors group-hover:text-white">
+        {item.name}
+      </span>
     </div>
   )
 }
@@ -107,10 +200,10 @@ function SkillCard({ skill, inView }: { skill: typeof skills[0]; inView: boolean
 export default function Skills() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-40px' })
-  const [activeCategory, setActiveCategory] = useState('ALL')
-  const { t } = useLanguage()
+  const [activeCategory, setActiveCategory] = useState<Category>('ALL')
+  const { language, t } = useLanguage()
 
-  const categoryLabels: Record<string, string> = {
+  const categoryLabels: Record<Category, string> = {
     'ALL': t.skills.all,
     'MOBILE & FRONTEND': t.skills.mobileFrontend,
     'BACKEND & APIS': t.skills.backendApis,
@@ -118,40 +211,88 @@ export default function Skills() {
     'DEVOPS & CLOUD': t.skills.devopsCloud,
   }
 
-  const filtered = useMemo(() => {
-    return activeCategory === 'ALL'
-      ? skills
-      : skills.filter((s) => s.category === activeCategory)
-  }, [activeCategory])
+  // Count total technologies
+  const totalCount = useMemo(() => {
+    return techRows.reduce((acc, row) => acc + row.length, 0)
+  }, [])
 
   return (
-    <section id="skills" className="py-12 sm:py-20 theme-main-bg theme-text-main border-t theme-border relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10" ref={ref}>
-        
-        {/* Section Header */}
+    <section
+      id="skills"
+      className="py-16 sm:py-24 theme-main-bg theme-text-main border-t theme-border relative overflow-hidden"
+    >
+      {/* ============================================================== */}
+      {/* 3D WIREFRAME SPHERE & CYBER TUNNEL BACKGROUND                  */}
+      {/* ============================================================== */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+        {/* Central Violet / Cyan Radial Ambient Glow */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[900px] h-[500px] sm:h-[650px] rounded-full blur-[140px] opacity-25"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(56, 189, 248, 0.25) 45%, transparent 70%)',
+          }}
+        />
+
+        {/* 3D Wireframe Globe & Latitudinal Orbit Rings (Pure SVG, 120fps) */}
+        <svg
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] opacity-20 dark:opacity-25"
+          viewBox="0 0 600 600"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Outer Sphere Ring */}
+          <circle cx="300" cy="300" r="260" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="3 4" />
+          
+          {/* Latitudinal Ellipses */}
+          <ellipse cx="300" cy="300" rx="260" ry="180" stroke="#8b5cf6" strokeWidth="0.8" opacity="0.6" />
+          <ellipse cx="300" cy="300" rx="260" ry="100" stroke="#38bdf8" strokeWidth="0.8" opacity="0.7" />
+          <ellipse cx="300" cy="300" rx="260" ry="35" stroke="#38bdf8" strokeWidth="1" opacity="0.8" />
+
+          {/* Longitudinal Ellipses */}
+          <ellipse cx="300" cy="300" rx="180" ry="260" stroke="#8b5cf6" strokeWidth="0.8" opacity="0.6" />
+          <ellipse cx="300" cy="300" rx="100" ry="260" stroke="#38bdf8" strokeWidth="0.8" opacity="0.7" />
+          <ellipse cx="300" cy="300" rx="35" ry="260" stroke="#8b5cf6" strokeWidth="1" opacity="0.8" />
+
+          {/* Perspective Fanning Lines going Downwards */}
+          <line x1="300" y1="300" x2="20" y2="580" stroke="#8b5cf6" strokeWidth="0.75" opacity="0.5" />
+          <line x1="300" y1="300" x2="160" y2="595" stroke="#8b5cf6" strokeWidth="0.75" opacity="0.5" />
+          <line x1="300" y1="300" x2="300" y2="600" stroke="#38bdf8" strokeWidth="1" opacity="0.7" />
+          <line x1="300" y1="300" x2="440" y2="595" stroke="#8b5cf6" strokeWidth="0.75" opacity="0.5" />
+          <line x1="300" y1="300" x2="580" y2="580" stroke="#8b5cf6" strokeWidth="0.75" opacity="0.5" />
+        </svg>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" ref={ref}>
+        {/* ============================================================== */}
+        {/* SECTION HEADER                                                 */}
+        {/* ============================================================== */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
           transition={{ duration: 0.4 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 border-b theme-border pb-3 sm:pb-4"
+          className="text-center mb-8 sm:mb-12 space-y-2.5"
         >
-          <div>
-            <p className="text-xs font-mono uppercase tracking-widest theme-text-accent font-bold mb-1 flex items-center gap-1.5">
-              <Sparkles size={13} />
-              <span>{t.skills.badge}</span>
-            </p>
-            <h2 className="font-billboard text-3xl xs:text-4xl sm:text-5xl theme-text-main tracking-wide">
-              {t.skills.heading}
-            </h2>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-mono font-bold tracking-widest uppercase">
+            <Sparkles size={13} />
+            <span>{totalCount}+ PRODUCTION TECHNOLOGIES</span>
           </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-500 font-bold">
-            <CheckCircle2 size={13} />
-            <span>{t.skills.sub}</span>
-          </div>
+
+          <h2 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black tracking-[0.2em] uppercase font-sans text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400">
+            {language === 'bn' ? 'টেক স্ট্যাক' : 'TECH STACK'}
+          </h2>
+
+          <p className="text-xs sm:text-sm font-mono text-stone-400 max-w-xl mx-auto">
+            {language === 'bn'
+              ? 'মোবাইল ও ফুল-স্ট্যাক ইঞ্জিনিয়ারিংয়ের জন্য পরীক্ষিত ও আধুনিক টেকনোলজি সমাহার'
+              : 'Architected for High-Impact Mobile, Distributed Cloud & Scalable Web Systems'}
+          </p>
         </motion.div>
 
-        {/* Category Filters (Swipeable on mobile) */}
-        <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none">
+        {/* ============================================================== */}
+        {/* CATEGORY FILTER PILLS                                          */}
+        {/* ============================================================== */}
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-10 sm:mb-14">
           {categories.map((cat) => {
             const isActive = activeCategory === cat
             return (
@@ -159,13 +300,11 @@ export default function Skills() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className="px-3.5 py-1.5 rounded-full text-xs font-mono transition-all duration-150 cursor-pointer border flex-shrink-0"
-                style={{
-                  backgroundColor: isActive ? 'var(--accent)' : 'var(--bg-card)',
-                  color: isActive ? 'var(--btn-primary-text)' : 'var(--text-muted)',
-                  borderColor: isActive ? 'var(--accent)' : 'var(--border-subtle)',
-                  fontWeight: isActive ? 700 : 500,
-                }}
+                className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-all duration-200 cursor-pointer border ${
+                  isActive
+                    ? 'bg-purple-600 border-purple-400 text-white font-bold shadow-lg shadow-purple-500/25 scale-105'
+                    : 'bg-white/[0.04] border-white/10 text-stone-400 hover:text-white hover:border-white/25'
+                }`}
               >
                 {categoryLabels[cat] || cat}
               </button>
@@ -173,13 +312,39 @@ export default function Skills() {
           })}
         </div>
 
-        {/* Compact 4-Column High-Performance Skills Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
-          {filtered.map((skill) => (
-            <SkillCard key={skill.name} skill={skill} inView={inView} />
+        {/* ============================================================== */}
+        {/* TAPERED 6-TIER MATRIX (Exact Match to User Reference Photo)    */}
+        {/* ============================================================== */}
+        <div className="flex flex-col items-center gap-2 sm:gap-2.5 md:gap-3 max-w-6xl mx-auto">
+          {techRows.map((row, rowIndex) => (
+            <motion.div
+              key={rowIndex}
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+              transition={{ duration: 0.35, delay: rowIndex * 0.06 }}
+              className="flex flex-wrap justify-center items-center gap-2 sm:gap-2.5 md:gap-3 w-full"
+            >
+              {row.map((item) => {
+                const isDimmed = activeCategory !== 'ALL' && item.category !== activeCategory
+                return (
+                  <TechTile
+                    key={item.name}
+                    item={item}
+                    isDimmed={isDimmed}
+                  />
+                )
+              })}
+            </motion.div>
           ))}
         </div>
 
+        {/* Bottom Micro Footer Badge */}
+        <div className="mt-12 sm:mt-16 text-center">
+          <span className="inline-flex items-center gap-2 text-[11px] font-mono text-stone-500 border border-white/5 px-4 py-1.5 rounded-full bg-black/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Benchmarked for 60-120fps Mobile & Microservice Scalability</span>
+          </span>
+        </div>
       </div>
     </section>
   )
