@@ -1,14 +1,15 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import {
-  SiPython, SiJavascript, SiTypescript, SiC, SiCplusplus, SiKotlin,
-  SiReact, SiNextdotjs, SiBootstrap, SiNodedotjs, SiDjango, SiFlask,
-  SiFastapi, SiTensorflow, SiPytorch, SiScikitlearn, SiOpencv, SiNumpy,
-  SiTailwindcss, SiPandas, SiMysql, SiPostgresql, SiMongodb, SiFirebase,
-  SiRedis, SiDocker, SiGit, SiGithub, SiLinux, SiVercel, SiJupyter,
-  SiFigma, SiPostman, SiHuggingface, SiGnubash
+  SiPython, SiJavascript, SiTypescript, SiPhp, SiLaravel, SiFlutter,
+  SiC, SiCplusplus, SiKotlin, SiReact, SiNextdotjs, SiBootstrap,
+  SiNodedotjs, SiDjango, SiFlask, SiFastapi, SiTensorflow, SiPytorch,
+  SiScikitlearn, SiOpencv, SiNumpy, SiTailwindcss, SiPandas, SiMysql,
+  SiPostgresql, SiMongodb, SiFirebase, SiRedis, SiDocker, SiGit,
+  SiGithub, SiLinux, SiVercel, SiJupyter, SiFigma, SiPostman,
+  SiHuggingface, SiGnubash
 } from 'react-icons/si'
 import { FaHtml5, FaCss3Alt, FaAws } from 'react-icons/fa6'
 import { TbBrandAzure, TbBrandVscode, TbBrandAdobePhotoshop, TbBrandOffice } from 'react-icons/tb'
@@ -24,20 +25,22 @@ export interface TechItem {
   category: 'core' | 'frontend' | 'backend' | 'aiml' | 'database' | 'devops' | 'tools'
 }
 
-// 42 High-Impact Colorful Technologies (100% Crisp, Sharp, Distinct)
+// 42 High-Impact Colorful Technologies (Including PHP, Laravel, Flutter)
 const ALL_TECH_LIST: TechItem[] = [
   { id: 'python', name: 'Python', icon: SiPython, color: '#387EB8', category: 'core' },
   { id: 'javascript', name: 'JavaScript', icon: SiJavascript, color: '#F7DF1E', category: 'core' },
   { id: 'typescript', name: 'TypeScript', icon: SiTypescript, color: '#3178C6', category: 'core' },
+  { id: 'php', name: 'PHP', icon: SiPhp, color: '#777BB4', category: 'backend' },
+  { id: 'laravel', name: 'Laravel', icon: SiLaravel, color: '#FF2D20', category: 'backend' },
+  { id: 'flutter', name: 'Flutter', icon: SiFlutter, color: '#47C5FB', category: 'frontend' },
   { id: 'c', name: 'C', icon: SiC, color: '#659AD2', category: 'core' },
   { id: 'cpp', name: 'C++', icon: SiCplusplus, color: '#00599C', category: 'core' },
   { id: 'kotlin', name: 'Kotlin', icon: SiKotlin, color: '#7F52FF', category: 'core' },
   { id: 'html', name: 'HTML5', icon: FaHtml5, color: '#E34F26', category: 'frontend' },
   { id: 'css', name: 'CSS3', icon: FaCss3Alt, color: '#1572B6', category: 'frontend' },
-  { id: 'bash', name: 'Bash', icon: SiGnubash, color: '#4EAA25', category: 'devops' },
   { id: 'react', name: 'React', icon: SiReact, color: '#61DAFB', category: 'frontend' },
   { id: 'nextjs', name: 'Next.js', icon: SiNextdotjs, color: '#EDEDED', category: 'frontend' },
-  { id: 'bootstrap', name: 'Bootstrap', icon: SiBootstrap, color: '#7952B3', category: 'frontend' },
+  { id: 'tailwind', name: 'Tailwind', icon: SiTailwindcss, color: '#06B6D4', category: 'frontend' },
   { id: 'nodejs', name: 'Node.js', icon: SiNodedotjs, color: '#5FA04E', category: 'backend' },
   { id: 'django', name: 'Django', icon: SiDjango, color: '#2BA977', category: 'backend' },
   { id: 'flask', name: 'Flask', icon: SiFlask, color: '#E0E0E0', category: 'backend' },
@@ -47,7 +50,6 @@ const ALL_TECH_LIST: TechItem[] = [
   { id: 'scikitlearn', name: 'Scikit-learn', icon: SiScikitlearn, color: '#F7931E', category: 'aiml' },
   { id: 'opencv', name: 'OpenCV', icon: SiOpencv, color: '#5C3EE8', category: 'aiml' },
   { id: 'numpy', name: 'NumPy', icon: SiNumpy, color: '#4DABCF', category: 'aiml' },
-  { id: 'tailwind', name: 'Tailwind', icon: SiTailwindcss, color: '#06B6D4', category: 'frontend' },
   { id: 'pandas', name: 'Pandas', icon: SiPandas, color: '#E70488', category: 'aiml' },
   { id: 'mysql', name: 'MySQL', icon: SiMysql, color: '#4479A1', category: 'database' },
   { id: 'postgresql', name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1', category: 'database' },
@@ -75,28 +77,42 @@ const TECH_REGISTRY: Record<string, TechItem> = ALL_TECH_LIST.reduce((acc, item)
   return acc
 }, {} as Record<string, TechItem>)
 
-// DESKTOP TAPERED MATRIX: 11 -> 10 -> 8 -> 6 -> 4 -> 2 (41 items)
-// Exactly matching user desktop reference photo media_1793719195230_77d5e227.jpg
+// DESKTOP PYRAMID MATRIX: 11 -> 10 -> 8 -> 6 -> 4 -> 2 (41 items)
+// Features PHP and Laravel prominently in the top tiers
 const DESKTOP_ROWS: string[][] = [
-  ['python', 'javascript', 'typescript', 'c', 'cpp', 'kotlin', 'html', 'css', 'react', 'nextjs', 'bootstrap'],
-  ['nodejs', 'django', 'flask', 'fastapi', 'tensorflow', 'pytorch', 'scikitlearn', 'opencv', 'numpy', 'tailwind'],
+  // Row 1: 11 items (Core Languages & Frontend Foundation)
+  ['python', 'javascript', 'typescript', 'php', 'c', 'cpp', 'kotlin', 'flutter', 'react', 'nextjs', 'tailwind'],
+  // Row 2: 10 items (Backend Engines & AI Frameworks)
+  ['laravel', 'nodejs', 'django', 'fastapi', 'flask', 'tensorflow', 'pytorch', 'scikitlearn', 'opencv', 'numpy'],
+  // Row 3: 8 items (Databases & Cloud Architecture)
   ['pandas', 'mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'docker', 'azure'],
+  // Row 4: 6 items (DevOps & Infrastructure)
   ['git', 'github', 'linux', 'aws', 'vscode', 'vercel'],
+  // Row 5: 4 items (Creative Tools & APIs)
   ['jupyter', 'figma', 'postman', 'photoshop'],
+  // Row 6: 2 items (Machine Learning & Productivity)
   ['huggingface', 'msoffice']
 ]
 
-// MOBILE CONTOUR MATRIX: 7 -> 5 -> 7 -> 3 -> 7 -> 1 -> 6 -> 4 -> 2 (42 items)
-// Exactly matching user mobile reference photo media_1793719196340_e25caa9f.jpg
+// MOBILE PYRAMID CONTOUR: 7 -> 5 -> 7 -> 3 -> 7 -> 1 -> 6 -> 4 -> 2
 const MOBILE_ROWS: string[][] = [
-  ['python', 'javascript', 'typescript', 'c', 'cpp', 'kotlin', 'html'],
-  ['css', 'bash', 'react', 'nextjs', 'bootstrap'],
-  ['nodejs', 'django', 'flask', 'fastapi', 'tensorflow', 'pytorch', 'scikitlearn'],
+  // Row 1: 7 items (Includes PHP)
+  ['python', 'javascript', 'typescript', 'php', 'c', 'cpp', 'kotlin'],
+  // Row 2: 5 items (Includes Flutter & Frontend)
+  ['html', 'css', 'flutter', 'react', 'nextjs'],
+  // Row 3: 7 items (Includes Laravel & Backend)
+  ['laravel', 'nodejs', 'django', 'fastapi', 'flask', 'tensorflow', 'pytorch'],
+  // Row 4: 3 items
   ['opencv', 'numpy', 'tailwind'],
+  // Row 5: 7 items
   ['pandas', 'mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'docker'],
+  // Row 6: 1 item
   ['azure'],
+  // Row 7: 6 items
   ['git', 'github', 'linux', 'aws', 'vscode', 'vercel'],
+  // Row 8: 4 items
   ['jupyter', 'figma', 'postman', 'photoshop'],
+  // Row 9: 2 items
   ['huggingface', 'msoffice']
 ]
 
@@ -134,7 +150,6 @@ function SharpSquircleTechTile({
           : 'w-[44px] h-[52px] xs:w-[48px] xs:h-[56px] rounded-lg xs:rounded-xl p-1'
       }`}
       style={{
-        // Pure solid dark cyber background — NO blur filter to prevent font smearing
         backgroundColor: hovered ? '#151928' : '#0c0f18',
         border: hovered
           ? `1.5px solid ${tech.color}`
@@ -143,7 +158,6 @@ function SharpSquircleTechTile({
           ? `0 0 24px ${tech.color}55, 0 10px 20px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.25)`
           : '0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.06)',
         opacity: isDimmed ? 0.22 : 1,
-        // True 3D lift on hover
         transform: hovered
           ? 'translateZ(28px) translateY(-5px) scale(1.12)'
           : 'translateZ(0px) translateY(0px) scale(1)',
@@ -174,7 +188,7 @@ function SharpSquircleTechTile({
         />
       </div>
 
-      {/* Crystal Clear High-Contrast Tech Name (100% Readable, No Jhaapsha) */}
+      {/* Crystal Clear High-Contrast Tech Name */}
       <span
         className={`font-mono text-center tracking-tight truncate max-w-full font-bold transition-colors duration-150 ${
           isDesktop
@@ -202,21 +216,18 @@ export default function Skills() {
 
   // Interactive 3D Perspective Tilt for the entire Matrix Plane
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
-  const [isHoveringPlane, setIsHoveringPlane] = useState(false)
 
   const handleMouseMovePlane = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left - rect.width / 2
     const y = e.clientY - rect.top - rect.height / 2
 
-    // Gentle 3D perspective tilt
-    const rotateY = (x / (rect.width / 2)) * 6 // max 6 deg
-    const rotateX = -(y / (rect.height / 2)) * 6 // max 6 deg
+    const rotateY = (x / (rect.width / 2)) * 6
+    const rotateX = -(y / (rect.height / 2)) * 6
     setTilt({ rotateX, rotateY })
   }
 
   const handleMouseLeavePlane = () => {
-    setIsHoveringPlane(false)
     setTilt({ rotateX: 0, rotateY: 0 })
   }
 
@@ -226,12 +237,11 @@ export default function Skills() {
       ref={ref}
       className="py-16 sm:py-24 relative overflow-hidden bg-[#06080d] text-white border-t border-white/5 select-none"
     >
-      {/* 3D ROTATING WIREFRAME CYBER GLOBE IN BACKGROUND (Razor-Sharp, Zero-Lag) */}
+      {/* 3D ROTATING WIREFRAME CYBER GLOBE IN BACKGROUND */}
       <TechStack3DBackground inView={inView} />
 
-      {/* ATMOSPHERIC BACKGROUND MATCHING PORTFOLIO PALETTE (Emerald + Cyan + Deep Cyber Void) */}
+      {/* ATMOSPHERIC BACKGROUND MATCHING PORTFOLIO PALETTE */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Central emerald & cyan atmospheric orb behind the 3D globe */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[850px] h-[450px] sm:h-[650px] rounded-full blur-[130px] opacity-35"
           style={{
@@ -239,12 +249,8 @@ export default function Skills() {
               'radial-gradient(circle, rgba(16,185,129,0.32) 0%, rgba(6,182,212,0.18) 40%, rgba(99,102,241,0.08) 70%, transparent 100%)'
           }}
         />
-
-        {/* Ambient Top/Bottom Glow */}
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[80vw] h-[300px] bg-emerald-500/10 blur-[130px] rounded-full" />
         <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[80vw] h-[300px] bg-cyan-600/10 blur-[140px] rounded-full" />
-
-        {/* Subtle curved wireframe grid lines */}
         <div
           className="absolute inset-0 opacity-[0.14] mix-blend-screen"
           style={{
@@ -257,14 +263,14 @@ export default function Skills() {
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 relative z-10">
-        {/* SECTION HEADER: CRYSTAL CLEAR TYPOGRAPHY & WEBSITE ACCENTS */}
+        {/* SECTION HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
           transition={{ duration: 0.4 }}
           className="flex flex-col items-center justify-center text-center mb-6 sm:mb-8"
         >
-          {/* Neon Emerald Top Badge */}
+          {/* Top Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] sm:text-xs font-mono font-medium tracking-wider uppercase mb-3 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
             <Sparkles size={12} className="text-emerald-400 animate-pulse" />
             <span>Interactive 3D Engineering Matrix</span>
@@ -288,7 +294,7 @@ export default function Skills() {
           </p>
         </motion.div>
 
-        {/* CATEGORY FILTER PILLS (Matching site's emerald theme, swipeable on mobile) */}
+        {/* CATEGORY FILTER PILLS */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
@@ -317,10 +323,9 @@ export default function Skills() {
         </motion.div>
 
         {/* =========================================================================
-            3D HOLOGRAPHIC PERSPECTIVE MATRIX (100% Sharp, Zero Blur / No Jhaapsha)
+            PYRAMID MATRIX (11 -> 10 -> 8 -> 6 -> 4 -> 2) WITH LARAVEL, PHP & FLUTTER
            ========================================================================= */}
         <div
-          onMouseEnter={() => setIsHoveringPlane(true)}
           onMouseMove={handleMouseMovePlane}
           onMouseLeave={handleMouseLeavePlane}
           className="relative mx-auto transition-transform duration-300 ease-out"
@@ -329,7 +334,7 @@ export default function Skills() {
             transformStyle: 'preserve-3d',
           }}
         >
-          {/* DESKTOP MATRIX: TAPERED FUNNEL (11 -> 10 -> 8 -> 6 -> 4 -> 2) */}
+          {/* DESKTOP MATRIX: TAPERED PYRAMID (11 -> 10 -> 8 -> 6 -> 4 -> 2) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
@@ -363,7 +368,7 @@ export default function Skills() {
             ))}
           </motion.div>
 
-          {/* MOBILE MATRIX: HOURGLASS FUNNEL (7->5->7->3->7->1->6->4->2) */}
+          {/* MOBILE MATRIX: HOURGLASS FUNNEL */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
