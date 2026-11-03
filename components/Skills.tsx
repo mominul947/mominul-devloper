@@ -9,10 +9,10 @@ import {
   SiScikitlearn, SiOpencv, SiNumpy, SiTailwindcss, SiPandas, SiMysql,
   SiPostgresql, SiMongodb, SiFirebase, SiRedis, SiDocker, SiGit,
   SiGithub, SiLinux, SiVercel, SiJupyter, SiFigma, SiPostman,
-  SiHuggingface, SiGnubash
+  SiAndroidstudio, SiHuggingface, SiGnubash
 } from 'react-icons/si'
 import { FaHtml5, FaCss3Alt, FaAws } from 'react-icons/fa6'
-import { TbBrandAzure, TbBrandVscode, TbBrandAdobePhotoshop, TbBrandOffice } from 'react-icons/tb'
+import { TbBrandAzure, TbBrandVscode, TbBrandOffice } from 'react-icons/tb'
 import { Sparkles, Terminal, CheckCircle2 } from 'lucide-react'
 import type { IconType } from 'react-icons'
 import TechStack3DBackground from './TechStack3DBackground'
@@ -26,7 +26,7 @@ export interface TechItem {
   secondaryCategory?: 'backend' | 'frontend'
 }
 
-// 42 High-Impact Colorful Technologies (Including PHP, Laravel, Flutter)
+// 42 High-Impact Colorful Technologies (Android Studio replaces Photoshop)
 const ALL_TECH_LIST: TechItem[] = [
   { id: 'python', name: 'Python', icon: SiPython, color: '#387EB8', category: 'core' },
   { id: 'javascript', name: 'JavaScript', icon: SiJavascript, color: '#F7DF1E', category: 'core' },
@@ -65,10 +65,10 @@ const ALL_TECH_LIST: TechItem[] = [
   { id: 'aws', name: 'AWS Cloud', icon: FaAws, color: '#FF9900', category: 'devops' },
   { id: 'vscode', name: 'VS Code', icon: TbBrandVscode, color: '#007ACC', category: 'tools' },
   { id: 'vercel', name: 'Vercel', icon: SiVercel, color: '#FFFFFF', category: 'devops' },
+  { id: 'androidstudio', name: 'Android Studio', icon: SiAndroidstudio, color: '#3DDC84', category: 'tools' },
   { id: 'jupyter', name: 'Jupyter', icon: SiJupyter, color: '#F37626', category: 'aiml' },
   { id: 'figma', name: 'Figma', icon: SiFigma, color: '#F24E1E', category: 'tools' },
   { id: 'postman', name: 'Postman', icon: SiPostman, color: '#FF6C37', category: 'tools' },
-  { id: 'photoshop', name: 'Photoshop', icon: TbBrandAdobePhotoshop, color: '#31A8FF', category: 'tools' },
   { id: 'huggingface', name: 'Hugging Face', icon: SiHuggingface, color: '#FFD21E', category: 'aiml' },
   { id: 'msoffice', name: 'MS Office', icon: TbBrandOffice, color: '#D83B01', category: 'tools' },
 ]
@@ -79,6 +79,7 @@ const TECH_REGISTRY: Record<string, TechItem> = ALL_TECH_LIST.reduce((acc, item)
 }, {} as Record<string, TechItem>)
 
 // DESKTOP PYRAMID MATRIX: 11 -> 10 -> 8 -> 6 -> 4 -> 2 (41 items)
+// Prominently featuring Android Studio in Tools
 const DESKTOP_ROWS: string[][] = [
   // Row 1: 11 items (Languages & UI Core)
   ['python', 'javascript', 'typescript', 'php', 'c', 'cpp', 'kotlin', 'flutter', 'react', 'nextjs', 'tailwind'],
@@ -88,22 +89,31 @@ const DESKTOP_ROWS: string[][] = [
   ['pandas', 'mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'docker', 'azure'],
   // Row 4: 6 items (DevOps & Infrastructure)
   ['git', 'github', 'linux', 'aws', 'vscode', 'vercel'],
-  // Row 5: 4 items (Creative Tools & APIs)
-  ['jupyter', 'figma', 'postman', 'photoshop'],
+  // Row 5: 4 items (Developer Tools: Android Studio, Figma, Postman, Jupyter)
+  ['androidstudio', 'figma', 'postman', 'jupyter'],
   // Row 6: 2 items (Machine Learning Hub & Productivity)
   ['huggingface', 'msoffice']
 ]
 
 // MOBILE PYRAMID CONTOUR: 7 -> 5 -> 7 -> 3 -> 7 -> 1 -> 6 -> 4 -> 2
 const MOBILE_ROWS: string[][] = [
+  // Row 1: 7 items (Includes PHP)
   ['python', 'javascript', 'typescript', 'php', 'c', 'cpp', 'kotlin'],
+  // Row 2: 5 items (Includes Flutter & Frontend)
   ['html', 'css', 'flutter', 'react', 'nextjs'],
+  // Row 3: 7 items (Includes Laravel & Backend)
   ['laravel', 'nodejs', 'django', 'fastapi', 'flask', 'tensorflow', 'pytorch'],
+  // Row 4: 3 items
   ['opencv', 'numpy', 'tailwind'],
+  // Row 5: 7 items
   ['pandas', 'mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'docker'],
+  // Row 6: 1 item
   ['azure'],
+  // Row 7: 6 items
   ['git', 'github', 'linux', 'aws', 'vscode', 'vercel'],
-  ['jupyter', 'figma', 'postman', 'photoshop'],
+  // Row 8: 4 items (Includes Android Studio)
+  ['androidstudio', 'figma', 'postman', 'jupyter'],
+  // Row 9: 2 items
   ['huggingface', 'msoffice']
 ]
 
@@ -115,7 +125,7 @@ const CATEGORY_FILTERS = [
   { id: 'aiml', label: 'AI, ML & Data' },
   { id: 'database', label: 'Databases' },
   { id: 'devops', label: 'DevOps & Cloud' },
-  { id: 'tools', label: 'Tools & Design' }
+  { id: 'tools', label: 'Tools & IDEs' }
 ]
 
 // 100% Crisp, Non-Blurry, 3D Interactive Squircle Card
@@ -214,7 +224,6 @@ export default function Skills() {
     })
   }, [activeCategory])
 
-  // Active category readable label
   const activeLabel = useMemo(() => {
     return CATEGORY_FILTERS.find(c => c.id === activeCategory)?.label || 'All Technologies'
   }, [activeCategory])
@@ -329,8 +338,8 @@ export default function Skills() {
 
         {/* =========================================================================
             CLEAN CATEGORIZED SERIAL MATRIX
-            - When ALL is active: Shows complete 11 -> 10 -> 8 -> 6 -> 4 -> 2 pyramid with zero gaps
-            - When a Category is active: Clean, tight, orderly serial row/grid with zero scattered items
+            - Features Android Studio prominently
+            - Photoshop is completely removed
            ========================================================================= */}
         <div
           onMouseMove={handleMouseMovePlane}
@@ -342,10 +351,7 @@ export default function Skills() {
           }}
         >
           <AnimatePresence mode="wait">
-            {/* ------------------------------------------------------------- */}
             {/* VIEW A: A SINGLE CATEGORY SELECTED -> CLEAN NEAT SERIAL ORDER */}
-            {/* (Zero scattered cards! Every item sits side-by-side neatly)   */}
-            {/* ------------------------------------------------------------- */}
             {filteredCategoryItems ? (
               <motion.div
                 key={`cat-${activeCategory}`}
@@ -355,14 +361,12 @@ export default function Skills() {
                 transition={{ duration: 0.3 }}
                 className="w-full flex flex-col items-center justify-center relative z-10"
               >
-                {/* Active Category Indicator Badge */}
                 <div className="mb-6 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
                   <CheckCircle2 size={13} className="text-emerald-400" />
                   <span className="font-bold">{filteredCategoryItems.length}</span>
                   <span>Verified Technologies in {activeLabel}</span>
                 </div>
 
-                {/* Symmetrical, Neatly Ordered Serial Grid (No gaps, perfectly centered) */}
                 <div
                   className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 max-w-3xl mx-auto px-4"
                   style={{
@@ -380,10 +384,7 @@ export default function Skills() {
                 </div>
               </motion.div>
             ) : (
-              /* ------------------------------------------------------------- */
-              /* VIEW B: ALL TECHNOLOGIES -> COMPLETE SOLID PYRAMID            */
-              /* (11 -> 10 -> 8 -> 6 -> 4 -> 2, Fully populated with zero gaps)*/
-              /* ------------------------------------------------------------- */
+              /* VIEW B: ALL TECHNOLOGIES -> COMPLETE SOLID PYRAMID */
               <motion.div
                 key="all-pyramid"
                 initial={{ opacity: 0, scale: 0.98 }}
