@@ -1,34 +1,81 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { motion } from 'framer-motion'
+
+const LINE_1_FULL = 'ERROR 404: Conventional'
+const LINE_2_FULL = 'developer not found.'
 
 export default function GlitchIntroPreloader() {
-  const [phase, setPhase] = useState<'showing' | 'splitting' | 'hidden'>('showing')
+  const [typedLine1, setTypedLine1] = useState('')
+  const [typedLine2, setTypedLine2] = useState('')
+  const [activeCursor, setActiveCursor] = useState<'line1' | 'line2' | 'done'>('line1')
+  const [phase, setPhase] = useState<'typing' | 'waiting' | 'splitting' | 'hidden'>('typing')
+
+  const splitTriggeredRef = useRef(false)
 
   // Trigger the 2-way split transition ("2 ta 2 dike jabe")
   const triggerSplit = useCallback(() => {
-    setPhase((prev) => {
-      if (prev !== 'showing') return prev
-      setTimeout(() => {
-        setPhase('hidden')
-      }, 950)
-      return 'splitting'
-    })
+    if (splitTriggeredRef.current) return
+    splitTriggeredRef.current = true
+
+    // Show full text immediately if skipped early
+    setTypedLine1(LINE_1_FULL)
+    setTypedLine2(LINE_2_FULL)
+    setActiveCursor('done')
+    setPhase('splitting')
+
+    setTimeout(() => {
+      setPhase('hidden')
+    }, 950)
   }, [])
 
+  // Typewriter effect loop
   useEffect(() => {
-    // 1. Wait on screen for ~1.6s so user can read comfortably
-    const timer = setTimeout(() => {
-      triggerSplit()
-    }, 1600)
+    let charIndex1 = 0
+    let charIndex2 = 0
+    let timeoutId: NodeJS.Timeout
 
-    // 2. Click or keypress skips immediately
+    // Step 1: Type Line 1 ("ERROR 404: Conventional")
+    const typeLine1 = () => {
+      if (splitTriggeredRef.current) return
+      if (charIndex1 < LINE_1_FULL.length) {
+        charIndex1++
+        setTypedLine1(LINE_1_FULL.slice(0, charIndex1))
+        timeoutId = setTimeout(typeLine1, 40)
+      } else {
+        // Line 1 finished, switch cursor to Line 2 after brief pause
+        setActiveCursor('line2')
+        timeoutId = setTimeout(typeLine2, 160)
+      }
+    }
+
+    // Step 2: Type Line 2 ("developer not found.")
+    const typeLine2 = () => {
+      if (splitTriggeredRef.current) return
+      if (charIndex2 < LINE_2_FULL.length) {
+        charIndex2++
+        setTypedLine2(LINE_2_FULL.slice(0, charIndex2))
+        timeoutId = setTimeout(typeLine2, 45)
+      } else {
+        // Typing fully completed! Pause so user can read ("seikhane kicukhon oppekha kore")
+        setActiveCursor('done')
+        setPhase('waiting')
+        timeoutId = setTimeout(() => {
+          triggerSplit()
+        }, 1400) // 1.4s comfortable pause
+      }
+    }
+
+    // Start typing line 1
+    timeoutId = setTimeout(typeLine1, 200)
+
+    // Allow user click or any keypress to skip typing and open immediately
     const handleKey = () => triggerSplit()
     window.addEventListener('keydown', handleKey, { once: true })
 
     return () => {
-      clearTimeout(timer)
+      clearTimeout(timeoutId)
       window.removeEventListener('keydown', handleKey)
     }
   }, [triggerSplit])
@@ -78,7 +125,7 @@ export default function GlitchIntroPreloader() {
           </span>
         </div>
 
-        {/* LINE 1: "ERROR 404: Conventional" (Moves LEFT on split) */}
+        {/* LINE 1: "ERROR 404: Conventional" (Typewriter + Moves LEFT on split) */}
         <motion.div
           animate={
             isSplitting
@@ -91,8 +138,11 @@ export default function GlitchIntroPreloader() {
           }
           className="relative z-10 text-center"
         >
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-wider text-stone-100 font-mono drop-shadow-lg whitespace-nowrap">
-            ERROR 404: Conventional
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-wider text-stone-100 font-mono drop-shadow-lg whitespace-nowrap inline-flex items-center">
+            <span>{typedLine1}</span>
+            {activeCursor === 'line1' && (
+              <span className="inline-block w-2.5 sm:w-3.5 h-6 sm:h-9 bg-purple-400 ml-1.5 animate-pulse align-middle" />
+            )}
           </h1>
         </motion.div>
       </motion.div>
@@ -122,7 +172,7 @@ export default function GlitchIntroPreloader() {
           }}
         />
 
-        {/* LINE 2: "developer not found." (Moves RIGHT on split) */}
+        {/* LINE 2: "developer not found." (Typewriter + Moves RIGHT on split) */}
         <motion.div
           animate={
             isSplitting
@@ -135,8 +185,11 @@ export default function GlitchIntroPreloader() {
           }
           className="relative z-10 text-center"
         >
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-wider text-stone-200 font-mono drop-shadow-lg whitespace-nowrap">
-            developer not found.
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-wider text-stone-200 font-mono drop-shadow-lg whitespace-nowrap inline-flex items-center">
+            <span>{typedLine2}</span>
+            {(activeCursor === 'line2' || activeCursor === 'done') && (
+              <span className="inline-block w-2.5 sm:w-3.5 h-6 sm:h-9 bg-purple-400 ml-1.5 animate-pulse align-middle" />
+            )}
           </h1>
         </motion.div>
 
@@ -154,4 +207,3 @@ export default function GlitchIntroPreloader() {
     </div>
   )
 }
-
