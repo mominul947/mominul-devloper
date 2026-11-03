@@ -7,6 +7,7 @@ import About from '@/components/About'
 import Projects from '@/components/Projects'
 import AppShowcase from '@/components/AppShowcase'
 import WebsiteShowcase from '@/components/WebsiteShowcase'
+import BoguraCityTeaser from '@/components/BoguraCityTeaser'
 import Skills from '@/components/Skills'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
@@ -25,6 +26,7 @@ export default function Home() {
         <About />
         <AppShowcase />
         <WebsiteShowcase />
+        <BoguraCityTeaser />
         <Projects />
         <Skills />
         <Contact />
