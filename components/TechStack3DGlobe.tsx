@@ -369,3 +369,4 @@ export default function TechStack3DGlobe({ items, activeCategory, inView }: Tech
     </div>
   )
 }
+

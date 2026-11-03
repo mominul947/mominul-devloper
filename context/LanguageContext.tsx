@@ -380,45 +380,25 @@ const LanguageContext = createContext<LanguageContextProps>({
 })
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>('en')
+  const language: Language = 'en'
 
-  // Load persisted language from localStorage on mount
   useEffect(() => {
     try {
-      const savedLang = localStorage.getItem('user_language') as Language
-      if (savedLang === 'en' || savedLang === 'bn') {
-        setLanguageState(savedLang)
-        document.documentElement.lang = savedLang
-      } else {
-        // Default to English as explicitly requested
-        setLanguageState('en')
-        document.documentElement.lang = 'en'
-      }
-    } catch {
-      // Fallback
-    }
+      localStorage.setItem('user_language', 'en')
+      document.documentElement.lang = 'en'
+    } catch {}
   }, [])
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    try {
-      localStorage.setItem('user_language', lang)
-      document.documentElement.lang = lang
-    } catch {}
-  }
-
-  const toggleLanguage = () => {
-    const nextLang: Language = language === 'en' ? 'bn' : 'en'
-    setLanguage(nextLang)
-  }
+  const setLanguage = () => {}
+  const toggleLanguage = () => {}
 
   return (
     <LanguageContext.Provider
       value={{
-        language,
+        language: 'en',
         setLanguage,
         toggleLanguage,
-        t: translations[language],
+        t: translations.en,
       }}
     >
       {children}
@@ -427,4 +407,3 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 }
 
 export const useLanguage = () => useContext(LanguageContext)
-

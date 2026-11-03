@@ -222,3 +222,4 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
     </div>
   )
 }
+

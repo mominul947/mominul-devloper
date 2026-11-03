@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowUpRight, CreditCard, Languages } from 'lucide-react'
+import { Menu, X, ArrowUpRight, CreditCard } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
@@ -104,17 +104,6 @@ export default function Navbar() {
 
           {/* Action CTAs & Language Switcher */}
           <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
-            {/* Language Switcher Pill */}
-            <button
-              onClick={toggleLanguage}
-              type="button"
-              className="px-3 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all font-bold cursor-pointer shadow-xs whitespace-nowrap flex-shrink-0"
-              title={language === 'en' ? 'বাংলা ভাষায় পরিবর্তন করুন' : 'Switch to English'}
-            >
-              <Languages size={14} />
-              <span>{language === 'en' ? 'বাংলা' : 'English'}</span>
-            </button>
-
             {/* Online Payment Link (Navigates to /pay Payment Gateway) */}
             <Link
               href="/pay"
@@ -146,17 +135,6 @@ export default function Navbar() {
 
           {/* Mobile Right Bar: Language Switcher, Pay Link & Hamburger */}
           <div className="flex lg:hidden items-center gap-1.5 xs:gap-2 flex-shrink-0">
-            {/* Mobile Language Switcher */}
-            <button
-              onClick={toggleLanguage}
-              type="button"
-              className="px-2.5 py-1 rounded-full text-[11px] font-mono flex items-center gap-1 border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-bold whitespace-nowrap"
-              title={language === 'en' ? 'বাংলা' : 'EN'}
-            >
-              <Languages size={12} />
-              <span>{language === 'en' ? 'বাং' : 'EN'}</span>
-            </button>
-
             <Link
               href="/pay"
               className="sm:hidden px-2.5 py-1 rounded-full text-[11px] font-mono flex items-center gap-1 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap"
@@ -206,22 +184,6 @@ export default function Navbar() {
                 borderColor: 'var(--border-subtle)',
               }}
             >
-              {/* Language Switcher Bar in Mobile Drawer */}
-              <div className="flex items-center justify-between pb-3 border-b theme-border">
-                <span className="text-xs font-mono text-stone-400 flex items-center gap-1.5">
-                  <Languages size={14} className="text-emerald-400" />
-                  <span>Language / ভাষা</span>
-                </span>
-                <button
-                  onClick={() => {
-                    toggleLanguage()
-                  }}
-                  className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500 text-black shadow-xs"
-                >
-                  {language === 'en' ? 'বাংলায় দেখুন' : 'Switch to English'}
-                </button>
-              </div>
-
               <div className="flex flex-col space-y-1">
                 {navItems.map((item) => {
                   const isActive = activeSection === item.href.slice(1)
