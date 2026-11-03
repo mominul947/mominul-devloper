@@ -2,74 +2,68 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-
-const LINE_1_FULL = 'ERROR 404: Conventional'
-const LINE_2_FULL = 'developer not found.'
+import Image from 'next/image'
+import { Sparkles } from 'lucide-react'
 
 export default function GlitchIntroPreloader() {
-  const [typedLine1, setTypedLine1] = useState('')
-  const [typedLine2, setTypedLine2] = useState('')
-  const [activeCursor, setActiveCursor] = useState<'line1' | 'line2' | 'done'>('line1')
-  const [phase, setPhase] = useState<'peeking' | 'waiting' | 'splitting' | 'hidden'>('peeking')
-
+  const [phase, setPhase] = useState<'idle' | 'splitting' | 'hidden'>('idle')
+  const [targetTransform, setTargetTransform] = useState({ x: 0, y: 0, scale: 1 })
+  const cardRef = useRef<HTMLDivElement>(null)
   const splitTriggeredRef = useRef(false)
 
-  // Trigger the 2-way Split Reveal
+  // Calculate pixel-perfect destination to Hero portrait slot
+  const getDestination = useCallback(() => {
+    if (typeof window === 'undefined') return { x: 0, y: 0, scale: 1 }
+    const isMobile = window.innerWidth < 1024
+    const targetId = isMobile ? 'hero-portrait-mobile' : 'hero-portrait-desktop'
+    const targetEl = document.getElementById(targetId)
+
+    if (targetEl && cardRef.current) {
+      const rect = targetEl.getBoundingClientRect()
+      const currentCard = cardRef.current.getBoundingClientRect()
+
+      const deltaX = rect.left + rect.width / 2 - (currentCard.left + currentCard.width / 2)
+      const deltaY = rect.top + rect.height / 2 - (currentCard.top + currentCard.height / 2)
+      const scale = rect.width / currentCard.width
+
+      return { x: deltaX, y: deltaY, scale }
+    }
+
+    // Default responsive fallback
+    return {
+      x: isMobile ? window.innerWidth * 0.22 : 0,
+      y: isMobile ? -window.innerHeight * 0.18 : 0,
+      scale: isMobile ? 0.75 : 0.95,
+    }
+  }, [])
+
+  // Trigger the 2-way Split and fly Image Card into Hero position
   const triggerSplit = useCallback(() => {
     if (splitTriggeredRef.current) return
     splitTriggeredRef.current = true
 
-    setTypedLine1(LINE_1_FULL)
-    setTypedLine2(LINE_2_FULL)
-    setActiveCursor('done')
+    const dest = getDestination()
+    setTargetTransform(dest)
     setPhase('splitting')
 
-    // Clean unmount from DOM — nothing remains
+    // Clean unmount once card arrives at home position
     setTimeout(() => {
       setPhase('hidden')
-    }, 750)
-  }, [])
+    }, 780)
+  }, [getDestination])
 
-  // Smooth Typewriter Sequence
   useEffect(() => {
-    let charIndex1 = 0
-    let charIndex2 = 0
-    let timeoutId: NodeJS.Timeout
+    // Automatically trigger split after comfortable ~1.5s intro view
+    const timer = setTimeout(() => {
+      triggerSplit()
+    }, 1500)
 
-    const typeLine1 = () => {
-      if (splitTriggeredRef.current) return
-      if (charIndex1 < LINE_1_FULL.length) {
-        charIndex1++
-        setTypedLine1(LINE_1_FULL.slice(0, charIndex1))
-        timeoutId = setTimeout(typeLine1, 35)
-      } else {
-        setActiveCursor('line2')
-        timeoutId = setTimeout(typeLine2, 140)
-      }
-    }
-
-    const typeLine2 = () => {
-      if (splitTriggeredRef.current) return
-      if (charIndex2 < LINE_2_FULL.length) {
-        charIndex2++
-        setTypedLine2(LINE_2_FULL.slice(0, charIndex2))
-        timeoutId = setTimeout(typeLine2, 38)
-      } else {
-        setActiveCursor('done')
-        setPhase('waiting')
-        timeoutId = setTimeout(() => {
-          triggerSplit()
-        }, 1200) // 1.2s reading pause
-      }
-    }
-
-    timeoutId = setTimeout(typeLine1, 200)
-
+    // Also allow click or keypress to skip immediately
     const handleKey = () => triggerSplit()
     window.addEventListener('keydown', handleKey, { once: true })
 
     return () => {
-      clearTimeout(timeoutId)
+      clearTimeout(timer)
       window.removeEventListener('keydown', handleKey)
     }
   }, [triggerSplit])
@@ -84,139 +78,146 @@ export default function GlitchIntroPreloader() {
       className="fixed inset-0 z-[9999999] pointer-events-auto select-none cursor-pointer overflow-hidden font-mono"
     >
       {/* =========================================================================
-          TOP SHUTTER DOOR (100% Solid Black, Opens Generously Wide, Disappears Completely)
+          TOP HALF SHUTTER DOOR (Moves UP on split: "2 ta 2 dike jabe")
          ========================================================================= */}
       <motion.div
         initial={{ y: 0 }}
         animate={
           isSplitting
             ? {
-                y: '-110%',
-                opacity: 0,
-                transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+                y: '-105%',
+                transition: { duration: 0.75, ease: [0.76, 0, 0.24, 1] },
               }
-            : {
-                // Wide, generous horizontal aperture opening ("ar o beshi khulbe")
-                y: '-45px',
-                transition: { duration: 0.5, ease: 'easeOut' },
-              }
+            : { y: 0 }
         }
-        className="absolute top-0 left-0 right-0 h-1/2 bg-[#020306] border-b border-white/20 flex flex-col justify-end items-center pb-3 px-4 z-20 shadow-2xl"
+        className="absolute top-0 left-0 right-0 h-1/2 bg-[#020306] border-b border-emerald-500/20 z-10 flex flex-col justify-start p-4 sm:p-7 shadow-2xl"
       >
         {/* Subtle Cyber Grid Texture */}
         <div
           className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px)',
+              'linear-gradient(to right, rgba(16, 185, 129, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.4) 1px, transparent 1px)',
             backgroundSize: '36px 36px',
           }}
         />
 
-        {/* Top Terminal Status */}
-        <div className="absolute top-4 sm:top-6 left-5 sm:left-10 right-5 sm:right-10 flex items-center justify-between text-[11px] text-stone-500 font-mono">
+        {/* Minimalist Top Terminal HUD */}
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-stone-400 font-mono">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="tracking-widest text-stone-400 font-bold uppercase">
-              SYSTEM ALERT // 404
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-emerald-400 font-bold tracking-widest uppercase">
+              MOMINUL ISLAM // ARCHITECT
             </span>
           </div>
           <span className="tracking-wider text-stone-500 hidden sm:inline">
-            CLICK OR PRESS ANY KEY TO ENTER ↵
+            CLICK OR TAP TO ENTER ↵
           </span>
         </div>
-
-        {/* LINE 1: "ERROR 404: Conventional" (Crisp, High-Contrast Typography) */}
-        <motion.div
-          animate={
-            isSplitting
-              ? {
-                  x: '-100%',
-                  opacity: 0,
-                  transition: { duration: 0.5, ease: 'easeIn' },
-                }
-              : { x: 0, opacity: 1 }
-          }
-          className="relative z-10 text-center mb-1"
-        >
-          <h1
-            className="text-xl xs:text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-white font-mono whitespace-nowrap inline-flex items-center"
-            style={{
-              letterSpacing: '0.04em',
-              textShadow: '0 0 25px rgba(255, 255, 255, 0.4), 0 2px 10px rgba(0,0,0,1)',
-            }}
-          >
-            <span>{typedLine1}</span>
-            {activeCursor === 'line1' && (
-              <span className="inline-block w-2 sm:w-3.5 h-5 sm:h-9 bg-white ml-1.5 animate-pulse align-middle" />
-            )}
-          </h1>
-        </motion.div>
       </motion.div>
 
       {/* =========================================================================
-          BOTTOM SHUTTER DOOR (100% Solid Black, Opens Generously Wide, Disappears Completely)
+          BOTTOM HALF SHUTTER DOOR (Moves DOWN on split: "2 ta 2 dike jabe")
          ========================================================================= */}
       <motion.div
         initial={{ y: 0 }}
         animate={
           isSplitting
             ? {
-                y: '110%',
-                opacity: 0,
-                transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+                y: '105%',
+                transition: { duration: 0.75, ease: [0.76, 0, 0.24, 1] },
               }
-            : {
-                // Wide, generous horizontal aperture opening ("ar o beshi khulbe")
-                y: '45px',
-                transition: { duration: 0.5, ease: 'easeOut' },
-              }
+            : { y: 0 }
         }
-        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#020306] border-t border-white/20 flex flex-col justify-start items-center pt-3 px-4 z-20 shadow-2xl"
+        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#020306] border-t border-emerald-500/20 z-10 flex flex-col justify-end p-4 sm:p-7 shadow-2xl"
       >
         {/* Subtle Cyber Grid Texture */}
         <div
           className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px)',
+              'linear-gradient(to right, rgba(16, 185, 129, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.4) 1px, transparent 1px)',
             backgroundSize: '36px 36px',
           }}
         />
 
-        {/* LINE 2: "developer not found." (Crisp, High-Contrast Typography) */}
+        {/* Minimalist Bottom HUD Status */}
+        <div className="flex items-center justify-between text-[10px] sm:text-xs text-stone-500 font-mono">
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={12} className="text-emerald-400 animate-pulse" />
+            <span className="text-stone-400">Mobile & Web Engineering Platform</span>
+          </div>
+          <span className="text-emerald-400 font-bold">PORTAL READY</span>
+        </div>
+      </motion.div>
+
+      {/* =========================================================================
+          HERO IMAGE CARD (Centered initially, then animates into exact Hero slot!)
+         ========================================================================= */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
         <motion.div
+          ref={cardRef}
+          initial={{ scale: 0.92, opacity: 0 }}
           animate={
             isSplitting
               ? {
-                  x: '100%',
-                  opacity: 0,
-                  transition: { duration: 0.5, ease: 'easeIn' },
+                  x: targetTransform.x,
+                  y: targetTransform.y,
+                  scale: targetTransform.scale,
+                  opacity: 1,
+                  transition: {
+                    duration: 0.75,
+                    ease: [0.22, 1, 0.36, 1], // Smooth Apple-grade spring-like curve
+                  },
                 }
-              : { x: 0, opacity: 1 }
+              : {
+                  x: 0,
+                  y: 0,
+                  scale: 1,
+                  opacity: 1,
+                  transition: { duration: 0.4, ease: 'easeOut' },
+                }
           }
-          className="relative z-10 text-center mt-1"
+          className="relative w-[210px] xs:w-[240px] sm:w-[300px] md:w-[340px] aspect-[3/4] rounded-2xl sm:rounded-[28px] overflow-hidden flex items-end justify-center pointer-events-auto"
+          style={{
+            border: '1.5px solid var(--portrait-border, rgba(16, 185, 129, 0.5))',
+            backgroundColor: 'rgba(10, 12, 18, 0.75)',
+            boxShadow:
+              '0 0 50px rgba(16, 185, 129, 0.4), 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.2)',
+          }}
         >
-          <h1
-            className="text-xl xs:text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider text-stone-200 font-mono whitespace-nowrap inline-flex items-center"
+          {/* Portrait Image */}
+          <div className="relative w-full h-full">
+            <Image
+              src="/images/hero-portrait-01.png"
+              alt="Md. Mominul Islam"
+              fill
+              priority
+              sizes="(max-width: 640px) 240px, (max-width: 1024px) 300px, 340px"
+              className="object-contain object-bottom scale-[1.18] origin-bottom drop-shadow-2xl"
+            />
+          </div>
+
+          {/* Floating Live Name Badge Docked at Bottom of Card */}
+          <div
+            className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-3 sm:left-3 sm:right-3 flex items-center justify-between p-2 sm:p-2.5 rounded-xl backdrop-blur-md border shadow-xl z-10"
             style={{
-              letterSpacing: '0.04em',
-              textShadow: '0 0 25px rgba(255, 255, 255, 0.3), 0 2px 10px rgba(0,0,0,1)',
+              backgroundColor: 'rgba(10, 10, 14, 0.92)',
+              borderColor: 'rgba(255, 255, 255, 0.12)',
             }}
           >
-            <span>{typedLine2}</span>
-            {(activeCursor === 'line2' || activeCursor === 'done') && (
-              <span className="inline-block w-2 sm:w-3.5 h-5 sm:h-9 bg-white ml-1.5 animate-pulse align-middle" />
-            )}
-          </h1>
+            <span className="text-[10px] sm:text-[11px] font-mono text-white font-bold tracking-wider truncate">
+              Md. Mominul Islam
+            </span>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase text-emerald-400 font-bold">
+                Architect
+              </span>
+            </div>
+          </div>
         </motion.div>
-
-        {/* Bottom Status */}
-        <div className="absolute bottom-4 sm:bottom-6 flex items-center gap-2 text-[10px] sm:text-xs text-stone-500 tracking-wider">
-          <span className="w-1.5 h-1.5 rounded-full bg-stone-500 animate-ping" />
-          <span className="font-mono text-stone-400">Click anywhere to open website</span>
-        </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

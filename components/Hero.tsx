@@ -143,7 +143,7 @@ export default function Hero() {
               className="col-span-5 flex flex-col items-center justify-center relative"
             >
               <div
-                className="relative w-full aspect-[3/4] max-w-[185px] xs:max-w-[215px] mx-auto flex items-end justify-center rounded-2xl overflow-hidden"
+                className="relative w-full aspect-[3/4] max-w-[185px] xs:max-w-[215px] mx-auto flex items-end justify-center rounded-2xl overflow-hidden" id="hero-portrait-mobile"
                 style={{
                   border: '1.5px solid var(--portrait-border)',
                   backgroundColor: 'transparent',
@@ -429,7 +429,7 @@ export default function Hero() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false, amount: 0.15 }}
               transition={{ duration: 0.7 }}
-              className="relative w-full max-w-[360px] aspect-[3/4] mx-auto flex items-end justify-center rounded-[28px] overflow-hidden shadow-2xl transition-all duration-300"
+              className="relative w-full max-w-[360px] aspect-[3/4] mx-auto flex items-end justify-center rounded-[28px] overflow-hidden shadow-2xl transition-all duration-300" id="hero-portrait-desktop"
               style={{
                 border: '1.5px solid var(--portrait-border)',
                 backgroundColor: 'transparent',
