@@ -6,7 +6,6 @@ import { getExperience } from '@/utils/experience'
 import DhakaTime from '@/components/DhakaTime'
 import { useLanguage } from '@/context/LanguageContext'
 import {
-  ArrowRight,
   Quote,
   CheckCircle2,
   MapPin,
@@ -23,48 +22,6 @@ export default function About() {
   const exp = getExperience()
   const { language, t } = useLanguage()
 
-  const processSteps = [
-    {
-      num: '01',
-      title: language === 'bn' ? 'আবিষ্কার ও বিশ্লেষণ' : 'DISCOVER & AUDIT',
-      desc: language === 'bn'
-        ? 'ক্লায়েন্টের ব্যবসায়িক লক্ষ্য, টার্গেট ইউজার এবং টেকনিক্যাল রিকোয়ারমেন্টের গভীর পর্যালোচনা।'
-        : 'Deep-dive into business requirements, user audience, technical scope, and performance KPIs without assumptions.',
-    },
-    {
-      num: '02',
-      title: language === 'bn' ? 'আর্কিটেকচার ও পরিকল্পনা' : 'ARCHITECT & PLAN',
-      desc: language === 'bn'
-        ? 'ডাটাবেজ স্কিমা মডেলিং, REST/GraphQL এপিআই স্ট্রাকচার এবং স্কেলেবল সিস্টেমের নীল নকশা।'
-        : 'Schema modeling, REST/GraphQL API contracts, responsive wireframes, and scalable component hierarchy.',
-    },
-    {
-      num: '03',
-      title: language === 'bn' ? 'ইউআই/ইউএক্স ডিজাইন' : 'DESIGN & PROTOTYPE',
-      desc: language === 'bn'
-        ? 'ব্যবহারকারীর জন্য সহজ ও সুন্দর ইন্টারফেস তৈরি এবং ইন্টারঅ্যাক্টিভ প্রোটোটাইপিং।'
-        : 'Crafting pixel-perfect, tactile interfaces with interactive micro-animations and intuitive workflows.',
-    },
-    {
-      num: '04',
-      title: language === 'bn' ? 'ডেভেলপমেন্ট ও অপ্টিমাইজেশন' : 'DEVELOP & BENCHMARK',
-      desc: language === 'bn'
-        ? '৬০ এফপিএস স্মুথ মোবাইল অ্যাপস (Flutter, Kotlin) এবং উচ্চগতির সুরক্ষিত ব্যাকএন্ড নির্মাণ।'
-        : 'Engineering 60fps mobile apps (Flutter, Kotlin) alongside high-throughput backends (Node.js, Laravel) and Next.js 14.',
-    },
-    {
-      num: '05',
-      title: language === 'bn' ? 'ডিপ্লয়মেন্ট ও মনিটরিং' : 'DEPLOY & SCALE',
-      desc: language === 'bn'
-        ? 'স্বয়ংক্রিয় CI/CD পাইপলাইন, লিনাক্স সার্ভার কনফিগারেশন, প্লে-স্টোর লঞ্চ ও সার্বক্ষণিক সার্ভার সাপোর্ট।'
-        : 'Automated CI/CD pipelines, hardened Linux VPS server configuration, Google Play Store launch, and live telemetry.',
-    },
-  ]
-
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
     <section id="about" className="py-14 sm:py-24 theme-main-bg theme-text-main border-t theme-border relative overflow-hidden">
       
@@ -73,8 +30,6 @@ export default function About() {
       <div className="absolute bottom-1/3 -right-40 w-96 h-96 bg-blue-500/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-16 sm:space-y-24 relative z-10">
-        
-        {/* ================================================================== */}
         {/* Section 1: Developer Spotlight Card & Personal Bio                */}
         {/* ================================================================== */}
         <div>
@@ -314,110 +269,7 @@ export default function About() {
         </div>
 
         {/* ================================================================== */}
-        {/* Section 2: SYSTEM WORK PROCESS (5 Steps)                           */}
-        {/* ================================================================== */}
-        <div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.5 }}
-            className="border-b theme-border pb-4 mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-2"
-          >
-            <div>
-              <p className="text-xs font-mono uppercase tracking-widest theme-text-accent font-bold mb-1">
-                {language === 'bn' ? 'কার্যপ্রণালী ও ধাপসমূহ' : 'SYSTEM WORK METHODOLOGY'}
-              </p>
-              <h2 className="font-billboard text-3xl xs:text-4xl sm:text-5xl theme-text-main tracking-wide">
-                {language === 'bn' ? 'যেভাবে সফল প্রোডাক্ট তৈরি করি' : 'HOW I BUILD HIGH-IMPACT PRODUCTS'}
-              </h2>
-            </div>
-            <span className="text-xs font-mono theme-text-muted">
-              {language === 'bn' ? '৫ ধাপে নিখুঁত সফটওয়্যার ডেভেলপমেন্ট' : '5-STEP PREDICTABLE ENGINEERING WORKFLOW'}
-            </span>
-          </motion.div>
-
-          {/* Process Step Cards */}
-          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0">
-            {processSteps.map((step, idx) => (
-              <div
-                key={step.num}
-                className="w-[80vw] xs:w-[75vw] max-w-[300px] sm:w-auto sm:max-w-none flex-shrink-0 sm:flex-shrink snap-center p-4 sm:p-5 rounded-2xl border theme-border space-y-2.5 sm:space-y-3 relative group transition-all duration-300 hover:scale-[1.02] shadow-xs"
-                style={{ backgroundColor: 'var(--bg-card)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-billboard text-lg sm:text-xl flex items-center justify-center font-bold"
-                    style={{
-                      backgroundColor: 'var(--accent-subtle)',
-                      color: 'var(--accent)',
-                    }}
-                  >
-                    {step.num}
-                  </span>
-                  <span className="text-[10px] font-mono theme-text-muted sm:hidden px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5 border theme-border">
-                    STEP {idx + 1}/5
-                  </span>
-                  {idx < processSteps.length - 1 && (
-                    <ArrowRight size={14} className="theme-text-muted hidden lg:block opacity-60" />
-                  )}
-                </div>
-
-                <p className="font-bold text-xs sm:text-sm theme-text-main tracking-wider font-mono uppercase">
-                  {step.title}
-                </p>
-
-                <p className="text-xs theme-text-muted leading-relaxed">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
-
-        {/* ================================================================== */}
-        {/* Section 3: Call-To-Action Banner                                   */}
-        {/* ================================================================== */}
-        <div
-          className="rounded-3xl p-6 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 shadow-xl transition-all duration-300 text-center lg:text-left border"
-          style={{
-            backgroundColor: 'var(--banner-cta-bg)',
-            color: 'var(--banner-cta-text)',
-            borderColor: 'var(--portrait-border)',
-          }}
-        >
-          <div className="space-y-2 max-w-xl">
-            <h3 className="font-serif-italic text-2xl sm:text-4xl font-normal text-white">
-              {language === 'bn' ? 'আসুন একসাথে দারুণ কিছু তৈরি করি।' : "Let's build something exceptional together."}
-            </h3>
-            <p className="text-xs sm:text-sm text-stone-300 font-mono">
-              {language === 'bn'
-                ? 'আপনার মোবাইল অ্যাপ, ব্যাকএন্ড আর্কিটেকচার বা ওয়েবসাইটকে বাস্তবে রূপ দিতে প্রস্তুত? ফ্রিল্যান্স চুক্তি ও ফুল-টাইম কাজের জন্য সর্বদা সক্রিয়।'
-                : 'Ready to bring your mobile app, backend architecture, or web platform to life? Available for freelance contracts and dedicated engagements.'}
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 flex-shrink-0 w-full sm:w-auto">
-            <button
-              onClick={() => scrollTo('contact')}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white text-stone-900 font-mono text-xs uppercase tracking-wider font-bold hover:bg-stone-100 transition-colors cursor-pointer shadow-md flex items-center justify-center gap-1.5"
-            >
-              <span>{language === 'bn' ? 'প্রজেক্ট আলোচনা করুন' : 'DISCUSS YOUR PROJECT'}</span>
-              <ArrowUpRight size={13} />
-            </button>
-
-            <a
-              href="https://wa.me/8801303482412"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white/10 border border-white/20 text-white font-mono text-xs uppercase tracking-wider hover:bg-white/20 transition-colors text-center font-semibold"
-            >
-              {language === 'bn' ? 'হোয়াটসঅ্যাপ চ্যাট' : 'WHATSAPP CHAT'}
-            </a>
-          </div>
-        </div>
-
-      </div>
     </section>
   )
 }
