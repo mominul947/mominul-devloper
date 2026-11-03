@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from '@/context/ThemeContext'
 import { LanguageProvider } from '@/context/LanguageContext'
+import { BuildTourProvider } from '@/context/BuildTourContext'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import About from '@/components/About'
@@ -16,29 +17,33 @@ import ScrollProgress from '@/components/ScrollProgress'
 import SmoothMotionBackdrop from '@/components/SmoothMotionBackdrop'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import GlitchIntroPreloader from '@/components/GlitchIntroPreloader'
+import SeeBuildTour from '@/components/SeeBuildTour'
 
 export default function Home() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <GlitchIntroPreloader />
-        <div className="relative theme-main-bg theme-text-main min-h-screen">
-          <SmoothMotionBackdrop />
-          <ScrollProgress />
-          <Navbar />
-          <main className="relative overflow-x-hidden">
-            <Hero />
-            <About />
-            <AppShowcase />
-            <WebsiteShowcase />
-            <BoguraCityTeaser />
-            <Projects />
-            <Skills />
-            <Contact />
-            <Footer />
-          </main>
-          <ThemeSwitcher />
-        </div>
+        <BuildTourProvider>
+          <GlitchIntroPreloader />
+          <SeeBuildTour />
+          <div className="relative theme-main-bg theme-text-main min-h-screen">
+            <SmoothMotionBackdrop />
+            <ScrollProgress />
+            <Navbar />
+            <main className="relative overflow-x-hidden">
+              <Hero />
+              <About />
+              <AppShowcase />
+              <WebsiteShowcase />
+              <BoguraCityTeaser />
+              <Projects />
+              <Skills />
+              <Contact />
+              <Footer />
+            </main>
+            <ThemeSwitcher />
+          </div>
+        </BuildTourProvider>
       </LanguageProvider>
     </ThemeProvider>
   )

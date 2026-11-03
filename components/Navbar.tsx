@@ -3,16 +3,18 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowUpRight, CreditCard } from 'lucide-react'
+import { Menu, X, ArrowUpRight, CreditCard, Hammer } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
+import { useBuildTour } from '@/context/BuildTourContext'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const { language, toggleLanguage, t } = useLanguage()
+  const { startTour } = useBuildTour()
 
   const navItems = [
     { label: t.nav.home, href: '#hero' },
@@ -111,6 +113,16 @@ export default function Navbar() {
 
           {/* Action CTAs & Language Switcher */}
           <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+            {/* SEE BUILD BUTTON */}
+            <button
+              onClick={startTour}
+              className="px-3 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all font-bold shadow-xs whitespace-nowrap flex-shrink-0 cursor-pointer"
+              title="Watch full website live build simulation"
+            >
+              <Hammer size={12} className="text-emerald-500" />
+              <span>SEE BUILD</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            </button>
             {/* Online Payment Link (Navigates to /pay Payment Gateway) */}
             <Link
               href="/pay"
