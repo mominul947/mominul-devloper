@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowDown, MapPin, Sparkles, ArrowUpRight, Mail, Phone, Hammer } from 'lucide-react'
+import { ArrowDown, MapPin, Sparkles, ArrowUpRight, Mail, Phone } from 'lucide-react'
 import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import Image from 'next/image'
@@ -10,7 +10,6 @@ import { getExperience, useLiveExperience } from '@/utils/experience'
 
 import DhakaTime from '@/components/DhakaTime'
 import { useLanguage } from '@/context/LanguageContext'
-import { useBuildTour } from '@/context/BuildTourContext'
 
 const portraits = [
   {
@@ -29,7 +28,6 @@ export default function Hero() {
   const [activePhoto, setActivePhoto] = useState(0)
   const liveExp = useLiveExperience()
   const { t, language } = useLanguage()
-  const { startTour } = useBuildTour()
 
   const stats = [
     { value: liveExp.yearsFormatted, label: t.hero.yearsExp, live: true },
@@ -226,17 +224,6 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* SEE BUILD BUTTON (Mobile) */}
-          <button
-            type="button"
-            onClick={startTour}
-            className="w-full py-3 px-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer mb-2"
-          >
-            <Hammer size={14} className="text-emerald-400" />
-            <span>SEE BUILD // LIVE AUTO SIMULATION</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-          </button>
-
           {/* Row 4: Direct Quick Contact Channels (Bigger, Beautiful & High Converting) */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider theme-text-muted">
@@ -400,18 +387,6 @@ export default function Hero() {
                 <FiverrLogo size={22} />
                 <span>Hire on Fiverr</span>
               </a>
-
-              {/* SEE BUILD BUTTON (Desktop) */}
-              <button
-                type="button"
-                onClick={startTour}
-                className="px-4.5 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 hover:text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all cursor-pointer group"
-                title="Watch automated live build simulation with collaborative cursors"
-              >
-                <Hammer size={14} className="group-hover:rotate-12 transition-transform text-emerald-400" />
-                <span>SEE BUILD</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping ml-0.5" />
-              </button>
             </motion.div>
 
             {/* Social Icons */}
