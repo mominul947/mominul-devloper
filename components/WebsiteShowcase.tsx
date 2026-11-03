@@ -46,6 +46,12 @@ export default function WebsiteShowcase() {
     setIframeKey((prev) => prev + 1)
   }
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setActiveMode('phone')
+    }
+  }, [])
+
   const calcScales = useCallback(() => {
     if (laptopRef.current) {
       const w = laptopRef.current.clientWidth

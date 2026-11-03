@@ -46,9 +46,9 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
     const globeGroup = new THREE.Group()
     scene.add(globeGroup)
 
-    // Geodesic Wireframe Sphere
+    // Geodesic Wireframe Sphere (Reduced vertices on mobile for max GPU efficiency)
     const sphereRadius = isMobile ? 2.3 : 2.7
-    const sphereDetail = isMobile ? 16 : 24
+    const sphereDetail = isMobile ? 10 : 24
 
     const sphereGeometry = new THREE.SphereGeometry(sphereRadius, sphereDetail, sphereDetail)
     const wireframe = new THREE.WireframeGeometry(sphereGeometry)
@@ -64,7 +64,7 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
     globeGroup.add(sphereLines)
 
     // Inner Glowing Core / Geodesic Accent (Cyan)
-    const innerGeo = new THREE.IcosahedronGeometry(sphereRadius * 0.72, isMobile ? 1 : 2)
+    const innerGeo = new THREE.IcosahedronGeometry(sphereRadius * 0.72, isMobile ? 0 : 2)
     const innerWire = new THREE.WireframeGeometry(innerGeo)
     const innerMat = new THREE.LineBasicMaterial({
       color: 0x06b6d4, // Cyan
@@ -75,7 +75,7 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
     globeGroup.add(innerMesh)
 
     // 4. Subtle Cyber Nodes / Particles at Vertices
-    const particleCount = isMobile ? 60 : 120
+    const particleCount = isMobile ? 24 : 120
     const particlePositions = new Float32Array(particleCount * 3)
 
     for (let i = 0; i < particleCount; i++) {
@@ -138,9 +138,17 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
     let animationFrameId: number
     let clock = new THREE.Clock()
     let isRunning = inView
+    let lastRenderTime = 0
 
-    const render = () => {
+    const render = (currentTime: number) => {
       if (!isRunning) return
+
+      // Pacing on mobile to leave 100% GPU headroom for touch momentum scrolling
+      if (isMobile && currentTime - lastRenderTime < 24) {
+        animationFrameId = requestAnimationFrame(render)
+        return
+      }
+      lastRenderTime = currentTime
 
       const delta = clock.getDelta()
 
@@ -167,7 +175,7 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
 
     if (inView) {
       isRunning = true
-      render()
+      animationFrameId = requestAnimationFrame(render)
     }
 
     // 8. Resize Handler

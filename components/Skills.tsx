@@ -153,14 +153,16 @@ function SharpSquircleTechTile({
         border: hovered
           ? `1.5px solid ${tech.color}`
           : '1px solid rgba(255, 255, 255, 0.12)',
-        boxShadow: hovered
-          ? `0 0 24px ${tech.color}55, 0 10px 20px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.25)`
-          : '0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.06)',
+        boxShadow: isDesktop
+          ? (hovered
+              ? `0 0 24px ${tech.color}55, 0 10px 20px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.25)`
+              : '0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.06)')
+          : '0 2px 6px rgba(0, 0, 0, 0.35)',
         transform: hovered
           ? 'translateZ(28px) translateY(-5px) scale(1.12)'
           : 'translateZ(0px) translateY(0px) scale(1)',
         zIndex: hovered ? 40 : 10,
-        transformStyle: 'preserve-3d',
+        transformStyle: isDesktop ? 'preserve-3d' : 'flat',
         willChange: 'transform',
       }}
     >

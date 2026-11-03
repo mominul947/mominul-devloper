@@ -13,9 +13,16 @@ export default function GlitchIntroPreloader() {
   const [typedLine2, setTypedLine2] = useState('')
   const [activeCursor, setActiveCursor] = useState<'line1' | 'line2' | 'done'>('line1')
   const [targetTransform, setTargetTransform] = useState({ x: 0, y: 0, scale: 1 })
+  const [isMobile, setIsMobile] = useState(false)
 
   const cardRef = useRef<HTMLDivElement>(null)
   const splitTriggeredRef = useRef(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMobile(window.innerWidth < 768)
+    }
+  }, [])
 
   // 1. Completely lock page scroll while intro preloader is active ("ayi page thaktei scrol kora jacche amn jeno na hoi")
   useEffect(() => {
@@ -181,7 +188,7 @@ export default function GlitchIntroPreloader() {
         className="absolute inset-0 pointer-events-none overflow-hidden"
       >
         {/* Base Deep Obsidian Mist Floor */}
-        <div className="absolute inset-0 bg-[#020306]/95 backdrop-blur-2xl" />
+        <div className="absolute inset-0 bg-[#020306]/98 sm:bg-[#020306]/95 sm:backdrop-blur-xl" />
 
         {/* Dense Swirling Smoke Cloud - Top Center */}
         <motion.div
@@ -199,7 +206,7 @@ export default function GlitchIntroPreloader() {
           style={{
             background:
               'radial-gradient(ellipse at center, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, rgba(2, 3, 6, 0.85) 75%, transparent 100%)',
-            filter: 'blur(65px)',
+            filter: isMobile ? 'blur(28px)' : 'blur(65px)',
           }}
         />
 
@@ -219,7 +226,7 @@ export default function GlitchIntroPreloader() {
           style={{
             background:
               'radial-gradient(ellipse at center, rgba(14, 165, 233, 0.18) 0%, rgba(15, 23, 42, 0.8) 50%, rgba(2, 3, 6, 0.9) 75%, transparent 100%)',
-            filter: 'blur(70px)',
+            filter: isMobile ? 'blur(30px)' : 'blur(70px)',
           }}
         />
 
@@ -238,7 +245,7 @@ export default function GlitchIntroPreloader() {
           style={{
             background:
               'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(2, 3, 6, 0.6) 45%, transparent 70%)',
-            filter: 'blur(45px)',
+            filter: isMobile ? 'blur(22px)' : 'blur(45px)',
           }}
         />
 

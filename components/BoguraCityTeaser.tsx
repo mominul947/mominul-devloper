@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Heart,
   Volume2,
@@ -16,6 +16,28 @@ export default function BoguraCityTeaser() {
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
   const { t } = useLanguage()
+
+  // IntersectionObserver: Only play when visible, pause when offscreen to save mobile CPU/battery
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {})
+          } else {
+            video.pause()
+          }
+        })
+      },
+      { threshold: 0.15 }
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
 
   // Cursor hover on video -> Sound turns ON
   const handleMouseEnter = () => {
@@ -78,10 +100,10 @@ export default function BoguraCityTeaser() {
                 <video
                   ref={videoRef}
                   src="/images/video/bogura-stream.mp4"
-                  autoPlay
                   loop
                   muted
                   playsInline
+                  preload="metadata"
                   className="w-full h-full object-cover"
                 />
 

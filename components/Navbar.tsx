@@ -24,16 +24,23 @@ export default function Navbar() {
   ]
 
   useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 30)
 
-      const sections = ['hero', 'about', 'apps', 'website', 'projects', 'contact']
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sections[i])
-        if (el && el.getBoundingClientRect().top <= 140) {
-          setActiveSection(sections[i])
-          break
-        }
+          const sections = ['hero', 'about', 'apps', 'website', 'projects', 'contact']
+          for (let i = sections.length - 1; i >= 0; i--) {
+            const el = document.getElementById(sections[i])
+            if (el && el.getBoundingClientRect().top <= 140) {
+              setActiveSection(sections[i])
+              break
+            }
+          }
+          ticking = false
+        })
+        ticking = true
       }
     }
 

@@ -310,16 +310,27 @@ html[lang="bn"] .font-billboard {
     -webkit-overflow-scrolling: touch;
   }
 
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
+    text-rendering: optimizeSpeed;
   }
 
-  /* GPU-friendly lightweight backdrop filters on mobile */
+  /* GPU-friendly lightweight backdrop filters on mobile (prevents frame drop on mid/low Android & iOS) */
   .neu-card,
-  .glass-pill {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+  .glass-pill,
+  [class*="backdrop-blur"] {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+
+  /* Reduce costly multi-layer box shadows on mobile */
+  .shadow-2xl {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45) !important;
   }
 
   /* Hardware acceleration for scroll containers */
@@ -328,6 +339,7 @@ html[lang="bn"] .font-billboard {
     -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    will-change: scroll-position;
   }
 }
 
