@@ -303,7 +303,7 @@ export default function Skills() {
               textShadow: '0 0 30px rgba(16, 185, 129, 0.35)'
             }}
           >
-            TECH STACK
+            FULL STACK
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-stone-300 font-mono tracking-wide max-w-xl">
             Multi-platform full-stack engineering stack — hovering triggers authentic neon brand resonance.
