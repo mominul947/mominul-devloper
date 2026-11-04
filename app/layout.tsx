@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import AnalyticsTracker from '@/components/AnalyticsTracker'
 
 export const metadata: Metadata = {
   title: 'Md. Mominul Islam | Full-Stack & Mobile App Developer',
@@ -36,7 +35,6 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <AnalyticsTracker />
         {children}
       </body>
     </html>
