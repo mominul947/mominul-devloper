@@ -82,6 +82,13 @@ export default function Contact() {
   ]
 
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [submittedData, setSubmittedData] = useState<{
+    name: string
+    email: string
+    phone: string
+    projectType: string
+    message: string
+  } | null>(null)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -98,6 +105,7 @@ export default function Contact() {
     e.preventDefault()
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) return
 
+    setSubmittedData({ ...form })
     setFormState('loading')
 
     try {
@@ -123,14 +131,14 @@ export default function Contact() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8" ref={ref}>
         
         {/* Header */}
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div className="grid md:grid-cols-12 gap-8 lg:gap-12 items-start">
           
           {/* Left: Contact Info (5 Cols) */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="lg:col-span-5 space-y-6 sm:space-y-8"
+            className="md:col-span-5 space-y-6 sm:space-y-8"
           >
             <div>
               <p className="text-xs font-mono uppercase tracking-widest theme-text-muted mb-1">
@@ -211,7 +219,7 @@ export default function Contact() {
             initial={{ opacity: 0, x: 30 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }}
-            className="lg:col-span-7 neu-card rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl relative overflow-hidden"
+            className="md:col-span-7 neu-card rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl relative overflow-hidden"
           >
             <div className="border-b theme-border pb-4 mb-5 sm:mb-6 flex items-center justify-between">
               <div>
@@ -231,20 +239,53 @@ export default function Contact() {
             </div>
 
             {formState === 'success' ? (
-              <div className="py-8 sm:py-12 text-center space-y-4">
+              <div className="py-8 sm:py-10 text-center space-y-5">
                 <div
                   className="w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-500/30 shadow-lg"
                 >
                   <CheckCircle size={32} />
                 </div>
-                <h4 className="font-billboard text-2xl sm:text-3xl theme-text-main">
-                  {language === 'bn' ? 'বার্তাটি পৌঁছেছে' : 'INQUIRY TRANSMITTED'}
-                </h4>
-                <p className="text-xs sm:text-sm theme-text-muted max-w-md mx-auto leading-relaxed">
-                  {t.contact.successMsg}
-                </p>
+                <div className="space-y-1">
+                  <h4 className="font-billboard text-2xl sm:text-3xl theme-text-main">
+                    {language === 'bn' ? 'বার্তাটি সফলভাবে পাঠানো হয়েছে!' : 'INQUIRY TRANSMITTED!'}
+                  </h4>
+                  <p className="text-xs sm:text-sm theme-text-muted max-w-md mx-auto leading-relaxed">
+                    {language === 'bn' 
+                      ? `ধন্যবাদ ${submittedData?.name || ''}! আপনার বার্তাটি mominulwebwork@gmail.com এ পাঠানো হয়েছে। তাৎক্ষণিক উত্তরের জন্য নিচে সরাসরি হোয়াটসঅ্যাপ বা ইমেইলে যোগাযোগ করতে পারেন:`
+                      : `Thank you, ${submittedData?.name || ''}! Your message has been dispatched to mominulwebwork@gmail.com. For instant priority response, feel free to connect directly:`}
+                  </p>
+                </div>
 
-                <div className="pt-2">
+                {/* Instant Connect Buttons */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <a
+                    href={`https://wa.me/8801303482412?text=${encodeURIComponent(
+                      `হ্যালো মোঃ মোমিনুল ইসলাম,\nআমি আপনার পোর্টফোলিও ওয়েবসাইট থেকে বার্তা পাঠিয়েছি:\n👤 নাম: ${submittedData?.name || ''}\n✉️ ইমেইল: ${submittedData?.email || ''}\n📞 ফোন: ${submittedData?.phone || ''}\n📁 প্রজেক্ট: ${submittedData?.projectType || ''}\n📝 বার্তা:\n${submittedData?.message || ''}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all"
+                  >
+                    <FaWhatsapp size={16} />
+                    <span>{language === 'bn' ? 'WhatsApp এ সরাসরি পাঠান' : 'Send via WhatsApp'}</span>
+                    <ArrowUpRight size={13} />
+                  </a>
+
+                  <a
+                    href={`mailto:mominulwebwork@gmail.com?subject=${encodeURIComponent(
+                      `🚀 Portfolio Inquiry: ${submittedData?.name || 'Client'} (${submittedData?.projectType || 'Project'})`
+                    )}&body=${encodeURIComponent(
+                      `Client Name: ${submittedData?.name || ''}\nClient Email: ${submittedData?.email || ''}\nPhone / WhatsApp: ${submittedData?.phone || ''}\nProject Category: ${submittedData?.projectType || ''}\n\nMessage Details:\n${submittedData?.message || ''}`
+                    )}`}
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl border theme-border hover:bg-white/10 theme-text-main font-bold font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Mail size={15} />
+                    <span>{language === 'bn' ? 'Gmail এ ওপেন করুন' : 'Open in Gmail'}</span>
+                    <ArrowUpRight size={13} />
+                  </a>
+                </div>
+
+                <div className="pt-3 border-t theme-border max-w-xs mx-auto">
                   <button
                     type="button"
                     onClick={() => {
@@ -256,10 +297,11 @@ export default function Contact() {
                         projectType: 'Mobile App Development (Android & Cross-Platform)',
                         message: ''
                       })
+                      setSubmittedData(null)
                     }}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full neu-card text-xs font-mono font-bold theme-text-main hover:opacity-80 transition-opacity cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono theme-text-muted hover:theme-text-accent transition-colors uppercase tracking-wider cursor-pointer"
                   >
-                    {language === 'bn' ? 'আরেকটি বার্তা পাঠান' : 'SEND ANOTHER INQUIRY'}
+                    <span>{language === 'bn' ? '← আরেকটি বার্তা লিখুন' : '← Send Another Message'}</span>
                   </button>
                 </div>
               </div>

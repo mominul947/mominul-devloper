@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { readJsonFileSafe, writeJsonFileSafe } from '@/lib/storage'
+import nodemailer from 'nodemailer'
 
 function getStoredPayments(): any[] {
   return readJsonFileSafe<any[]>('payments.json', [])
@@ -29,6 +30,8 @@ export async function POST(request: Request) {
     const currentMethod = paymentMethod || 'bKash Personal'
     const methodPrefix = currentMethod.split(' ')[0].toUpperCase()
     const recipientEmail = process.env.NOTIFICATION_EMAIL || 'mominulwebwork@gmail.com'
+    const gmailUser = process.env.GMAIL_USER || recipientEmail
+    const gmailPass = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '')
     const receiptId = `${methodPrefix}-${Date.now().toString().slice(-6)}`
 
     // 1. Save payment record locally
@@ -42,118 +45,106 @@ export async function POST(request: Request) {
       amount: Number(cleanAmount) || 0,
       method: currentMethod,
       package: selectedPackage || 'Online Service Payment',
-      status: 'pending', // 'pending' | 'verified' | 'rejected'
+      status: 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       notes: '',
     }
 
     const existingPayments = getStoredPayments()
-    // Prepend newest first
     existingPayments.unshift(newRecord)
     if (existingPayments.length > 500) {
       existingPayments.length = 500
     }
     saveStoredPayments(existingPayments)
 
-    // 2. Dispatch Email notification to owner
-    const originHeader = request.headers.get('origin')
-    const hostHeader = request.headers.get('host')
-    const safeOrigin = originHeader && !originHeader.includes('localhost')
-      ? originHeader
-      : hostHeader
-      ? `https://${hostHeader}`
-      : 'https://mominul-portfolio.vercel.app'
-
-    try {
-      const emailResponse = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Origin': safeOrigin,
-          'Referer': `${safeOrigin}/pay`
-        },
-        body: JSON.stringify({
-          'PAYMENT STATUS': 'VERIFICATION PENDING',
-          'Receipt ID': receiptId,
-          'Payment Gateway': currentMethod,
-          'Transaction ID (TrxID)': transactionId,
-          'Amount (BDT)': `৳${cleanAmount} BDT`,
-          'Sender Number/Account': senderNum,
-          'Client Name': finalClientName,
-          'Client Phone/WhatsApp': clientPhone || senderNum,
-          'Client Email': clientEmail || 'N/A',
-          'Package / Service': selectedPackage || 'Custom Order',
-          '_subject': `💰 ${currentMethod.toUpperCase()} PAYMENT: TrxID ${transactionId} (৳${cleanAmount} BDT)`,
-          '_template': 'table',
-          '_captcha': 'false',
-          '_autoresponse': 'false'
-        })
-      })
-
-      const emailResult = await emailResponse.json().catch(() => null)
-      console.log('Payment email dispatch result:', emailResult)
-    } catch (emailErr) {
-      console.error('Payment email dispatch error:', emailErr)
-    }
-
-    // 3. WhatsApp Notification via CallMeBot (if configured)
-    const ownerPhone = process.env.WHATSAPP_PHONE || '8801303482412'
-    const apiKey = process.env.CALLMEBOT_API_KEY
-
-    const alertMessage = 
-`💰 *NEW ${currentMethod.toUpperCase()} PAYMENT ALERT!*
-━━━━━━━━━━━━━━━━━━
-🆔 *TrxID:* ${transactionId}
-💵 *Amount:* ৳${cleanAmount} BDT
-📱 *Sender:* ${senderNum}
-👤 *Client:* ${finalClientName}
-📞 *Phone:* ${clientPhone || 'N/A'}
-📦 *Package:* ${selectedPackage || 'Custom'}
-🧾 *Receipt ID:* ${receiptId}
-━━━━━━━━━━━━━━━━━━
-_Verify on your ${currentMethod} account and confirm with client._`
-
-    if (apiKey) {
+    // 2. Dispatch Email notification via Gmail SMTP
+    if (gmailPass) {
       try {
-        const encoded = encodeURIComponent(alertMessage)
-        await fetch(`https://api.callmebot.com/whatsapp.php?phone=${ownerPhone}&text=${encoded}&apikey=${apiKey}`)
-      } catch (waErr) {
-        console.error('WhatsApp payment alert error:', waErr)
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: gmailUser,
+            pass: gmailPass,
+          },
+        })
+
+        await transporter.sendMail({
+          from: `"Payment Verification" <${gmailUser}>`,
+          to: recipientEmail,
+          replyTo: clientEmail || recipientEmail,
+          subject: `💰 ${currentMethod.toUpperCase()} PAYMENT: TrxID ${transactionId} (৳${cleanAmount} BDT)`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #334155;">
+              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
+                <h1 style="margin: 0; color: #ffffff; font-size: 20px;">New Payment Received</h1>
+                <p style="margin: 4px 0 0 0; color: #e2e8f0; font-size: 13px;">Receipt: ${receiptId}</p>
+              </div>
+              <div style="padding: 24px;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">Method:</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #f8fafc; font-weight: bold; font-size: 14px;">${currentMethod}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">Transaction ID (TrxID):</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #38bdf8; font-family: monospace; font-size: 16px; font-weight: bold;">${transactionId}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">Amount:</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #10b981; font-size: 18px; font-weight: bold;">৳${cleanAmount} BDT</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">Sender Number:</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #f8fafc; font-size: 14px;">${senderNum}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">Client Name:</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #f8fafc; font-size: 14px;">${finalClientName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 13px;">Package:</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #334155; color: #f8fafc; font-size: 14px;">${selectedPackage || 'Custom Order'}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          `,
+        })
+      } catch (smtpErr) {
+        console.error('Payment SMTP dispatch error:', smtpErr)
       }
     }
 
-    // 4. Telegram Alert (if configured)
+    // 3. Optional Telegram Notification
     const telegramToken = process.env.TELEGRAM_BOT_TOKEN
     const telegramChatId = process.env.TELEGRAM_CHAT_ID
     if (telegramToken && telegramChatId) {
       try {
+        const tgAlert = `💰 *NEW ${currentMethod.toUpperCase()} PAYMENT!*\n━━━━━━━━━━━━━━━━━━\n🆔 *TrxID:* ${transactionId}\n💵 *Amount:* ৳${cleanAmount} BDT\n📱 *Sender:* ${senderNum}\n👤 *Client:* ${finalClientName}\n📦 *Package:* ${selectedPackage || 'Custom'}\n🧾 *Receipt:* ${receiptId}`
         await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: telegramChatId,
-            text: alertMessage,
-            parse_mode: 'Markdown'
-          })
+            text: tgAlert,
+            parse_mode: 'Markdown',
+          }),
         })
       } catch (tgErr) {
-        console.error('Telegram payment alert error:', tgErr)
+        console.error('Telegram notification error:', tgErr)
       }
     }
 
     return NextResponse.json({
       success: true,
       receiptId,
-      record: newRecord,
-      message: 'Payment details submitted successfully for verification.'
+      message: 'Payment recorded successfully',
     })
   } catch (error) {
     console.error('Payment API error:', error)
     return NextResponse.json(
-      { error: 'Failed to record payment' },
+      { error: 'Failed to process payment' },
       { status: 500 }
     )
   }
