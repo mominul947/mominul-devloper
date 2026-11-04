@@ -17,7 +17,7 @@ import {
   Star,
   DownloadCloud,
 } from 'lucide-react'
-import { FaGooglePlay } from 'react-icons/fa6'
+import GooglePlayLogo from '@/components/GooglePlayLogo'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -326,8 +326,8 @@ export default function AppShowcase() {
                   </span>
 
                   {isPlayStore ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/40 flex items-center gap-1 shadow-sm flex-shrink-0">
-                      <FaGooglePlay size={10} />
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/15 text-[#34A853] border border-[#34A853]/35 flex items-center gap-1.5 shadow-xs flex-shrink-0">
+                      <GooglePlayLogo size={11} />
                       <span>{downloads} Live</span>
                     </span>
                   ) : (
@@ -555,7 +555,7 @@ export default function AppShowcase() {
                       rel="noopener noreferrer"
                       className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.01]"
                     >
-                      <FaGooglePlay size={13} />
+                      <GooglePlayLogo size={14} />
                       <span>Live on Play Store ({downloads})</span>
                       <ExternalLink size={12} />
                     </a>
@@ -636,10 +636,11 @@ export default function AppShowcase() {
                     <p className="font-billboard text-[11px] sm:text-xs theme-text-main truncate leading-tight">
                       {app.name}
                     </p>
-                    <span className={`text-[8px] font-mono px-1 rounded uppercase font-bold inline-block mt-0.5 truncate max-w-full ${
+                    <span className={`text-[8px] font-mono px-1 rounded uppercase font-bold inline-flex items-center justify-center gap-1 mt-0.5 truncate max-w-full ${
                       isActive ? 'text-emerald-400 bg-emerald-500/20' : 'theme-text-muted'
                     }`}>
-                      {isPlay ? `${liveStat.downloads} Play` : 'Client MVP'}
+                      {isPlay && <GooglePlayLogo size={8} />}
+                      <span>{isPlay ? `${liveStat.downloads} Play` : 'Client MVP'}</span>
                     </span>
                   </div>
                 </button>
@@ -757,7 +758,7 @@ export default function AppShowcase() {
                   rel="noopener noreferrer"
                   className="px-2.5 py-1 rounded-full text-xs font-mono font-bold border border-emerald-500/40 text-emerald-400 bg-emerald-500/15 flex items-center gap-1.5"
                 >
-                  <FaGooglePlay size={11} />
+                  <GooglePlayLogo size={12} />
                   <span>{playStats[selectedMobileApp.id]?.downloads || selectedMobileApp.downloads} Live</span>
                   <ExternalLink size={10} />
                 </a>
@@ -784,7 +785,7 @@ export default function AppShowcase() {
                   rel="noopener noreferrer"
                   className="w-full py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md"
                 >
-                  <FaGooglePlay size={14} />
+                  <GooglePlayLogo size={15} />
                   <span>Install on Google Play ({playStats[selectedMobileApp.id]?.downloads || selectedMobileApp.downloads})</span>
                   <ExternalLink size={12} />
                 </a>
