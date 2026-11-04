@@ -318,33 +318,33 @@ export default function AppShowcase() {
                   style={{ backgroundColor: app.accent }}
                 />
 
-                {/* Top Badge & Number */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                {/* Top Badge & Number - Fixed height to ensure 100% horizontal alignment */}
+                <div className="flex items-center justify-between mb-3 h-6">
+                  <span className="font-mono text-xs font-bold text-emerald-400 flex items-center gap-1.5 truncate">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
                     <span>0{idx + 1} • {app.category}</span>
                   </span>
 
                   {isPlayStore ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/40 flex items-center gap-1 shadow-sm">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/40 flex items-center gap-1 shadow-sm flex-shrink-0">
                       <FaGooglePlay size={10} />
                       <span>{downloads} Live</span>
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold border border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
+                    <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex-shrink-0">
                       Client MVP
                     </span>
                   )}
                 </div>
 
-                {/* App Name & Tagline */}
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-billboard text-2xl xl:text-3xl theme-text-main leading-tight">
+                {/* App Name & Tagline - Fixed height so 1-line or 2-line title never offsets the phones */}
+                <div className="mb-3 h-[74px] flex flex-col justify-start">
+                  <div className="flex items-center gap-2 min-h-[30px]">
+                    <h3 className="font-billboard text-2xl xl:text-3xl theme-text-main leading-tight truncate">
                       {app.name}
                     </h3>
                     {isPlayStore && (
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 flex-shrink-0">
                         PLAY STORE
                       </span>
                     )}
@@ -354,8 +354,8 @@ export default function AppShowcase() {
                   </p>
                 </div>
 
-                {/* Key Metrics Strip */}
-                <div className="grid grid-cols-2 gap-2 mb-4 p-2.5 rounded-2xl border theme-border bg-black/10 dark:bg-black/30">
+                {/* Key Metrics Strip - Fixed height */}
+                <div className="grid grid-cols-2 gap-2 mb-4 p-2.5 rounded-2xl border theme-border bg-black/10 dark:bg-black/30 h-[58px] items-center">
                   <div className="text-center">
                     <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
                       {isPlayStore ? (
@@ -394,9 +394,9 @@ export default function AppShowcase() {
                   </div>
                 </div>
 
-                {/* DEDICATED PHONE MOCKUP FOR THIS PROJECT */}
-                <div className="relative flex flex-col items-center justify-center my-2">
-                  <div className="relative w-full max-w-[240px] xl:max-w-[260px] rounded-[36px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
+                {/* DEDICATED PHONE MOCKUP FOR THIS PROJECT (Identical fixed dimensions on desktop) */}
+                <div className="relative flex flex-col items-center justify-center my-1">
+                  <div className="relative w-full max-w-[215px] xl:max-w-[230px] rounded-[34px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
                     
                     {/* Hardware Buttons */}
                     <div className="absolute -right-[4.5px] top-20 w-[2.5px] h-8 rounded-r bg-[#3f3f46]" />
@@ -596,94 +596,78 @@ export default function AppShowcase() {
            ========================================================================= */}
         <div className="lg:hidden space-y-6">
           
-          {/* Mobile App Selector Cards (Carbook & Repairmate Pro at top) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {/* Mobile 4 Mini Phone Previews (All 4 apps visible together in small phone size) */}
+          <div className="grid grid-cols-4 gap-2 sm:gap-2.5 mb-2">
             {apps.map((app, idx) => {
               const isActive = selectedMobileApp.id === app.id
               const isPlay = Boolean(app.playStoreUrl)
-              const curDownloads = playStats[app.id]?.downloads || app.downloads
+              const firstScreenshot = app.screenshots[0]
+              const liveStat = playStats[app.id] || { downloads: app.downloads || 'Live' }
+
               return (
                 <button
                   key={app.id}
-                  onClick={() => {
-                    setSelectedMobileApp(app)
-                  }}
-                  className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                  onClick={() => setSelectedMobileApp(app)}
+                  className={`flex flex-col items-center p-1.5 sm:p-2 rounded-2xl border transition-all cursor-pointer text-center relative group ${
                     isActive
-                      ? 'border-emerald-500 bg-emerald-500/10 shadow-md shadow-emerald-500/10 ring-1 ring-emerald-500/30'
-                      : 'theme-border bg-black/5 dark:bg-white/5'
+                      ? 'border-emerald-500 bg-emerald-500/15 shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-500/40 scale-[1.03]'
+                      : 'theme-border bg-black/5 dark:bg-white/5 opacity-75 hover:opacity-100 hover:border-neutral-600'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-[10px] font-bold text-emerald-500 flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-500'}`} />
-                      <span>0{idx + 1}</span>
-                    </span>
-                    {isPlay ? (
-                      <span className="text-[8px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/30 flex items-center gap-0.5">
-                        <FaGooglePlay size={8} />
-                        <span>{curDownloads}</span>
-                      </span>
-                    ) : (
-                      <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold border ${
-                        isActive ? 'bg-emerald-500 text-black border-emerald-500' : 'theme-border theme-text-muted'
-                      }`}>
-                        {isActive ? 'ACTIVE' : 'VIEW'}
-                      </span>
-                    )}
+                  {/* Active Indicator Dot */}
+                  {isActive && (
+                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse border-2 border-slate-900 z-10" />
+                  )}
+
+                  {/* Tiny Phone Frame */}
+                  <div
+                    className={`relative w-full aspect-[9/18.5] max-w-[66px] sm:max-w-[74px] rounded-[16px] p-1 bg-[#09090b] shadow-md border-[2px] transition-colors ${
+                      isActive ? 'border-emerald-500' : 'border-[#27272a]'
+                    }`}
+                  >
+                    <div className="w-full h-full rounded-[12px] overflow-hidden bg-white relative">
+                      <Image
+                        src={firstScreenshot}
+                        alt={app.name}
+                        fill
+                        sizes="74px"
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
-                  <h3 className="font-billboard text-base theme-text-main truncate">
-                    {app.name}
-                  </h3>
-                  <p className="text-[9px] font-mono theme-text-muted truncate">
-                    {app.category}
-                  </p>
+
+                  {/* App Mini Label */}
+                  <div className="mt-1.5 w-full">
+                    <p className="font-billboard text-[11px] sm:text-xs theme-text-main truncate leading-tight">
+                      {app.name}
+                    </p>
+                    <span className={`text-[8px] font-mono px-1 rounded uppercase font-bold inline-block mt-0.5 truncate max-w-full ${
+                      isActive ? 'text-emerald-400 bg-emerald-500/20' : 'theme-text-muted'
+                    }`}>
+                      {isPlay ? `${liveStat.downloads} Play` : 'Client MVP'}
+                    </span>
+                  </div>
                 </button>
               )
             })}
           </div>
 
-          {/* Mobile Phone Mockup View */}
-          <div className="flex flex-col items-center justify-center relative">
+          {/* Medium-Sized Active Phone Mockup View ("majhari size") */}
+          <div className="flex flex-col items-center justify-center relative pt-1">
             <div className="relative flex items-center justify-center w-full">
               
-              {/* Stacked Next App Peek */}
-              <div
-                onClick={() => setSelectedMobileApp(nextMobileApp)}
-                className="absolute top-3 right-0 xs:right-2 w-full max-w-[250px] rounded-[34px] p-2 shadow-2xl border-[3px] border-[#27272a]/60 bg-[#09090b] scale-[0.92] origin-right opacity-35 hover:opacity-75 transition-all cursor-pointer z-0 select-none group"
-                title={`Next: ${nextMobileApp.name}`}
-              >
-                <div className="w-full rounded-[26px] overflow-hidden bg-white aspect-[390/884] relative">
-                  <Image
-                    src={nextMobileApp.screenshots[0]}
-                    alt={nextMobileApp.name}
-                    fill
-                    sizes="200px"
-                    className="object-contain"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-2 text-center">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[8px] font-mono uppercase mb-1">
-                      Next App →
-                    </span>
-                    <span className="text-white font-bold text-xs font-billboard">
-                      {nextMobileApp.name}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
               {/* Prev Arrow */}
               <button
                 onClick={() => handlePrevScreenshot(selectedMobileApp.id)}
-                className="absolute -left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-xl flex items-center justify-center cursor-pointer z-40 hover:bg-emerald-500 hover:text-black transition-colors"
+                className="absolute left-2 xs:left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-xl flex items-center justify-center cursor-pointer z-40 hover:bg-emerald-500 hover:text-black transition-colors"
                 aria-label="Previous screen"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
 
-              {/* Mobile Phone Container */}
-              <div className="relative z-20 w-full max-w-[275px] rounded-[38px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b]">
-                <div className="w-full rounded-[30px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
+              {/* Medium Phone Container (Balanced "Majhari" Size) */}
+              <div className="relative z-20 w-full max-w-[205px] xs:max-w-[215px] sm:max-w-[230px] rounded-[34px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300">
+                <div className="w-full rounded-[26px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
                   {/* Status Bar (Omitted when app screenshots already contain status bar) */}
                   {!selectedMobileApp.hasOwnStatusBar && (
                     <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
@@ -700,19 +684,20 @@ export default function AppShowcase() {
                     </div>
                   )}
 
-                  {/* Screenshot Image */}
+                  {/* Screenshot Image with Lightbox Zoom */}
                   <div
                     className="relative w-full aspect-[390/884] bg-white cursor-zoom-in group select-none overflow-hidden"
                     onClick={() => {
                       const cur = screenshotIndices[selectedMobileApp.id] || 0
                       setZoomedImage(selectedMobileApp.screenshots[cur])
                     }}
+                    title="Tap to zoom"
                   >
                     <Image
                       src={selectedMobileApp.screenshots[screenshotIndices[selectedMobileApp.id] || 0]}
                       alt={`${selectedMobileApp.name} Screen`}
                       fill
-                      sizes="280px"
+                      sizes="230px"
                       className="object-contain"
                       priority
                     />
@@ -720,7 +705,7 @@ export default function AppShowcase() {
 
                   {/* Android Home Bar */}
                   <div className="w-full h-3 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
-                    <div className="w-16 h-0.5 rounded-full bg-stone-300" />
+                    <div className="w-14 h-0.5 rounded-full bg-stone-300" />
                   </div>
                 </div>
               </div>
@@ -728,15 +713,15 @@ export default function AppShowcase() {
               {/* Next Arrow */}
               <button
                 onClick={() => handleNextScreenshot(selectedMobileApp.id)}
-                className="absolute -right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-xl flex items-center justify-center cursor-pointer z-40 hover:bg-emerald-500 hover:text-black transition-colors"
+                className="absolute right-2 xs:right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-xl flex items-center justify-center cursor-pointer z-40 hover:bg-emerald-500 hover:text-black transition-colors"
                 aria-label="Next screen"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             </div>
 
             {/* Mobile Thumbnails */}
-            <div className="mt-4 flex flex-col items-center gap-2">
+            <div className="mt-3 flex flex-col items-center gap-1.5">
               <div className="flex items-center gap-1.5 p-1 rounded-xl border theme-border bg-black/40 backdrop-blur-md">
                 {selectedMobileApp.screenshots.map((img, idx) => {
                   const isCur = (screenshotIndices[selectedMobileApp.id] || 0) === idx
@@ -749,7 +734,7 @@ export default function AppShowcase() {
                           [selectedMobileApp.id]: idx,
                         }))
                       }
-                      className={`relative w-10 h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                      className={`relative w-9 h-13 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
                         isCur ? 'border-emerald-500 scale-105 shadow-md shadow-emerald-500/25' : 'border-white/10 opacity-50'
                       }`}
                     >
