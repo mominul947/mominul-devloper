@@ -49,3 +49,4 @@ export function isValidPackageName(pkg: string): boolean {
   if (!pkg || typeof pkg !== 'string' || pkg.length > 100) return false
   return /^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)+$/.test(pkg.trim())
 }
+

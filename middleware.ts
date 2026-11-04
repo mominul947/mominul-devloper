@@ -215,24 +215,7 @@ export function middleware(request: NextRequest) {
 }
 
 function applySecurityHeaders(res: NextResponse) {
-  // Comprehensive Content Security Policy (CSP)
-  res.headers.set(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https:",
-      "style-src 'self' 'unsafe-inline' https:",
-      "img-src 'self' data: blob: https:",
-      "font-src 'self' data: https:",
-      "connect-src 'self' https:",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "upgrade-insecure-requests",
-    ].join('; ')
-  )
-
-  // Hardened Anti-Clickjacking & Privacy Headers
+  // Hardened Anti-Clickjacking, MIME Sniffing & Privacy Headers
   res.headers.set('X-Frame-Options', 'DENY')
   res.headers.set('X-Content-Type-Options', 'nosniff')
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
