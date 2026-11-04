@@ -4,8 +4,8 @@
 
 export const paymentConfig = {
   // Mobile Banking Numbers (Personal)
-  bkashNumber: process.env.NEXT_PUBLIC_BKASH_NUMBER || '01303482412',
-  nagadNumber: process.env.NEXT_PUBLIC_NAGAD_NUMBER || '01963259247',
+  bkashNumber: process.env.NEXT_PUBLIC_BKASH_NUMBER || '01710718308',
+  nagadNumber: process.env.NEXT_PUBLIC_NAGAD_NUMBER || '01727852771',
 
   // Cellfin / Islami Bank Limited
   cellfinBankName: 'ISLAMI BANK BANGLADESH LIMITED',
