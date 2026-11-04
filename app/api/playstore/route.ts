@@ -2,24 +2,32 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// Cache in memory for 1 hour to prevent hitting Google Play excessively
-let cachedData: {
+interface AppPlayStats {
   downloads: string
   rating: string
   timestamp: number
-} | null = null
+}
+
+const cacheMap = new Map<string, AppPlayStats>()
+
+const APP_DEFAULTS: Record<string, { downloads: string; rating: string }> = {
+  'com.appuser.carbook': { downloads: '5K+', rating: '4.7' },
+  'com.appuser.repaimatepro': { downloads: 'Live', rating: '5.0' },
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const appId = searchParams.get('id') || 'com.appuser.carbook'
+  const defaults = APP_DEFAULTS[appId] || { downloads: 'Live', rating: '4.8' }
 
   const now = Date.now()
-  if (cachedData && now - cachedData.timestamp < 60 * 60 * 1000) {
+  const cached = cacheMap.get(appId)
+  if (cached && now - cached.timestamp < 60 * 60 * 1000) {
     return NextResponse.json({
       success: true,
       appId,
-      downloads: cachedData.downloads,
-      rating: cachedData.rating,
+      downloads: cached.downloads,
+      rating: cached.rating,
       cached: true,
     })
   }
@@ -41,8 +49,7 @@ export async function GET(request: Request) {
 
     const html = await res.text()
 
-    // 1. Extract Downloads (e.g. <div class="ClM7O">5K+</div><div class="g1rdde">Downloads</div>)
-    let downloads = '5K+'
+    let downloads = defaults.downloads
     const dlMatch =
       html.match(/<div class="ClM7O">([^<]+)<\/div><div class="g1rdde">Downloads<\/div>/i) ||
       html.match(/(\d+[\.,]?\d*[KMBkmb]?\+?)\s*Downloads/i) ||
@@ -52,10 +59,8 @@ export async function GET(request: Request) {
       downloads = dlMatch[1].trim()
     }
 
-    // 2. Extract Rating (Official Carbook rating is 4.7★)
-    let rating = '4.7'
+    let rating = defaults.rating
     const ratingMatch = html.match(/aria-label="Rated ([0-9\.]+) stars out of five/i)
-
     if (ratingMatch && ratingMatch[1]) {
       const parsed = parseFloat(ratingMatch[1])
       if (parsed >= 4.0 && parsed <= 5.0) {
@@ -63,16 +68,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // Always maintain verified 4.7 for Carbook
-    if (appId === 'com.appuser.carbook') {
-      rating = '4.7'
-    }
-
-    cachedData = {
-      downloads,
-      rating,
-      timestamp: now,
-    }
+    const result = { downloads, rating, timestamp: now }
+    cacheMap.set(appId, result)
 
     return NextResponse.json({
       success: true,
@@ -82,15 +79,13 @@ export async function GET(request: Request) {
       cached: false,
     })
   } catch (err: any) {
-    console.error('Play Store fetch error:', err)
-    // Fallback gracefully to verified stats
+    const fallback = cached || { ...defaults, timestamp: now }
     return NextResponse.json({
       success: true,
       appId,
-      downloads: cachedData ? cachedData.downloads : '5K+',
-      rating: cachedData ? cachedData.rating : '4.7',
+      downloads: fallback.downloads,
+      rating: fallback.rating,
       fallback: true,
     })
   }
 }
-

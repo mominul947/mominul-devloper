@@ -46,7 +46,7 @@ const apps: AppProject[] = [
     name: 'Carbook',
     tagline: 'On-Demand Car Rental, Intercity Ride & Vehicle Booking App',
     category: 'Car Rental & Travel',
-    deliverable: 'Google Play Store Production Release',
+    deliverable: 'Google Play Store Release',
     performance: '60fps Native Android UI',
     platform: 'Android (Google Play)',
     accent: '#10b981',
@@ -67,6 +67,35 @@ const apps: AppProject[] = [
       'Real-Time Driver & Vehicle GPS Geolocation on Interactive Map',
       'Automated Fare Engine for Hourly & Intercity Ride Booking',
       'Instant Digital Invoicing, Push Telemetry & Ride History Tracking',
+    ],
+    isPrivateBuild: false,
+  },
+  {
+    id: 'repairmate',
+    name: 'Repairmate Pro',
+    tagline: 'Smart Task Management, Workflow Organizer & Productivity Utility',
+    category: 'Productivity & Utility',
+    deliverable: 'Google Play Store Release',
+    performance: '60fps Native Android UI',
+    platform: 'Android (Google Play)',
+    accent: '#10b981',
+    playStoreUrl: 'https://play.google.com/store/apps/details?id=com.appuser.repaimatepro',
+    downloads: 'Live',
+    rating: '5.0',
+    description:
+      'Production-grade daily workflow and smart task organization app live on Google Play Store. Features structured task notes, item cart & favorites workflow system, intuitive clean interface, and secure cloud synchronization.',
+    techStack: ['Flutter', 'Android Native', 'Firebase Cloud', 'REST API', 'Node.js', 'State Management'],
+    screenshots: [
+      '/images/image4/1111.jpg',
+      '/images/image4/2222.jpg',
+      '/images/image4/3333.jpg',
+      '/images/image4/4444.jpg',
+    ],
+    features: [
+      'Live Production Release on Google Play Store (SwiftBox Tools)',
+      'Smart Task Management: Seamlessly organize notes, items & tasks',
+      'Favorites & Cart Workflow Engine with Instant State Sync',
+      'Clean 60fps Native Android UI with Secure Cloud Synchronization',
     ],
     isPrivateBuild: false,
   },
@@ -128,6 +157,7 @@ export default function AppShowcase() {
   // Independent screenshot indices for each project
   const [screenshotIndices, setScreenshotIndices] = useState<Record<string, number>>({
     carbook: 0,
+    repairmate: 0,
     servicego: 0,
     tournament: 0,
   })
@@ -138,24 +168,42 @@ export default function AppShowcase() {
   // Lightbox zoom modal
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
 
-  // Live Google Play stats for Carbook
-  const [carbookLive, setCarbookLive] = useState({
-    downloads: '5K+',
-    rating: '4.7',
+  // Live Google Play stats for apps
+  const [playStats, setPlayStats] = useState<Record<string, { downloads: string; rating: string }>>({
+    carbook: { downloads: '5K+', rating: '4.7' },
+    repairmate: { downloads: 'Live', rating: '5.0' },
   })
 
   const [isPaused, setIsPaused] = useState<boolean>(false)
 
-  // Fetch live stats
+  // Fetch live stats from Play Store API
   useEffect(() => {
     fetch('/api/playstore?id=com.appuser.carbook')
       .then((res) => res.json())
       .then((data) => {
         if (data && data.downloads) {
-          setCarbookLive({
-            downloads: data.downloads,
-            rating: data.rating || '4.7',
-          })
+          setPlayStats((prev) => ({
+            ...prev,
+            carbook: {
+              downloads: data.downloads,
+              rating: data.rating || '4.7',
+            },
+          }))
+        }
+      })
+      .catch(() => {})
+
+    fetch('/api/playstore?id=com.appuser.repaimatepro')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.downloads) {
+          setPlayStats((prev) => ({
+            ...prev,
+            repairmate: {
+              downloads: data.downloads,
+              rating: data.rating || '5.0',
+            },
+          }))
         }
       })
       .catch(() => {})
@@ -229,26 +277,27 @@ export default function AppShowcase() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono px-3 py-1 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-bold">
-              {language === 'bn' ? '৩টি লাইভ অ্যাপ • ৬০ এফপিএস অ্যান্ড্রয়েড' : '3 LIVE BUILDS • 60FPS NATIVE ANDROID'}
+              {language === 'bn' ? '৪টি প্রোডাকশন অ্যাপ • ২টি গুগল প্লে স্টোরে লাইভ' : '4 APPS • 2 LIVE ON GOOGLE PLAY'}
             </span>
           </div>
         </motion.div>
 
         {/* =========================================================================
-            DESKTOP PC VIEW (hidden on mobile, grid on lg: screens):
-            "jei koita project sei koita phone" -> 3 PROJECTS = 3 PHONES SIDE-BY-SIDE
+            DESKTOP PC VIEW:
+            4 PROJECTS = 4 DEDICATED PHONE SHOWCASES
            ========================================================================= */}
         <div
-          className="hidden lg:grid lg:grid-cols-3 gap-6 xl:gap-8 items-stretch"
+          className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-4 gap-5 xl:gap-6 items-stretch"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           {apps.map((app, idx) => {
-            const isCarbook = app.id === 'carbook'
+            const isPlayStore = Boolean(app.playStoreUrl)
+            const liveStat = playStats[app.id] || { downloads: app.downloads || 'Live', rating: app.rating || '5.0' }
+            const downloads = liveStat.downloads
+            const rating = liveStat.rating
             const currentIdx = screenshotIndices[app.id] || 0
             const activeScreenshot = app.screenshots[currentIdx] || app.screenshots[0]
-            const downloads = isCarbook ? carbookLive.downloads : app.downloads
-            const rating = isCarbook ? carbookLive.rating : app.rating
 
             return (
               <motion.div
@@ -256,8 +305,8 @@ export default function AppShowcase() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false, margin: '-30px' }}
-                transition={{ duration: 0.5, delay: idx * 0.12 }}
-                className="flex flex-col rounded-3xl p-5 xl:p-6 border theme-border hover:border-emerald-500/40 transition-all duration-300 shadow-xl relative overflow-hidden group"
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="flex flex-col rounded-3xl p-5 border theme-border hover:border-emerald-500/40 transition-all duration-300 shadow-xl relative overflow-hidden group"
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
                 {/* Accent ambient glow */}
@@ -273,7 +322,7 @@ export default function AppShowcase() {
                     <span>0{idx + 1} • {app.category}</span>
                   </span>
 
-                  {isCarbook ? (
+                  {isPlayStore ? (
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/40 flex items-center gap-1 shadow-sm">
                       <FaGooglePlay size={10} />
                       <span>{downloads} Live</span>
@@ -287,12 +336,12 @@ export default function AppShowcase() {
 
                 {/* App Name & Tagline */}
                 <div className="mb-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-billboard text-2xl xl:text-3xl theme-text-main leading-tight">
                       {app.name}
                     </h3>
-                    {isCarbook && (
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                    {isPlayStore && (
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
                         PLAY STORE
                       </span>
                     )}
@@ -306,7 +355,7 @@ export default function AppShowcase() {
                 <div className="grid grid-cols-2 gap-2 mb-4 p-2.5 rounded-2xl border theme-border bg-black/10 dark:bg-black/30">
                   <div className="text-center">
                     <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
-                      {isCarbook ? (
+                      {isPlayStore ? (
                         <>
                           <DownloadCloud size={11} className="text-emerald-400" />
                           <span>Downloads</span>
@@ -318,13 +367,13 @@ export default function AppShowcase() {
                         </>
                       )}
                     </p>
-                    <p className="text-xs font-bold theme-text-main mt-0.5">
-                      {isCarbook ? `${downloads} Live` : app.deliverable}
+                    <p className="text-xs font-bold theme-text-main mt-0.5 truncate px-1">
+                      {isPlayStore ? `${downloads} Live` : app.deliverable}
                     </p>
                   </div>
                   <div className="text-center border-l theme-border">
                     <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
-                      {isCarbook ? (
+                      {isPlayStore ? (
                         <>
                           <Star size={11} className="text-amber-400 fill-amber-400" />
                           <span>Rating</span>
@@ -337,24 +386,25 @@ export default function AppShowcase() {
                       )}
                     </p>
                     <p className="text-xs font-bold text-emerald-400 mt-0.5">
-                      {isCarbook ? `${rating} ★ / 5.0` : app.performance}
+                      {isPlayStore ? `${rating} ★ / 5.0` : app.performance}
                     </p>
                   </div>
                 </div>
 
                 {/* DEDICATED PHONE MOCKUP FOR THIS PROJECT */}
                 <div className="relative flex flex-col items-center justify-center my-2">
-                  <div className="relative w-full max-w-[270px] xl:max-w-[280px] rounded-[38px] p-2 sm:p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
+                  <div className="relative w-full max-w-[240px] xl:max-w-[260px] rounded-[36px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
                     
                     {/* Hardware Buttons */}
                     <div className="absolute -right-[4.5px] top-20 w-[2.5px] h-8 rounded-r bg-[#3f3f46]" />
-                    <div className="absolute -right-[4.5px] top-32 w-[2.5px] h-12 rounded-r bg-[#3f3f46]" />
+                    <div className="absolute -left-[4.5px] top-16 w-[2.5px] h-7 rounded-l bg-[#3f3f46]" />
+                    <div className="absolute -left-[4.5px] top-26 w-[2.5px] h-7 rounded-l bg-[#3f3f46]" />
 
-                    {/* Phone Inner Screen */}
-                    <div className="w-full rounded-[30px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
+                    {/* Phone Screen Container */}
+                    <div className="w-full rounded-[28px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
                       
                       {/* Android Status Bar */}
-                      <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5 border-b border-stone-100">
+                      <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
                         <span className="font-bold text-[9px]">9:41</span>
                         <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
                           <span className="w-1 h-1 rounded-full bg-[#18181b]" />
@@ -367,15 +417,15 @@ export default function AppShowcase() {
                         </div>
                       </div>
 
-                      {/* Screen Image Body with Interactive Arrows & Zoom */}
+                      {/* Main Screenshot Screen with Zoom Lightbox Click */}
                       <div
-                        className="relative w-full aspect-[390/860] bg-white cursor-zoom-in group/screen select-none overflow-hidden"
+                        className="relative w-full aspect-[390/884] bg-white cursor-zoom-in group/screen select-none overflow-hidden"
                         onClick={() => setZoomedImage(activeScreenshot)}
-                        title="Click to Zoom Screenshot"
+                        title="Click to Zoom Fullscreen"
                       >
                         <AnimatePresence mode="wait">
                           <motion.div
-                            key={app.id + '-' + currentIdx}
+                            key={activeScreenshot}
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 1.02 }}
@@ -386,9 +436,9 @@ export default function AppShowcase() {
                               src={activeScreenshot}
                               alt={`${app.name} Screen ${currentIdx + 1}`}
                               fill
-                              sizes="(max-width: 1280px) 270px, 290px"
+                              sizes="(max-width: 1280px) 250px, 270px"
                               className="object-contain"
-                              priority={idx === 0}
+                              priority={idx < 2}
                             />
                             <div className="absolute inset-0 bg-black/25 opacity-0 group-hover/screen:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                               <span className="px-2.5 py-1 rounded-full bg-black/85 backdrop-blur-md text-[10px] font-mono text-white flex items-center gap-1.5 border border-white/20 shadow-lg">
@@ -448,7 +498,7 @@ export default function AppShowcase() {
                               [app.id]: tIdx,
                             }))
                           }
-                          className={`relative w-8 xl:w-9 h-12 xl:h-13 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                          className={`relative w-8 xl:w-8.5 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
                             isCurrent
                               ? 'border-emerald-500 scale-105 shadow-md shadow-emerald-500/20 ring-1 ring-emerald-500/30'
                               : 'border-white/10 opacity-50 hover:opacity-90'
@@ -498,7 +548,7 @@ export default function AppShowcase() {
 
                 {/* Action CTA Buttons */}
                 <div className="space-y-2 mt-auto">
-                  {isCarbook && app.playStoreUrl ? (
+                  {isPlayStore && app.playStoreUrl ? (
                     <a
                       href={app.playStoreUrl}
                       target="_blank"
@@ -537,48 +587,52 @@ export default function AppShowcase() {
 
         {/* =========================================================================
             MOBILE VIEW (lg:hidden):
-            Keeps smooth single-phone view with clean tabs so mobile isn't cramped
+            Interactive tabs for all 4 apps
            ========================================================================= */}
         <div className="lg:hidden space-y-6">
           
-          {/* Mobile App Selector Cards (Carbook 1st) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {/* Mobile App Selector Cards (Carbook & Repairmate Pro at top) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {apps.map((app, idx) => {
               const isActive = selectedMobileApp.id === app.id
-              const isThisCarbook = app.id === 'carbook'
+              const isPlay = Boolean(app.playStoreUrl)
+              const curDownloads = playStats[app.id]?.downloads || app.downloads
               return (
                 <button
                   key={app.id}
                   onClick={() => {
                     setSelectedMobileApp(app)
                   }}
-                  className={`p-3.5 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                  className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
                     isActive
                       ? 'border-emerald-500 bg-emerald-500/10 shadow-md shadow-emerald-500/10 ring-1 ring-emerald-500/30'
                       : 'theme-border bg-black/5 dark:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-[11px] font-bold text-emerald-500 flex items-center gap-1.5">
+                    <span className="font-mono text-[10px] font-bold text-emerald-500 flex items-center gap-1">
                       <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-500'}`} />
-                      <span>0{idx + 1} • {app.category}</span>
+                      <span>0{idx + 1}</span>
                     </span>
-                    {isThisCarbook ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/30 flex items-center gap-1">
-                        <FaGooglePlay size={9} />
-                        <span>{carbookLive.downloads}</span>
+                    {isPlay ? (
+                      <span className="text-[8px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold bg-[#34A853]/20 text-[#34A853] border border-[#34A853]/30 flex items-center gap-0.5">
+                        <FaGooglePlay size={8} />
+                        <span>{curDownloads}</span>
                       </span>
                     ) : (
-                      <span className={`text-[9px] font-mono px-2 py-0.2 rounded-full uppercase font-bold border ${
+                      <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded-full uppercase font-bold border ${
                         isActive ? 'bg-emerald-500 text-black border-emerald-500' : 'theme-border theme-text-muted'
                       }`}>
                         {isActive ? 'ACTIVE' : 'VIEW'}
                       </span>
                     )}
                   </div>
-                  <h3 className="font-billboard text-lg theme-text-main">
+                  <h3 className="font-billboard text-base theme-text-main truncate">
                     {app.name}
                   </h3>
+                  <p className="text-[9px] font-mono theme-text-muted truncate">
+                    {app.category}
+                  </p>
                 </button>
               )
             })}
@@ -717,7 +771,7 @@ export default function AppShowcase() {
                   className="px-2.5 py-1 rounded-full text-xs font-mono font-bold border border-emerald-500/40 text-emerald-400 bg-emerald-500/15 flex items-center gap-1.5"
                 >
                   <FaGooglePlay size={11} />
-                  <span>{carbookLive.downloads} Live</span>
+                  <span>{playStats[selectedMobileApp.id]?.downloads || selectedMobileApp.downloads} Live</span>
                   <ExternalLink size={10} />
                 </a>
               ) : (
@@ -744,7 +798,7 @@ export default function AppShowcase() {
                   className="w-full py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md"
                 >
                   <FaGooglePlay size={14} />
-                  <span>Install on Google Play ({carbookLive.downloads})</span>
+                  <span>Install on Google Play ({playStats[selectedMobileApp.id]?.downloads || selectedMobileApp.downloads})</span>
                   <ExternalLink size={12} />
                 </a>
               )}
