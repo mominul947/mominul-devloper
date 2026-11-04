@@ -46,7 +46,7 @@ const apps: AppProject[] = [
     id: 'carbook',
     name: 'Carbook',
     tagline: 'On-Demand Car Rental, Intercity Ride & Vehicle Booking App',
-    category: 'Car Rental & Travel',
+    category: 'Car Rental',
     deliverable: 'Google Play Store Release',
     performance: '60fps Native Android UI',
     platform: 'Android (Google Play)',
@@ -76,7 +76,7 @@ const apps: AppProject[] = [
     id: 'repairmate',
     name: 'Repairmate Pro',
     tagline: 'Smart Task Management, Workflow Organizer & Productivity Utility',
-    category: 'Productivity & Utility',
+    category: 'Productivity',
     deliverable: 'Google Play Store Release',
     performance: '60fps Native Android UI',
     platform: 'Android (Google Play)',
@@ -106,7 +106,7 @@ const apps: AppProject[] = [
     id: 'servicego',
     name: 'ServiceGo',
     tagline: 'On-Demand Electrician, AC Repair & Plumber Booking App',
-    category: 'Home Services & Repairs',
+    category: 'Home Services',
     deliverable: 'Custom Client Mobile MVP',
     performance: '60fps Native Android UI',
     platform: 'Android & Web',
@@ -132,7 +132,7 @@ const apps: AppProject[] = [
     id: 'tournament',
     name: 'ArenaX Pro Tournament',
     tagline: 'Custom Esports Tournament & Live Match Bracket Engine',
-    category: 'Esports & Gaming',
+    category: 'Esports Gaming',
     deliverable: 'Custom Client Build',
     performance: 'Sub-50ms Real-Time Sync',
     platform: 'Android & Web',
@@ -319,8 +319,8 @@ export default function AppShowcase() {
                 />
 
                 {/* Top Badge & Number - Fixed height to ensure 100% horizontal alignment */}
-                <div className="flex items-center justify-between mb-3 h-6">
-                  <span className="font-mono text-xs font-bold text-emerald-400 flex items-center gap-1.5 truncate">
+                <div className="flex items-center justify-between mb-2.5 h-6">
+                  <span className="font-mono text-xs font-bold text-emerald-400 flex items-center gap-1.5 flex-shrink-0">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
                     <span>0{idx + 1} • {app.category}</span>
                   </span>
@@ -337,19 +337,14 @@ export default function AppShowcase() {
                   )}
                 </div>
 
-                {/* App Name & Tagline - Fixed height so 1-line or 2-line title never offsets the phones */}
-                <div className="mb-3 h-[74px] flex flex-col justify-start">
-                  <div className="flex items-center gap-2 min-h-[30px]">
-                    <h3 className="font-billboard text-2xl xl:text-3xl theme-text-main leading-tight truncate">
+                {/* App Name & Tagline - Fixed height so 1-line and multi-line titles fit without truncation and all phones align identically */}
+                <div className="mb-3 h-[78px] flex flex-col justify-start">
+                  <div className="min-h-[34px] flex items-center">
+                    <h3 className="font-billboard text-xl xl:text-2xl theme-text-main leading-tight tracking-wide">
                       {app.name}
                     </h3>
-                    {isPlayStore && (
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 flex-shrink-0">
-                        PLAY STORE
-                      </span>
-                    )}
                   </div>
-                  <p className="text-xs theme-text-muted mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-xs theme-text-muted mt-0.5 line-clamp-2 leading-relaxed">
                     {app.tagline}
                   </p>
                 </div>
