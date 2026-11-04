@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowUp, Mail, Phone, MapPin, CreditCard } from 'lucide-react'
@@ -42,6 +43,16 @@ const socials = [
 
 export default function Footer() {
   const { language, t } = useLanguage()
+  const [visitorCount, setVisitorCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/analytics/track')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.totalVisitors) setVisitorCount(d.totalVisitors)
+      })
+      .catch(() => {})
+  }, [])
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -156,9 +167,21 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
-          <p className="theme-text-muted">
-            © {new Date().getFullYear()} Md. Mominul Islam. {t.footer.copyright}
-          </p>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+            <p className="theme-text-muted">
+              © {new Date().getFullYear()} Md. Mominul Islam. {t.footer.copyright}
+            </p>
+            {visitorCount !== null && (
+              <Link
+                href="/dashboard"
+                className="px-2.5 py-0.5 rounded-full border theme-border text-[11px] font-mono theme-text-muted hover:theme-text-accent flex items-center gap-1.5 transition-colors"
+                title="View Real-Time Dashboard"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{language === 'bn' ? 'ভিজিটর:' : 'Visits:'} {visitorCount.toLocaleString()}</span>
+              </Link>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             {socials.map((soc) => {
