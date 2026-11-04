@@ -59,7 +59,7 @@ export default function About() {
             </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="grid md:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* Left: Framed Portrait Card (5 cols) */}
             <motion.div
@@ -67,10 +67,10 @@ export default function About() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="lg:col-span-5 relative"
+              className="md:col-span-5 relative"
             >
               <div
-                className="relative max-w-[300px] xs:max-w-[320px] sm:max-w-sm mx-auto lg:max-w-none aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl transition-all duration-300 group"
+                className="relative max-w-[300px] xs:max-w-[320px] sm:max-w-sm mx-auto md:max-w-none aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl transition-all duration-300 group"
                 style={{
                   border: '1.5px solid var(--portrait-border)',
                   backgroundColor: 'var(--bg-card)',
@@ -130,7 +130,7 @@ export default function About() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-              className="lg:col-span-7 space-y-6"
+              className="md:col-span-7 space-y-6"
             >
               <div className="space-y-3">
                 <span className="text-xs font-mono uppercase tracking-widest theme-text-accent font-bold flex items-center gap-1.5">

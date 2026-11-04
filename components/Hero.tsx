@@ -40,7 +40,7 @@ export default function Hero() {
   }
 
   return (
-    <section id="hero" className="relative min-h-0 sm:min-h-screen pt-20 sm:pt-28 pb-10 sm:pb-16 overflow-hidden theme-main-bg theme-text-main">
+    <section id="hero" className="relative min-h-0 pt-20 sm:pt-24 md:pt-28 pb-8 sm:pb-12 md:pb-14 overflow-hidden theme-main-bg theme-text-main">
       
       {/* Top Banner Subhead */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mb-6 sm:mb-8 flex items-center justify-between text-[11px] sm:text-xs font-mono tracking-widest uppercase border-b theme-border pb-3">
@@ -67,9 +67,9 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 relative">
         
         {/* Massive Background Billboard Typography ("PORTFOLIO") - Clearly Visible Behind Cutout */}
-        <div className="absolute top-[18%] sm:top-[24%] lg:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen text-center pointer-events-none select-none z-0 overflow-hidden">
+        <div className="absolute top-[18%] sm:top-[24%] md:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen text-center pointer-events-none select-none z-0 overflow-hidden">
           <h1
-            className="font-billboard text-[24vw] sm:text-[20vw] lg:text-[18.5vw] leading-none tracking-tight font-black whitespace-nowrap transition-colors duration-300"
+            className="font-billboard text-[24vw] sm:text-[20vw] md:text-[18.5vw] leading-none tracking-tight font-black whitespace-nowrap transition-colors duration-300"
             style={{
               color: 'var(--billboard-color)',
               opacity: 'var(--billboard-opacity)',
@@ -82,7 +82,7 @@ export default function Hero() {
         {/* ------------------------------------------------------------------ */}
         {/* MOBILE & TABLET LAYOUT (< lg): Left Text + Right Framed Image      */}
         {/* ------------------------------------------------------------------ */}
-        <div className="lg:hidden space-y-5 relative z-10">
+        <div className="md:hidden space-y-5 relative z-10">
           
           {/* Row 1: Split Header (Left: Name & Actions, Right: Transparent Card with Border) */}
           <div className="grid grid-cols-12 gap-3 items-center">
@@ -321,10 +321,10 @@ export default function Hero() {
         {/* ------------------------------------------------------------------ */}
         {/* DESKTOP LAYOUT (lg:): 3-Column Billboard Showcase                  */}
         {/* ------------------------------------------------------------------ */}
-        <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-center relative z-10">
+        <div className="hidden md:grid md:grid-cols-12 gap-4 lg:gap-8 items-center relative z-10">
           
           {/* Left Column (4 cols): Name, Bio, Location, Buttons & Socials */}
-          <div className="lg:col-span-4 text-left space-y-6">
+          <div className="md:col-span-4 text-left space-y-4 lg:space-y-6">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -335,7 +335,7 @@ export default function Hero() {
               <p className="font-serif-italic text-3xl theme-text-accent tracking-wide">
                 Hello, I&apos;m
               </p>
-              <h2 className="font-billboard text-7xl xl:text-8xl theme-text-main tracking-wide leading-[0.9]">
+              <h2 className="font-billboard text-5xl lg:text-7xl xl:text-8xl theme-text-main tracking-wide leading-[0.9]">
                 MOMINUL<br />
                 <span className="theme-text-accent">ISLAM</span>
               </h2>
@@ -372,7 +372,7 @@ export default function Hero() {
             >
               <button
                 onClick={() => scrollTo('apps')}
-                className="btn-theme-primary px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                className="btn-theme-primary px-4 lg:px-6 py-3 lg:py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg"
               >
                 <span>{t.hero.viewWork}</span>
                 <ArrowUpRight size={14} />
@@ -382,7 +382,7 @@ export default function Hero() {
                 href="https://www.fiverr.com/s/WebEmax"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-theme-secondary px-5 py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-xs"
+                className="btn-theme-secondary px-3.5 lg:px-5 py-3 lg:py-3.5 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-xs"
               >
                 <FiverrLogo size={22} />
                 <span>Hire on Fiverr</span>
@@ -423,13 +423,13 @@ export default function Hero() {
           </div>
 
           {/* Center Column (4 cols): Framed Portrait Card with Border & 100% Transparent Background */}
-          <div className="lg:col-span-4 flex flex-col items-center justify-center relative my-0 w-full">
+          <div className="md:col-span-4 flex flex-col items-center justify-center relative my-0 w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false, amount: 0.15 }}
               transition={{ duration: 0.7 }}
-              className="relative w-full max-w-[360px] aspect-[3/4] mx-auto flex items-end justify-center rounded-[28px] overflow-hidden shadow-2xl transition-all duration-300" id="hero-portrait-desktop"
+              className="relative w-full max-w-[280px] lg:max-w-[360px] aspect-[3/4] mx-auto flex items-end justify-center rounded-[28px] overflow-hidden shadow-2xl transition-all duration-300" id="hero-portrait-desktop"
               style={{
                 border: '1.5px solid var(--portrait-border)',
                 backgroundColor: 'transparent',
@@ -502,7 +502,7 @@ export default function Hero() {
           </div>
 
           {/* Right Column (4 cols): Key Stats & Statement */}
-          <div className="lg:col-span-4 text-right space-y-8 w-full">
+          <div className="md:col-span-4 text-right space-y-5 lg:space-y-8 w-full">
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -532,7 +532,7 @@ export default function Hero() {
                   key={idx}
                   className="border-b theme-border pb-4 last:border-b-0 text-right"
                 >
-                  <p className="font-billboard text-5xl xl:text-6xl theme-text-accent tracking-tight leading-none font-bold">
+                  <p className="font-billboard text-4xl lg:text-5xl xl:text-6xl theme-text-accent tracking-tight leading-none font-bold">
                     {stat.value}
                   </p>
                   <p className="text-xs font-mono uppercase tracking-widest theme-text-main mt-1 flex items-center justify-end gap-1.5">

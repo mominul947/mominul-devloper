@@ -90,7 +90,7 @@ export default function Navbar() {
           </button>
 
           {/* Center Navigation Links (Visible on large screens) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-mono tracking-wider uppercase flex-shrink-0">
+          <nav className="hidden md:flex items-center gap-1 xl:gap-2 text-xs font-mono tracking-wider uppercase flex-shrink-0">
             {navItems.map((item) => {
               const isActive = activeSection === item.href.slice(1)
               return (
@@ -141,7 +141,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Right Bar: Language Switcher, Pay Link & Hamburger */}
-          <div className="flex lg:hidden items-center gap-1.5 xs:gap-2 flex-shrink-0">
+          <div className="flex md:hidden items-center gap-1.5 xs:gap-2 flex-shrink-0">
             <Link
               href="/pay"
               className="sm:hidden px-2.5 py-1 rounded-full text-[11px] font-mono flex items-center gap-1 border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap"
@@ -176,7 +176,7 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 lg:hidden"
+              className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 md:hidden"
             />
 
             {/* Slide Down Drawer */}
@@ -185,7 +185,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -15, scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-x-3 sm:inset-x-4 top-18 z-50 p-5 rounded-3xl border lg:hidden shadow-2xl space-y-4 max-h-[calc(100vh-90px)] overflow-y-auto"
+              className="fixed inset-x-3 sm:inset-x-4 top-18 z-50 p-5 rounded-3xl border md:hidden shadow-2xl space-y-4 max-h-[calc(100vh-90px)] overflow-y-auto"
               style={{
                 backgroundColor: 'var(--bg-card)',
                 borderColor: 'var(--border-subtle)',
