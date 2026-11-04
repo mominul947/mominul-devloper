@@ -38,6 +38,7 @@ interface AppProject {
   playStoreUrl?: string
   downloads?: string
   rating?: string
+  hasOwnStatusBar?: boolean
 }
 
 const apps: AppProject[] = [
@@ -69,6 +70,7 @@ const apps: AppProject[] = [
       'Instant Digital Invoicing, Push Telemetry & Ride History Tracking',
     ],
     isPrivateBuild: false,
+    hasOwnStatusBar: true,
   },
   {
     id: 'repairmate',
@@ -98,6 +100,7 @@ const apps: AppProject[] = [
       'Clean 60fps Native Android UI with Secure Cloud Synchronization',
     ],
     isPrivateBuild: false,
+    hasOwnStatusBar: true,
   },
   {
     id: 'servicego',
@@ -403,19 +406,21 @@ export default function AppShowcase() {
                     {/* Phone Screen Container */}
                     <div className="w-full rounded-[28px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
                       
-                      {/* Android Status Bar */}
-                      <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
-                        <span className="font-bold text-[9px]">9:41</span>
-                        <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
-                          <span className="w-1 h-1 rounded-full bg-[#18181b]" />
-                        </div>
-                        <div className="flex items-center gap-1 text-stone-700">
-                          <span className="text-[8px] font-bold">5G</span>
-                          <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
-                            <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                      {/* Android Status Bar (Omitted when app screenshots already contain status bar) */}
+                      {!app.hasOwnStatusBar && (
+                        <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
+                          <span className="font-bold text-[9px]">9:41</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
+                            <span className="w-1 h-1 rounded-full bg-[#18181b]" />
+                          </div>
+                          <div className="flex items-center gap-1 text-stone-700">
+                            <span className="text-[8px] font-bold">5G</span>
+                            <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
+                              <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Main Screenshot Screen with Zoom Lightbox Click */}
                       <div
@@ -679,19 +684,21 @@ export default function AppShowcase() {
               {/* Mobile Phone Container */}
               <div className="relative z-20 w-full max-w-[275px] rounded-[38px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b]">
                 <div className="w-full rounded-[30px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
-                  {/* Status Bar */}
-                  <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
-                    <span className="font-bold text-[9px]">9:41</span>
-                    <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
-                      <span className="w-1 h-1 rounded-full bg-[#18181b]" />
-                    </div>
-                    <div className="flex items-center gap-1 text-stone-700">
-                      <span className="text-[8px] font-bold">5G</span>
-                      <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
-                        <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                  {/* Status Bar (Omitted when app screenshots already contain status bar) */}
+                  {!selectedMobileApp.hasOwnStatusBar && (
+                    <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
+                      <span className="font-bold text-[9px]">9:41</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
+                        <span className="w-1 h-1 rounded-full bg-[#18181b]" />
+                      </div>
+                      <div className="flex items-center gap-1 text-stone-700">
+                        <span className="text-[8px] font-bold">5G</span>
+                        <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
+                          <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Screenshot Image */}
                   <div
