@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowDown, MapPin, Sparkles, ArrowUpRight, Mail, Phone } from 'lucide-react'
 import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6'
@@ -29,7 +29,37 @@ export default function Hero() {
   const liveExp = useLiveExperience()
   const { t, language } = useLanguage()
 
+  const [visitorCount, setVisitorCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    let isNew = false
+    if (typeof window !== 'undefined') {
+      const recorded = sessionStorage.getItem('portfolio_visited')
+      if (!recorded) {
+        sessionStorage.setItem('portfolio_visited', 'true')
+        isNew = true
+      }
+    }
+
+    fetch('/api/visitor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isNew }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.count) setVisitorCount(d.count)
+      })
+      .catch(() => {})
+  }, [])
+
   const stats = [
+    {
+      value: visitorCount !== null ? `${visitorCount}` : '1',
+      label: language === 'bn' ? 'আসল ভিজিটর' : 'Real Visitors',
+      live: true,
+      isVisitor: true,
+    },
     { value: liveExp.yearsFormatted, label: t.hero.yearsExp, live: true },
     { value: '50+', label: t.hero.projectsCount, live: false },
     { value: '25+', label: t.hero.clientsCount, live: false },
@@ -53,12 +83,21 @@ export default function Hero() {
             {t.hero.roleBadge}
           </span>
         </div>
-        <div className="hidden sm:flex items-center gap-3 theme-text-muted">
-          <DhakaTime />
-          <span className="opacity-40">•</span>
-          <div className="flex items-center gap-1.5">
-            <Sparkles size={12} className="theme-text-accent" />
-            <span>{t.hero.availableBadge}</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Highlighted Real Visitor Pill */}
+          <div className="px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1.5 shadow-xs text-[10px] sm:text-[11px] font-mono tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+            <span>{visitorCount ?? 1} {language === 'bn' ? 'আসল ভিজিটর' : 'REAL VISITORS'}</span>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-3 theme-text-muted">
+            <span className="opacity-40">•</span>
+            <DhakaTime />
+            <span className="opacity-40">•</span>
+            <div className="flex items-center gap-1.5">
+              <Sparkles size={12} className="theme-text-accent" />
+              <span>{t.hero.availableBadge}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -199,12 +238,16 @@ export default function Hero() {
           </p>
 
           {/* Row 3: Stats Row (3 Columns Side-by-Side) */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
+          <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 pt-1">
             {stats.map((stat, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-xl border theme-border text-center flex flex-col justify-center"
-                style={{ backgroundColor: 'var(--bg-card)' }}
+                className={`p-2.5 rounded-xl border text-center flex flex-col justify-center transition-all ${
+                  stat.isVisitor
+                    ? 'border-emerald-500/50 bg-emerald-500/10 shadow-xs'
+                    : 'theme-border'
+                }`}
+                style={{ backgroundColor: stat.isVisitor ? undefined : 'var(--bg-card)' }}
               >
                 <p className="font-billboard text-2xl xs:text-3xl theme-text-accent tracking-tight leading-none font-bold">
                   {stat.value}
@@ -215,9 +258,14 @@ export default function Hero() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
                   )}
                 </p>
-                {stat.live && (
+                {stat.live && !stat.isVisitor && (
                   <p className="text-[9px] font-mono text-emerald-500 font-bold tracking-tight mt-0.5">
                     {liveExp.days}d {liveExp.timeFormatted}
+                  </p>
+                )}
+                {stat.isVisitor && (
+                  <p className="text-[8px] font-mono text-emerald-400 font-bold tracking-tight mt-0.5">
+                    ● 100% REAL
                   </p>
                 )}
               </div>
@@ -530,7 +578,9 @@ export default function Hero() {
               {stats.map((stat, idx) => (
                 <div
                   key={idx}
-                  className="border-b theme-border pb-4 last:border-b-0 text-right"
+                  className={`border-b theme-border pb-3.5 last:border-b-0 text-right transition-all ${
+                    stat.isVisitor ? 'p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 shadow-xs' : ''
+                  }`}
                 >
                   <p className="font-billboard text-4xl lg:text-5xl xl:text-6xl theme-text-accent tracking-tight leading-none font-bold">
                     {stat.value}
@@ -541,9 +591,14 @@ export default function Hero() {
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" title="Auto-updating live experience" />
                     )}
                   </p>
-                  {stat.live && (
+                  {stat.live && !stat.isVisitor && (
                     <p className="text-xs font-mono text-emerald-500 font-bold tracking-wider mt-1">
                       {liveExp.days} Days • {liveExp.timeFormatted}
+                    </p>
+                  )}
+                  {stat.isVisitor && (
+                    <p className="text-[10px] font-mono text-emerald-400 font-bold tracking-wider mt-1">
+                      ● 100% REAL LIVE COUNT
                     </p>
                   )}
                 </div>
