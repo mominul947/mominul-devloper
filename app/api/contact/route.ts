@@ -13,8 +13,8 @@ export async function POST(request: Request) {
     }
 
     const recipientEmail = process.env.NOTIFICATION_EMAIL || 'mominulwebwork@gmail.com'
-    const gmailUser = process.env.GMAIL_USER || recipientEmail
-    const gmailPass = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '')
+    const gmailUser = process.env.GMAIL_USER || 'mominulwebwork@gmail.com'
+    const gmailPass = (process.env.GMAIL_APP_PASSWORD || 'jqopjchfoyoqmror').replace(/\s+/g, '')
     const resendApiKey = process.env.RESEND_API_KEY
 
     let emailDelivered = false
@@ -24,7 +24,9 @@ export async function POST(request: Request) {
     if (gmailPass) {
       try {
         const transporter = nodemailer.createTransport({
-          service: 'gmail',
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
           auth: {
             user: gmailUser,
             pass: gmailPass,

@@ -30,8 +30,8 @@ export async function POST(request: Request) {
     const currentMethod = paymentMethod || 'bKash Personal'
     const methodPrefix = currentMethod.split(' ')[0].toUpperCase()
     const recipientEmail = process.env.NOTIFICATION_EMAIL || 'mominulwebwork@gmail.com'
-    const gmailUser = process.env.GMAIL_USER || recipientEmail
-    const gmailPass = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '')
+    const gmailUser = process.env.GMAIL_USER || 'mominulwebwork@gmail.com'
+    const gmailPass = (process.env.GMAIL_APP_PASSWORD || 'jqopjchfoyoqmror').replace(/\s+/g, '')
     const receiptId = `${methodPrefix}-${Date.now().toString().slice(-6)}`
 
     // 1. Save payment record locally
@@ -62,7 +62,9 @@ export async function POST(request: Request) {
     if (gmailPass) {
       try {
         const transporter = nodemailer.createTransport({
-          service: 'gmail',
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
           auth: {
             user: gmailUser,
             pass: gmailPass,
