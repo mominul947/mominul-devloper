@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isValidPackageName } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,14 @@ const APP_DEFAULTS: Record<string, { downloads: string; rating: string }> = {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const appId = searchParams.get('id') || 'com.appuser.carbook'
+  const rawAppId = searchParams.get('id') || 'com.appuser.carbook'
+
+  // Security check: Validate package name format to prevent SSRF and parameter pollution
+  if (!isValidPackageName(rawAppId)) {
+    return NextResponse.json({ error: 'Invalid application ID.' }, { status: 400 })
+  }
+
+  const appId = rawAppId.trim()
   const defaults = APP_DEFAULTS[appId] || { downloads: 'Live', rating: '4.8' }
 
   const now = Date.now()
@@ -34,7 +42,11 @@ export async function GET(request: Request) {
 
   try {
     const playUrl = `https://play.google.com/store/apps/details?id=${encodeURIComponent(appId)}&hl=en`
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 4000)
+
     const res = await fetch(playUrl, {
+      signal: controller.signal,
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -42,9 +54,10 @@ export async function GET(request: Request) {
       },
       next: { revalidate: 3600 },
     })
+    clearTimeout(timeoutId)
 
     if (!res.ok) {
-      throw new Error(`Google Play returned status ${res.status}`)
+      throw new Error(`Google Play status ${res.status}`)
     }
 
     const html = await res.text()
@@ -56,14 +69,14 @@ export async function GET(request: Request) {
       html.match(/"(\d+[\+KMBkmb]?)\s*downloads"/i)
 
     if (dlMatch && dlMatch[1]) {
-      downloads = dlMatch[1].trim()
+      downloads = dlMatch[1].trim().slice(0, 20)
     }
 
     let rating = defaults.rating
     const ratingMatch = html.match(/aria-label="Rated ([0-9\.]+) stars out of five/i)
     if (ratingMatch && ratingMatch[1]) {
       const parsed = parseFloat(ratingMatch[1])
-      if (parsed >= 4.0 && parsed <= 5.0) {
+      if (parsed >= 1.0 && parsed <= 5.0) {
         rating = ratingMatch[1].trim()
       }
     }

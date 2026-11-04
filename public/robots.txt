@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /api/
+Disallow: /_next/
+Allow: /
+Allow: /pay
+
+Sitemap: https://mominul-devloper-bd.vercel.app/sitemap.xml
