@@ -242,12 +242,8 @@ export default function Hero() {
             {stats.map((stat, idx) => (
               <div
                 key={idx}
-                className={`p-2.5 rounded-xl border text-center flex flex-col justify-center transition-all ${
-                  stat.isVisitor
-                    ? 'border-emerald-500/50 bg-emerald-500/10 shadow-xs'
-                    : 'theme-border'
-                }`}
-                style={{ backgroundColor: stat.isVisitor ? undefined : 'var(--bg-card)' }}
+                className="p-2.5 rounded-xl border theme-border text-center flex flex-col justify-center transition-all"
+                style={{ backgroundColor: 'var(--bg-card)' }}
               >
                 <p className="font-billboard text-2xl xs:text-3xl theme-text-accent tracking-tight leading-none font-bold">
                   {stat.value}
@@ -261,11 +257,6 @@ export default function Hero() {
                 {stat.live && !stat.isVisitor && (
                   <p className="text-[9px] font-mono text-emerald-500 font-bold tracking-tight mt-0.5">
                     {liveExp.days}d {liveExp.timeFormatted}
-                  </p>
-                )}
-                {stat.isVisitor && (
-                  <p className="text-[8px] font-mono text-emerald-400 font-bold tracking-tight mt-0.5">
-                    ● 100% REAL
                   </p>
                 )}
               </div>
@@ -578,9 +569,7 @@ export default function Hero() {
               {stats.map((stat, idx) => (
                 <div
                   key={idx}
-                  className={`border-b theme-border pb-3.5 last:border-b-0 text-right transition-all ${
-                    stat.isVisitor ? 'p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 shadow-xs' : ''
-                  }`}
+                  className="border-b theme-border pb-3.5 last:border-b-0 text-right transition-all"
                 >
                   <p className="font-billboard text-4xl lg:text-5xl xl:text-6xl theme-text-accent tracking-tight leading-none font-bold">
                     {stat.value}
@@ -594,11 +583,6 @@ export default function Hero() {
                   {stat.live && !stat.isVisitor && (
                     <p className="text-xs font-mono text-emerald-500 font-bold tracking-wider mt-1">
                       {liveExp.days} Days • {liveExp.timeFormatted}
-                    </p>
-                  )}
-                  {stat.isVisitor && (
-                    <p className="text-[10px] font-mono text-emerald-400 font-bold tracking-wider mt-1">
-                      ● 100% REAL LIVE COUNT
                     </p>
                   )}
                 </div>
