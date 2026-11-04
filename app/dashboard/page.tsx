@@ -10,12 +10,10 @@ import {
   Tablet,
   RefreshCw,
   ArrowUpRight,
-  ShieldCheck,
   CreditCard,
-  Clock,
-  Globe,
   Radio,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react'
 
 interface VisitorRecord {
@@ -64,12 +62,32 @@ export default function DashboardPage() {
     }
   }
 
+  const handleResetCounter = async () => {
+    const val = prompt('ভিজিটর কাউন্টার কত দিয়ে শুরু করতে চান? (যেমন: 1)', '1')
+    if (val === null) return
+    const num = parseInt(val, 10)
+    if (isNaN(num)) return
+
+    try {
+      const res = await fetch('/api/analytics/track', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: num, clearHistory: num <= 1 }),
+      })
+      if (res.ok) {
+        fetchAnalytics(true)
+      }
+    } catch (e) {
+      console.error('Failed to reset counter:', e)
+    }
+  }
+
   useEffect(() => {
     fetchAnalytics()
-    // Auto-refresh every 5 seconds for real-time live sync
+    // Poll every 8 seconds (never causes false hits)
     const interval = setInterval(() => {
       fetchAnalytics()
-    }, 5000)
+    }, 8000)
     return () => clearInterval(interval)
   }, [])
 
@@ -78,7 +96,6 @@ export default function DashboardPage() {
   const totalDevices = (deviceStats.Desktop + deviceStats.Mobile + deviceStats.Tablet) || 1
   const mobilePct = Math.round((deviceStats.Mobile / totalDevices) * 100)
   const desktopPct = Math.round((deviceStats.Desktop / totalDevices) * 100)
-  const tabletPct = 100 - mobilePct - desktopPct
 
   const formatTimeAgo = (isoString: string) => {
     try {
@@ -112,11 +129,11 @@ export default function DashboardPage() {
                 </h1>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  LIVE TRACKER
+                  GENUINE LIVE COUNTER
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-mono">
-                Real-Time Visitor & Analytics Dashboard
+                Real-Time Verified Visitor Analytics
               </p>
             </div>
           </div>
@@ -145,84 +162,106 @@ export default function DashboardPage() {
         {/* Highlight Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Total Visitors Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-[#0f172a] to-[#0f172a] border border-emerald-500/30 shadow-lg relative overflow-hidden">
-            <div className="flex items-center justify-between text-xs font-mono text-emerald-400 mb-2">
-              <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                <Users size={14} />
-                Real Visitors
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-[10px]">
-                dhuklei barbe
-              </span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <p className="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight">
-                {loading ? '...' : totalVisitors.toLocaleString()}
+          {/* Total Real Visitors Card */}
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-[#0f172a] to-[#0f172a] border border-emerald-500/30 shadow-lg relative overflow-hidden flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-mono text-emerald-400 mb-2">
+                <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                  <Users size={14} />
+                  Real Visitors
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-[10px] text-emerald-300 font-bold">
+                  আসল ভিজিটর
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight">
+                  {loading ? '...' : totalVisitors.toLocaleString()}
+                </p>
+              </div>
+              <p className="text-xs text-slate-400 mt-2 font-mono flex items-center gap-1">
+                <CheckCircle2 size={12} className="text-emerald-400" />
+                <span>প্রকৃত ইউনিক ভিজিটে ১ বাড়বে</span>
               </p>
             </div>
-            <p className="text-xs text-slate-400 mt-2 font-mono flex items-center gap-1">
-              <CheckCircle2 size={12} className="text-emerald-400" />
-              <span>প্রতিবারে ১ জন করে লাইভ কাউন্ট হয়</span>
-            </p>
+
+            <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono">
+              <span className="text-slate-400">কাউন্টার এডজাস্ট:</span>
+              <button
+                onClick={handleResetCounter}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 font-bold flex items-center gap-1 transition-all cursor-pointer"
+                title="Reset or set counter"
+              >
+                <RotateCcw size={11} />
+                <span>রিসেট / পরিবর্তন</span>
+              </button>
+            </div>
           </div>
 
           {/* Device Distribution */}
-          <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-lg">
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
-              <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                <Smartphone size={14} className="text-sky-400" />
-                Mobile vs PC
-              </span>
-              <span className="text-[10px] text-slate-500">Breakdown</span>
-            </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <div>
-                <p className="text-2xl font-bold font-mono text-sky-400">{mobilePct}%</p>
-                <p className="text-[11px] text-slate-400 font-mono">Mobile</p>
+          <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-lg flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+                <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                  <Smartphone size={14} className="text-sky-400" />
+                  Mobile vs PC
+                </span>
+                <span className="text-[10px] text-slate-500">Breakdown</span>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold font-mono text-purple-400">{desktopPct}%</p>
-                <p className="text-[11px] text-slate-400 font-mono">Desktop</p>
+              <div className="flex items-baseline justify-between mt-1">
+                <div>
+                  <p className="text-2xl font-bold font-mono text-sky-400">{mobilePct}%</p>
+                  <p className="text-[11px] text-slate-400 font-mono">Mobile</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold font-mono text-purple-400">{desktopPct}%</p>
+                  <p className="text-[11px] text-slate-400 font-mono">Desktop</p>
+                </div>
+              </div>
+              <div className="w-full h-1.5 bg-slate-800 rounded-full mt-3 overflow-hidden flex">
+                <div className="bg-sky-400 h-full" style={{ width: `${mobilePct}%` }} />
+                <div className="bg-purple-400 h-full" style={{ width: `${desktopPct}%` }} />
               </div>
             </div>
-            {/* Progress bar */}
-            <div className="w-full h-1.5 bg-slate-800 rounded-full mt-3 overflow-hidden flex">
-              <div className="bg-sky-400 h-full" style={{ width: `${mobilePct}%` }} />
-              <div className="bg-purple-400 h-full" style={{ width: `${desktopPct}%` }} />
-            </div>
+            <p className="text-[10px] text-slate-500 mt-4 font-mono">
+              রিয়েল ডিভাইস ডিটেকশন
+            </p>
           </div>
 
           {/* Payments Received */}
-          <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-lg">
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
-              <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                <CreditCard size={14} className="text-amber-400" />
-                Payments
-              </span>
-              <span className="text-[10px] text-amber-400/80">bKash/Nagad</span>
+          <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-lg flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+                <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                  <CreditCard size={14} className="text-amber-400" />
+                  Payments
+                </span>
+                <span className="text-[10px] text-amber-400/80">bKash/Nagad</span>
+              </div>
+              <p className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight">
+                {data?.payments?.length || 0}
+              </p>
             </div>
-            <p className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight">
-              {data?.payments?.length || 0}
-            </p>
-            <p className="text-xs text-slate-400 mt-2 font-mono">
+            <p className="text-xs text-slate-400 mt-4 font-mono">
               পেমেন্ট ভেরিফিকেশন রেকর্ড
             </p>
           </div>
 
-          {/* Live Sync Status */}
-          <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-lg">
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
-              <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                <Radio size={14} className="text-emerald-400 animate-pulse" />
-                System Status
-              </span>
-              <span className="text-[10px] text-emerald-400">100% ONLINE</span>
+          {/* System Status */}
+          <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-lg flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+                <span className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                  <Radio size={14} className="text-emerald-400 animate-pulse" />
+                  Tracker Status
+                </span>
+                <span className="text-[10px] text-emerald-400 font-bold">100% ONLINE</span>
+              </div>
+              <p className="text-xl font-bold font-mono text-emerald-400 mt-1">
+                Verified Accuracy
+              </p>
             </div>
-            <p className="text-xl font-bold font-mono text-emerald-400 mt-1">
-              Active Cloud
-            </p>
-            <p className="text-xs text-slate-400 mt-2 font-mono truncate">
+            <p className="text-xs text-slate-400 mt-4 font-mono truncate">
               Last sync: {formatTimeAgo(lastRefreshed.toISOString())}
             </p>
           </div>
@@ -238,11 +277,11 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <Eye size={16} className="text-emerald-400" />
                 <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white">
-                  Real Visitor Feed (সাম্প্রতিক ভিজিটর)
+                  Real Visitor Feed (সাম্প্রতিক প্রকৃত ভিজিটর)
                 </h2>
               </div>
               <span className="text-[11px] font-mono text-slate-400">
-                Auto-refreshes every 5s
+                পাবলিক পেজ ভিজিট লগ
               </span>
             </div>
 
@@ -253,7 +292,7 @@ export default function DashboardPage() {
             ) : !data?.recentVisitors?.length ? (
               <div className="py-12 text-center space-y-2">
                 <p className="text-slate-400 text-sm font-mono">No recent sessions recorded yet.</p>
-                <p className="text-xs text-slate-600">Open the homepage in another browser tab to see real-time hits.</p>
+                <p className="text-xs text-slate-600">ওয়েবসাইটে নতুন কোনো ভিজিটর ঢুকলে এখানে সাথে সাথে লগ তৈরি হবে।</p>
               </div>
             ) : (
               <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">

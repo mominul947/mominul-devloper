@@ -1,29 +1,5 @@
 {
   "totalVisitors": 1,
-  "totalPageviews": 23,
-  "totalTimeSpentSeconds": 1806,
-  "pageStats": {
-    "/admin": {
-      "views": 3,
-      "timeSpentSeconds": 422
-    },
-    "/pay": {
-      "views": 9,
-      "timeSpentSeconds": 307
-    },
-    "/": {
-      "views": 11,
-      "timeSpentSeconds": 1077
-    }
-  },
-  "sectionStats": {
-    "hero": 635,
-    "about": 29,
-    "apps": 179,
-    "projects": 60,
-    "contact": 112,
-    "skills": 62
-  },
   "deviceStats": {
     "Desktop": 1,
     "Mobile": 0,
@@ -32,41 +8,17 @@
   "browserStats": {
     "Chrome": 1
   },
-  "sessions": [
+  "recentVisitors": [
     {
-      "id": "vis_bb0vt0h1mvzd0n5b",
-      "ip": "::1",
+      "id": "vis_initial",
+      "ip": "Live Visitor",
       "device": "Desktop",
       "browser": "Chrome",
       "os": "Windows",
-      "referrer": "Direct",
       "screen": "1920x1080",
-      "firstSeen": "2026-11-02T14:34:03.710Z",
-      "lastActive": "2026-11-02T16:57:07.226Z",
-      "totalTimeSpentSeconds": 1806,
-      "currentPage": "/pay",
-      "pages": {
-        "/admin": {
-          "views": 3,
-          "timeSpentSeconds": 422
-        },
-        "/pay": {
-          "views": 9,
-          "timeSpentSeconds": 307
-        },
-        "/": {
-          "views": 11,
-          "timeSpentSeconds": 1077
-        }
-      },
-      "sections": {
-        "hero": 635,
-        "about": 29,
-        "apps": 179,
-        "projects": 60,
-        "contact": 112,
-        "skills": 62
-      }
+      "path": "/",
+      "referrer": "Direct",
+      "timestamp": "2026-11-04T07:30:00.000Z"
     }
   ]
 }

@@ -21,28 +21,10 @@ interface AnalyticsData {
 }
 
 const defaultAnalytics: AnalyticsData = {
-  totalVisitors: 0,
-  deviceStats: { Desktop: 0, Mobile: 0, Tablet: 0 },
-  browserStats: {},
+  totalVisitors: 1,
+  deviceStats: { Desktop: 1, Mobile: 0, Tablet: 0 },
+  browserStats: { Chrome: 1 },
   recentVisitors: [],
-}
-
-async function fetchCloudHitCount(increment = false): Promise<number | null> {
-  try {
-    const url = `https://hits.sh/mominul-devloper-bd.vercel.app.svg?t=${Date.now()}`
-    const res = await fetch(url, {
-      cache: 'no-store',
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-    })
-    const text = await res.text()
-    const match = text.match(/hits:\s*(\d+)/i)
-    if (match) {
-      return parseInt(match[1], 10)
-    }
-    return null
-  } catch (e) {
-    return null
-  }
 }
 
 function parseUserAgent(ua: string): { device: 'Desktop' | 'Mobile' | 'Tablet'; browser: string; os: string } {
@@ -73,7 +55,13 @@ export async function POST(request: Request) {
       pathname = '/',
       referrer = 'Direct',
       screen = '1920x1080',
+      isNewVisitor = false,
     } = body
+
+    // NEVER track dashboard or admin paths
+    if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+      return NextResponse.json({ success: true, ignored: true })
+    }
 
     const ua = request.headers.get('user-agent') || ''
     const { device, browser, os } = parseUserAgent(ua)
@@ -85,45 +73,38 @@ export async function POST(request: Request) {
       '127.0.0.1'
     const clientIp = rawIp.split(',')[0].trim()
 
-    // 1. Increment persistent cloud counter (hits.sh)
-    const cloudHits = await fetchCloudHitCount(true)
-
-    // 2. Read local fallback storage
     const analytics = readJsonFileSafe<AnalyticsData>('analytics.json', defaultAnalytics)
 
-    if (cloudHits !== null && cloudHits > analytics.totalVisitors) {
-      analytics.totalVisitors = cloudHits
-    } else {
+    // ONLY increment if it's a real new visitor/session
+    if (isNewVisitor) {
       analytics.totalVisitors = (analytics.totalVisitors || 0) + 1
+
+      analytics.deviceStats = analytics.deviceStats || { Desktop: 0, Mobile: 0, Tablet: 0 }
+      analytics.deviceStats[device] = (analytics.deviceStats[device] || 0) + 1
+
+      analytics.browserStats = analytics.browserStats || {}
+      analytics.browserStats[browser] = (analytics.browserStats[browser] || 0) + 1
+
+      const newVisitor: VisitorRecord = {
+        id: sessionId,
+        ip: clientIp,
+        device,
+        browser,
+        os,
+        screen,
+        path: pathname,
+        referrer,
+        timestamp: new Date().toISOString(),
+      }
+
+      analytics.recentVisitors = analytics.recentVisitors || []
+      analytics.recentVisitors.unshift(newVisitor)
+      if (analytics.recentVisitors.length > 50) {
+        analytics.recentVisitors.length = 50
+      }
+
+      writeJsonFileSafe('analytics.json', analytics)
     }
-
-    // 3. Update device and browser stats
-    analytics.deviceStats = analytics.deviceStats || { Desktop: 0, Mobile: 0, Tablet: 0 }
-    analytics.deviceStats[device] = (analytics.deviceStats[device] || 0) + 1
-
-    analytics.browserStats = analytics.browserStats || {}
-    analytics.browserStats[browser] = (analytics.browserStats[browser] || 0) + 1
-
-    // 4. Record new visitor entry
-    const newVisitor: VisitorRecord = {
-      id: sessionId,
-      ip: clientIp,
-      device,
-      browser,
-      os,
-      screen,
-      path: pathname,
-      referrer,
-      timestamp: new Date().toISOString(),
-    }
-
-    analytics.recentVisitors = analytics.recentVisitors || []
-    analytics.recentVisitors.unshift(newVisitor)
-    if (analytics.recentVisitors.length > 100) {
-      analytics.recentVisitors.length = 100
-    }
-
-    writeJsonFileSafe('analytics.json', analytics)
 
     return NextResponse.json({
       success: true,
@@ -137,23 +118,14 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    // Read local cache
     const analytics = readJsonFileSafe<AnalyticsData>('analytics.json', defaultAnalytics)
-    
-    // Always check cloud counter for 100% sync
-    const cloudHits = await fetchCloudHitCount(false)
-    if (cloudHits !== null && cloudHits > analytics.totalVisitors) {
-      analytics.totalVisitors = cloudHits
-    }
-
-    // Read stored payments
     const payments = readJsonFileSafe<any[]>('payments.json', [])
 
     return NextResponse.json({
       success: true,
       totalVisitors: analytics.totalVisitors || 1,
-      deviceStats: analytics.deviceStats || { Desktop: 0, Mobile: 0, Tablet: 0 },
-      browserStats: analytics.browserStats || {},
+      deviceStats: analytics.deviceStats || { Desktop: 1, Mobile: 0, Tablet: 0 },
+      browserStats: analytics.browserStats || { Chrome: 1 },
       recentVisitors: analytics.recentVisitors || [],
       payments: payments || [],
       lastUpdated: new Date().toISOString(),
@@ -161,5 +133,30 @@ export async function GET() {
   } catch (err: any) {
     console.error('Analytics GET error:', err)
     return NextResponse.json({ error: 'Failed to retrieve analytics' }, { status: 500 })
+  }
+}
+
+// Allow Mominul to reset or adjust counter directly from dashboard
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}))
+    const { count = 1, clearHistory = false } = body
+
+    const analytics = readJsonFileSafe<AnalyticsData>('analytics.json', defaultAnalytics)
+    analytics.totalVisitors = Math.max(0, parseInt(count, 10) || 0)
+
+    if (clearHistory) {
+      analytics.recentVisitors = []
+      analytics.deviceStats = { Desktop: 0, Mobile: 0, Tablet: 0 }
+    }
+
+    writeJsonFileSafe('analytics.json', analytics)
+
+    return NextResponse.json({
+      success: true,
+      totalVisitors: analytics.totalVisitors,
+    })
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Failed to update counter' }, { status: 500 })
   }
 }
