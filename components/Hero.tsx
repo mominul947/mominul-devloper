@@ -33,7 +33,17 @@ export default function Hero() {
 
   useEffect(() => {
     let isNew = false
+    let currentFloor = 1
     if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('portfolio_cached_visitors')
+      if (saved) {
+        const parsed = parseInt(saved, 10)
+        if (!isNaN(parsed) && parsed > 0) {
+          currentFloor = parsed
+          setVisitorCount(parsed)
+        }
+      }
+
       const recorded = sessionStorage.getItem('portfolio_visited')
       if (!recorded) {
         sessionStorage.setItem('portfolio_visited', 'true')
@@ -48,7 +58,13 @@ export default function Hero() {
     })
       .then((r) => r.json())
       .then((d) => {
-        if (d?.count) setVisitorCount(d.count)
+        if (d?.count) {
+          const highest = Math.max(currentFloor, d.count)
+          setVisitorCount(highest)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('portfolio_cached_visitors', String(highest))
+          }
+        }
       })
       .catch(() => {})
   }, [])
