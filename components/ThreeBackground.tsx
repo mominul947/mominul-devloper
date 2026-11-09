@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
@@ -136,12 +136,30 @@ function InteractiveScene() {
 }
 
 export default function ThreeBackground() {
+  const [webglOk, setWebglOk] = useState(true)
+
+  useEffect(() => {
+    try {
+      const c = document.createElement('canvas')
+      const gl = c.getContext('webgl') || c.getContext('experimental-webgl')
+      if (!gl) setWebglOk(false)
+    } catch {
+      setWebglOk(false)
+    }
+  }, [])
+
+  if (!webglOk) return null
+
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
       <Canvas
         camera={{ position: [0, 0, 6], fov: 50 }}
         style={{ background: 'transparent' }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        onCreated={({ gl }) => {
+          // Extra safety: if context is lost, unmount gracefully
+          gl.domElement.addEventListener('webglcontextlost', () => setWebglOk(false))
+        }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} color="#ffffff" />

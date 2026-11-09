@@ -10,8 +10,22 @@ interface TechStack3DBackgroundProps {
 export default function TechStack3DBackground({ inView }: TechStack3DBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [webglSupported, setWebglSupported] = React.useState(true)
 
   useEffect(() => {
+    // Check WebGL support before attempting to create renderer
+    try {
+      const testCanvas = document.createElement('canvas')
+      const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl')
+      if (!gl) {
+        setWebglSupported(false)
+        return
+      }
+    } catch {
+      setWebglSupported(false)
+      return
+    }
+
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
@@ -31,12 +45,19 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
     camera.position.z = isMobile ? 7.5 : 6.5
 
     // Renderer with ultra-light performance settings for 60fps on mobile
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: !isMobile, // Disable MSAA on mobile for max GPU fillrate
-      powerPreference: 'high-performance',
-    })
+    let renderer: THREE.WebGLRenderer
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: !isMobile, // Disable MSAA on mobile for max GPU fillrate
+        powerPreference: 'high-performance',
+      })
+    } catch {
+      // WebGL not available — silently degrade
+      setWebglSupported(false)
+      return
+    }
 
     const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, isMobile ? 1 : 1.5)
     renderer.setPixelRatio(dpr)
@@ -210,7 +231,10 @@ export default function TechStack3DBackground({ inView }: TechStack3DBackgroundP
       ringMat.dispose()
       renderer.dispose()
     }
-  }, [inView])
+  }, [inView, webglSupported])
+
+  // Graceful fallback: render nothing if WebGL is unavailable
+  if (!webglSupported) return null
 
   return (
     <div

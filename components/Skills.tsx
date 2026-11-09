@@ -16,6 +16,7 @@ import { TbBrandAzure, TbBrandVscode, TbBrandOffice } from 'react-icons/tb'
 import { Sparkles, Terminal, CheckCircle2 } from 'lucide-react'
 import type { IconType } from 'react-icons'
 import TechStack3DBackground from './TechStack3DBackground'
+import WebGLErrorBoundary from './WebGLErrorBoundary'
 
 export interface TechItem {
   id: string
@@ -254,7 +255,9 @@ export default function Skills() {
       className="py-16 sm:py-24 relative overflow-hidden bg-[#06080d] text-white border-t border-white/5 select-none"
     >
       {/* 3D ROTATING WIREFRAME CYBER GLOBE IN BACKGROUND */}
-      <TechStack3DBackground inView={inView} />
+      <WebGLErrorBoundary>
+        <TechStack3DBackground inView={inView} />
+      </WebGLErrorBoundary>
 
       {/* ATMOSPHERIC BACKGROUND MATCHING PORTFOLIO PALETTE */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
