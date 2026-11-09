@@ -166,6 +166,42 @@ export async function POST(request: Request) {
             </div>
           `,
         })
+
+        // Also send confirmation email copy to client if they provided their email
+        if (safeEmail && isValidEmail(safeEmail)) {
+          try {
+            await transporter.sendMail({
+              from: `"Md. Mominul Islam" <${gmailUser}>`,
+              to: safeEmail,
+              subject: `✅ Payment Verification Request Received (Receipt: ${receiptId})`,
+              text: `Hello ${safeClientName},\n\nWe have received your payment verification request.\nReceipt ID: ${receiptId}\nAmount: ৳${parsedAmount}\nMethod: ${safeMethod}\nTrxID: ${safeTrxId}\n\nWe are currently reviewing the transaction and will confirm shortly.\n\nBest regards,\nMd. Mominul Islam`,
+              html: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #334155;">
+                  <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
+                    <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: bold;">Payment Verification Received</h1>
+                    <p style="margin: 6px 0 0 0; color: #e2e8f0; font-size: 13px;">Receipt: ${receiptId}</p>
+                  </div>
+                  <div style="padding: 24px;">
+                    <p style="color: #cbd5e1; font-size: 14px; margin-top: 0;">Hello <strong>${htmlClientName}</strong>,</p>
+                    <p style="color: #94a3b8; font-size: 13px; line-height: 1.6;">Thank you for submitting your payment verification. Your payment details have been logged and are currently under verification.</p>
+                    <div style="background: #1e293b; padding: 18px; border-radius: 12px; border: 1px solid #334155; margin: 20px 0;">
+                      <table style="width: 100%; font-size: 13px;">
+                        <tr><td style="color: #94a3b8; padding: 6px 0;">Amount:</td><td style="color: #10b981; font-weight: bold; font-size: 16px;">৳${parsedAmount.toLocaleString('en-US')} BDT</td></tr>
+                        <tr><td style="color: #94a3b8; padding: 6px 0;">Method:</td><td style="color: #f8fafc; font-weight: bold;">${htmlMethod}</td></tr>
+                        <tr><td style="color: #94a3b8; padding: 6px 0;">TrxID:</td><td style="color: #38bdf8; font-family: monospace; font-weight: bold;">${htmlTrxId}</td></tr>
+                        <tr><td style="color: #94a3b8; padding: 6px 0;">Package:</td><td style="color: #f8fafc;">${htmlPackage}</td></tr>
+                        <tr><td style="color: #94a3b8; padding: 6px 0;">Status:</td><td style="color: #fbbf24; font-weight: bold;">Under Review / ভেরিফিকেশন চলছে</td></tr>
+                      </table>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">If you have any urgent queries, contact via WhatsApp: <a href="https://wa.me/8801303482412" style="color: #10b981; text-decoration: underline;">+880 1303 482412</a></p>
+                  </div>
+                </div>
+              `,
+            })
+          } catch (clientErr) {
+            console.error('Client receipt email error:', clientErr)
+          }
+        }
       } catch (emailErr) {
         console.error('Payment email dispatch error:', emailErr)
       }

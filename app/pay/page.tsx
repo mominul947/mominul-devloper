@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Package,
   AlertCircle,
+  Mail,
+  Send,
 } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { paymentConfig } from '@/config/payment'
@@ -50,6 +52,7 @@ export default function PaymentPage() {
   const [receipt, setReceipt] = useState<{
     id: string
     name: string
+    email?: string
     trxId: string
     amount: string
     senderPhone: string
@@ -60,6 +63,7 @@ export default function PaymentPage() {
 
   const [form, setForm] = useState({
     clientName: '',
+    clientEmail: '',
     senderNumber: '',
     trxId: '',
     amount: '',
@@ -161,6 +165,7 @@ export default function PaymentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientName: form.clientName || 'Valued Client',
+          clientEmail: form.clientEmail || '',
           clientPhone: form.senderNumber,
           senderBkash: form.senderNumber,
           trxId: form.trxId.toUpperCase(),
@@ -179,6 +184,7 @@ export default function PaymentPage() {
       const newReceipt = {
         id: data.receiptId || `${brandName.toUpperCase().replace(/[^A-Z0-9]/g, '-')}-${Date.now().toString().slice(-6)}`,
         name: form.clientName || 'Valued Client',
+        email: form.clientEmail || '',
         trxId: form.trxId.toUpperCase(),
         amount: form.amount,
         senderPhone: form.senderNumber,
@@ -197,40 +203,11 @@ export default function PaymentPage() {
         localStorage.setItem('portfolio_submitted_payments', JSON.stringify(stored.slice(0, 50)))
       } catch (e) {}
 
-      // Directly open WhatsApp immediately with full payment details pre-filled
-      const waText = `হ্যালো মোঃ মোমিনুল ইসলাম,
-আমি একটি পেমেন্ট সম্পন্ন করেছি:
-💳 মেথড: ${brandName.toUpperCase()}
-🆔 TrxID: ${form.trxId.toUpperCase()}
-💵 পরিমাণ: ৳${form.amount} BDT
-📱 প্রেরক নম্বর: ${form.senderNumber}
-👤 গ্রাহক: ${form.clientName || 'Valued Client'}
-📦 প্যাকেজ: ${selectedPackage || 'Online Service Payment'}
-🧾 রিসিপ্ট আইডি: ${newReceipt.id}
-
-অনুগ্রহ করে ভেরিফাই করুন!`
-
-      const waUrl = `https://wa.me/8801303482412?text=${encodeURIComponent(waText)}`
-
-      if (typeof window !== 'undefined') {
-        window.location.href = waUrl
-      }
+      // Directly show receipt with email notification confirmation (no WhatsApp redirect!)
+      setReceipt(newReceipt)
     } catch (err: any) {
       console.error(err)
-      // Even if network API failed, still redirect directly to WhatsApp with user details
-      const fallbackText = `হ্যালো মোঃ মোমিনুল ইসলাম,
-আমি একটি পেমেন্ট সম্পন্ন করেছি:
-💳 মেথড: ${brandName.toUpperCase()}
-🆔 TrxID: ${form.trxId.toUpperCase()}
-💵 পরিমাণ: ৳${form.amount} BDT
-📱 প্রেরক নম্বর: ${form.senderNumber}
-👤 গ্রাহক: ${form.clientName || 'Valued Client'}
-
-অনুগ্রহ করে ভেরিফাই করুন!`
-      const waUrl = `https://wa.me/8801303482412?text=${encodeURIComponent(fallbackText)}`
-      if (typeof window !== 'undefined') {
-        window.location.href = waUrl
-      }
+      setSubmitError(err.message || 'পেমেন্ট ভেরিফিকেশন পাঠাতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
     } finally {
       setLoading(false)
     }
@@ -247,21 +224,35 @@ export default function PaymentPage() {
       {/* CASE 1: RECEIPT VIEW AFTER VERIFICATION                        */}
       {/* ============================================================== */}
       {receipt ? (
-        <div className="w-full max-w-lg bg-gradient-to-b from-[#111622] to-[#0A0D14] backdrop-blur-2xl rounded-3xl border border-white/10 p-6 sm:p-8 text-center space-y-6 shadow-2xl relative z-10">
+        <div className="w-full max-w-lg bg-gradient-to-b from-[#111622] to-[#0A0D14] backdrop-blur-2xl rounded-3xl border border-white/10 p-6 sm:p-8 text-center space-y-6 shadow-2xl relative z-10 animate-fade-in">
           <div className="w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)]">
             <CheckCircle2 size={36} />
           </div>
 
           <div>
             <span className="text-[10px] font-mono font-bold uppercase bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
-              Payment Submitted
+              পেমেন্ট ভেরিফিকেশন জমা হয়েছে
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-white mt-3">
-              Verification In Progress
+              Payment Submitted Successfully!
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Your transaction details have been securely logged for confirmation.
+            <p className="text-xs text-slate-300 mt-1 flex items-center justify-center gap-1.5">
+              <Mail size={13} className="text-emerald-400 flex-shrink-0" />
+              <span>পেমেন্টের বিস্তারিত তথ্য সরাসরি ইমেইলে পাঠিয়ে দেওয়া হয়েছে।</span>
             </p>
+          </div>
+
+          {/* Email Notification Alert Card */}
+          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs text-left flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Mail size={16} />
+            </div>
+            <div className="space-y-0.5">
+              <p className="font-bold text-white text-[12px]">সরাসরি ইমেইল নিশ্চিতকরণ:</p>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                আপনার TrxID এবং পেমেন্ট সংক্রান্ত সমস্ত তথ্য মোঃ মোমিনুল ইসলাম-এর ইমেইলে পৌঁছে গেছে। দ্রুততম সময়ের মধ্যে ভেরিফাই করে নেওয়া হবে।
+              </p>
+            </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-black/50 text-left text-xs font-mono space-y-2.5 border border-white/10">
@@ -289,32 +280,56 @@ export default function PaymentPage() {
               <span className="text-slate-400">Sender:</span>
               <span className="font-bold text-white">{receipt.senderPhone}</span>
             </div>
+            {receipt.email && (
+              <div className="flex justify-between">
+                <span className="text-slate-400">Email:</span>
+                <span className="font-bold text-sky-400 truncate max-w-[200px]">{receipt.email}</span>
+              </div>
+            )}
             <div className="flex justify-between pt-2 border-t border-white/10">
               <span className="text-slate-400">Date &amp; Time:</span>
-              <span className="text-slate-500 text-[11px]">{receipt.date}</span>
+              <span className="text-slate-400 text-[11px]">{receipt.date}</span>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t border-white/10 text-emerald-400">
+              <span className="text-slate-400">Status:</span>
+              <span className="font-bold flex items-center gap-1.5 text-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Under Review / ভেরিফিকেশন চলছে
+              </span>
             </div>
           </div>
 
-          <a
-            href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-              `Hello Md. Mominul Islam,\n\nI have submitted a ${receipt.method} payment!\n\nPackage: ${receipt.package}\nReceipt: ${receipt.id}\nTrxID: ${receipt.trxId}\nAmount: ৳${receipt.amount} BDT\nSender: ${receipt.senderPhone}\n\nPlease check and verify.`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-3.5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold text-xs uppercase flex items-center justify-center gap-2 shadow-lg transition-all"
-          >
-            <FaWhatsapp size={16} />
-            <span>Confirm on WhatsApp</span>
-          </a>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <Link
+              href="/"
+              className="flex-1 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg"
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Portfolio (হোমপেজ)</span>
+            </Link>
+
+            <a
+              href={`https://wa.me/8801303482412?text=${encodeURIComponent(
+                `Hello Md. Mominul Islam,\n\nI have submitted a ${receipt.method} payment!\n\nPackage: ${receipt.package}\nReceipt: ${receipt.id}\nTrxID: ${receipt.trxId}\nAmount: ৳${receipt.amount} BDT\nSender: ${receipt.senderPhone}\n\nPlease check your email.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-3 px-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all"
+            >
+              <FaWhatsapp size={14} className="text-[#25D366]" />
+              <span>WhatsApp (জরুরি প্রয়োজনে)</span>
+            </a>
+          </div>
 
           <button
             onClick={() => {
               setReceipt(null)
-              setForm({ clientName: '', senderNumber: '', trxId: '', amount: '' })
+              setForm({ clientName: '', clientEmail: '', senderNumber: '', trxId: '', amount: '' })
             }}
             className="text-xs text-slate-400 hover:text-white hover:underline block mx-auto pt-1 cursor-pointer"
           >
-            Make another payment
+            আরেকটি পেমেন্ট জমা দিন (Make another payment)
           </button>
         </div>
       ) : !method ? (
@@ -1137,6 +1152,27 @@ export default function PaymentPage() {
               </div>
             </div>
 
+            {/* Field: Client Email (Optional) */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
+                <span>Your Email Address (Optional)</span>
+                <span className="text-[10px] text-emerald-400 font-mono">For Confirmation Copy</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <Mail size={14} />
+                </div>
+                <input
+                  type="email"
+                  name="clientEmail"
+                  value={form.clientEmail}
+                  onChange={handleChange}
+                  placeholder="e.g. client@example.com"
+                  className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
+                />
+              </div>
+            </div>
+
             {/* Error Message */}
             {submitError && (
               <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
@@ -1159,12 +1195,12 @@ export default function PaymentPage() {
                 {loading ? (
                   <>
                     <Loader size={16} className="animate-spin" />
-                    <span>ভেরিফাই হচ্ছে ও হোয়াটসঅ্যাপ ওপেন হচ্ছে...</span>
+                    <span>ভেরিফাই হচ্ছে ও সরাসরি ইমেইল পাঠানো হচ্ছে...</span>
                   </>
                 ) : (
                   <>
-                    <FaWhatsapp size={18} className="text-[#25D366]" />
-                    <span>VERIFY &amp; CONFIRM ON WHATSAPP (ভেরিফাই করুন)</span>
+                    <Mail size={18} className="text-white" />
+                    <span>VERIFY &amp; SUBMIT PAYMENT (পেমেন্ট ভেরিফাই করুন)</span>
                   </>
                 )}
               </button>
@@ -1177,17 +1213,10 @@ export default function PaymentPage() {
                 <span>256-Bit SSL Encrypted Verification</span>
               </div>
 
-              <a
-                href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-                  `Hello Md. Mominul Islam, I need help with ${brandName} payment.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-slate-300 hover:text-emerald-400 transition-colors font-medium"
-              >
-                <FaWhatsapp size={13} className="text-[#25D366]" />
-                <span>WhatsApp Support</span>
-              </a>
+              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
+                <Mail size={12} />
+                <span>সরাসরি নোটিফিকেশন ইমেইল ডেলিভারি</span>
+              </div>
             </div>
 
           </form>
