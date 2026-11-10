@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Web payment orders submitted from portfolio website
+    match /web_payments/{paymentId} {
+      allow read, write: if true;
+    }
+    
+    // Clients CRM & Projects
+    match /clients/{clientId} {
+      allow read, write: if true;
+    }
+    
+    // Customer Khata / Due Book (Mobile App & Desktop Software)
+    match /customers/{customerId} {
+      allow read, write: if true;
+    }
+    
+    // Customer Transactions / Ledger entries
+    match /customer_transactions/{txId} {
+      allow read, write: if true;
+    }
+    
+    // Cash Flow & General Transactions Ledger
+    match /transactions/{txId} {
+      allow read, write: if true;
+    }
+    
+    // System stats and balance tracking
+    match /wallet_stats/{docId} {
+      allow read, write: if true;
+    }
+    
+    // Fallback for all other collections
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

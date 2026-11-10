@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { readJsonFileSafe, writeJsonFileSafe } from '@/lib/storage'
 import nodemailer from 'nodemailer'
 import { escapeHtml, isValidEmail, isValidPhone, isValidTrxId, sanitizeText } from '@/lib/security'
+import { savePaymentToFirestore, updatePaymentInFirestore } from '@/lib/firebase'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,6 +92,9 @@ export async function POST(request: Request) {
       existingPayments.length = 500
     }
     saveStoredPayments(existingPayments)
+
+    // Auto-sync to Firebase Firestore Cloud Database
+    await savePaymentToFirestore(newRecord)
 
     // 4. Send Instant Admin Notification via Secure Gmail SMTP
     const recipientEmail = process.env.NOTIFICATION_EMAIL || 'mominulwebwork@gmail.com'
@@ -244,6 +248,9 @@ export async function PATCH(request: Request) {
     target.status = data.status
     target.updatedAt = new Date().toISOString()
     saveStoredPayments(payments)
+
+    // Sync status change to Firebase Firestore
+    await updatePaymentInFirestore(data.id, data.status)
 
     return NextResponse.json({ success: true, payment: target })
   } catch (err: any) {
