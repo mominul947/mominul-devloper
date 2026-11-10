@@ -23,6 +23,9 @@ import {
   AlertCircle,
   Mail,
   Send,
+  CreditCard,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { paymentConfig } from '@/config/payment'
@@ -31,7 +34,9 @@ export default function PaymentPage() {
   const [method, setMethod] = useState<'bkash' | 'nagad' | 'cellfin' | 'bank' | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [liveSettings, setLiveSettings] = useState({
+  const [showOptionalFields, setShowOptionalFields] = useState(false)
+
+  const [liveSettings] = useState({
     bkashNumber: paymentConfig.bkashNumber,
     nagadNumber: paymentConfig.nagadNumber,
     cellfinBankName: paymentConfig.cellfinBankName,
@@ -44,10 +49,9 @@ export default function PaymentPage() {
     bankRoutingNumber: paymentConfig.bankRoutingNumber,
     bankAccountName: paymentConfig.bankAccountName,
     bankAccountNumber: paymentConfig.bankAccountNumber,
-    minAmount: paymentConfig.minAmount,
   })
 
-  const [selectedPackage, setSelectedPackage] = useState<string>('Online Service Payment')
+  const [selectedPackage, setSelectedPackage] = useState<string>('Service Payment')
 
   const [receipt, setReceipt] = useState<{
     id: string
@@ -69,7 +73,9 @@ export default function PaymentPage() {
     amount: '',
   })
 
-  // Check URL params on mount
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  // Auto-detect method & package from URL query params
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
@@ -106,11 +112,11 @@ export default function PaymentPage() {
 
   const brandBangla =
     method === 'bkash'
-      ? 'বিকাশ'
+      ? 'বিকাশ পার্সোনাল'
       : method === 'nagad'
-      ? 'নগদ'
+      ? 'নগদ পার্সোনাল'
       : method === 'cellfin'
-      ? 'সেলফিন / ইসলামী ব্যাংক'
+      ? 'সেলফিন ও ইসলামী ব্যাংক'
       : 'মার্কেন্টাইল ব্যাংক'
 
   const brandLogo =
@@ -147,13 +153,12 @@ export default function PaymentPage() {
     setForm((prev) => ({ ...prev, amount: val }))
   }
 
-  const [submitError, setSubmitError] = useState<string | null>(null)
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitError(null)
-    if (!form.senderNumber || !form.trxId || !form.amount) {
-      setSubmitError('অনুগ্রহ করে প্রেরকের নম্বর, TrxID এবং টাকার পরিমাণ সঠিকভাবে পূরণ করুন।')
+
+    if (!form.senderNumber.trim() || !form.trxId.trim() || !form.amount.trim()) {
+      setSubmitError('অনুগ্রহ করে টাকার পরিমাণ, প্রেরকের নম্বর এবং TrxID পূরণ করুন।')
       return
     }
 
@@ -164,46 +169,44 @@ export default function PaymentPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientName: form.clientName || 'Valued Client',
-          clientEmail: form.clientEmail || '',
-          clientPhone: form.senderNumber,
-          senderBkash: form.senderNumber,
-          trxId: form.trxId.toUpperCase(),
-          amount: form.amount,
+          clientName: form.clientName.trim() || 'Valued Client',
+          clientEmail: form.clientEmail.trim() || '',
+          clientPhone: form.senderNumber.trim(),
+          senderBkash: form.senderNumber.trim(),
+          trxId: form.trxId.trim().toUpperCase(),
+          amount: form.amount.trim(),
           paymentMethod: brandName.toUpperCase(),
-          selectedPackage: selectedPackage || 'Online Service Payment',
+          selectedPackage: selectedPackage || 'Service Payment',
         }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'পেমেন্ট জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।')
+        throw new Error(data.error || 'পেমেন্ট ভেরিফিকেশন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।')
       }
 
       const newReceipt = {
         id: data.receiptId || `${brandName.toUpperCase().replace(/[^A-Z0-9]/g, '-')}-${Date.now().toString().slice(-6)}`,
-        name: form.clientName || 'Valued Client',
-        email: form.clientEmail || '',
-        trxId: form.trxId.toUpperCase(),
-        amount: form.amount,
-        senderPhone: form.senderNumber,
+        name: form.clientName.trim() || 'Valued Client',
+        email: form.clientEmail.trim() || '',
+        trxId: form.trxId.trim().toUpperCase(),
+        amount: form.amount.trim(),
+        senderPhone: form.senderNumber.trim(),
         method: brandName.toUpperCase(),
-        package: selectedPackage || 'Online Service Payment',
+        package: selectedPackage || 'Service Payment',
         date: new Date().toLocaleString('en-US', {
           dateStyle: 'medium',
           timeStyle: 'short',
         }),
       }
 
-      // Cache locally so admin or client can access receipt
       try {
         const stored = JSON.parse(localStorage.getItem('portfolio_submitted_payments') || '[]')
         stored.unshift(newReceipt)
         localStorage.setItem('portfolio_submitted_payments', JSON.stringify(stored.slice(0, 50)))
       } catch (e) {}
 
-      // Directly show receipt with email notification confirmation (no WhatsApp redirect!)
       setReceipt(newReceipt)
     } catch (err: any) {
       console.error(err)
@@ -214,87 +217,67 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07080B] text-slate-100 py-8 sm:py-16 px-4 sm:px-6 flex flex-col items-center justify-center font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-[#07080B] text-slate-100 py-8 sm:py-14 px-4 sm:px-6 flex flex-col items-center justify-center font-sans relative overflow-hidden">
       
-      {/* Background Soft Ambient Lights */}
-      <div className="absolute top-1/4 -left-36 w-96 h-96 bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-36 w-96 h-96 bg-blue-500/10 rounded-full blur-[160px] pointer-events-none" />
+      {/* Background Soft Glows */}
+      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-blue-500/10 rounded-full blur-[150px] pointer-events-none" />
 
       {/* ============================================================== */}
-      {/* CASE 1: RECEIPT VIEW AFTER VERIFICATION                        */}
+      {/* CASE 1: SUCCESSFUL PAYMENT RECEIPT                              */}
       {/* ============================================================== */}
       {receipt ? (
-        <div className="w-full max-w-lg bg-gradient-to-b from-[#111622] to-[#0A0D14] backdrop-blur-2xl rounded-3xl border border-white/10 p-6 sm:p-8 text-center space-y-6 shadow-2xl relative z-10 animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)]">
+        <div className="w-full max-w-lg bg-gradient-to-b from-[#111726] to-[#090D15] rounded-3xl border border-white/10 p-6 sm:p-8 text-center space-y-6 shadow-2xl relative z-10 animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
             <CheckCircle2 size={36} />
           </div>
 
           <div>
             <span className="text-[10px] font-mono font-bold uppercase bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
-              পেমেন্ট ভেরিফিকেশন জমা হয়েছে
+              ✓ পেমেন্ট রিসিভ ও সাবমিট সম্পন্ন
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-white mt-3">
               Payment Submitted Successfully!
             </h2>
             <p className="text-xs text-slate-300 mt-1 flex items-center justify-center gap-1.5">
               <Mail size={13} className="text-emerald-400 flex-shrink-0" />
-              <span>পেমেন্টের বিস্তারিত তথ্য সরাসরি ইমেইলে পাঠিয়ে দেওয়া হয়েছে।</span>
+              <span>পেমেন্টের তথ্য সরাসরি মোঃ মোমিনুল ইসলামের কাছে পৌঁছে গেছে।</span>
             </p>
           </div>
 
-          {/* Email Notification Alert Card */}
-          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs text-left flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Mail size={16} />
-            </div>
-            <div className="space-y-0.5">
-              <p className="font-bold text-white text-[12px]">সরাসরি ইমেইল নিশ্চিতকরণ:</p>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                আপনার TrxID এবং পেমেন্ট সংক্রান্ত সমস্ত তথ্য মোঃ মোমিনুল ইসলাম-এর ইমেইলে পৌঁছে গেছে। দ্রুততম সময়ের মধ্যে ভেরিফাই করে নেওয়া হবে।
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-black/50 text-left text-xs font-mono space-y-2.5 border border-white/10">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Receipt ID:</span>
+          {/* Minimal Digital Receipt Card */}
+          <div className="p-4 rounded-2xl bg-black/60 text-left text-xs font-mono space-y-2.5 border border-white/10">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">রিসিট নং:</span>
               <span className="font-bold text-white">{receipt.id}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Method:</span>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">মেথড:</span>
               <span className="font-bold text-emerald-400">{receipt.method}</span>
             </div>
-            <div className="flex justify-between items-center gap-2">
-              <span className="text-slate-400">Package / Service:</span>
-              <span className="font-bold text-white text-xs truncate max-w-[200px] text-right">{receipt.package}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">টাকার পরিমাণ:</span>
+              <span className="font-bold text-white text-base">৳{receipt.amount} BDT</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Amount:</span>
-              <span className="font-bold text-white text-sm">৳{receipt.amount} BDT</span>
-            </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-slate-400">TrxID:</span>
-              <span className="font-bold text-emerald-400">{receipt.trxId}</span>
+              <span className="font-bold text-emerald-400 text-sm tracking-wider">{receipt.trxId}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Sender:</span>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">প্রেরক:</span>
               <span className="font-bold text-white">{receipt.senderPhone}</span>
             </div>
-            {receipt.email && (
-              <div className="flex justify-between">
-                <span className="text-slate-400">Email:</span>
-                <span className="font-bold text-sky-400 truncate max-w-[200px]">{receipt.email}</span>
+            {receipt.package && (
+              <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                <span className="text-slate-400">সার্ভিস / প্রজেক্ট:</span>
+                <span className="font-bold text-white truncate max-w-[200px] text-right">{receipt.package}</span>
               </div>
             )}
-            <div className="flex justify-between pt-2 border-t border-white/10">
-              <span className="text-slate-400">Date &amp; Time:</span>
-              <span className="text-slate-400 text-[11px]">{receipt.date}</span>
-            </div>
             <div className="flex justify-between items-center pt-2 border-t border-white/10 text-emerald-400">
-              <span className="text-slate-400">Status:</span>
+              <span className="text-slate-400">স্ট্যাটাস:</span>
               <span className="font-bold flex items-center gap-1.5 text-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Under Review / ভেরিফিকেশন চলছে
+                Under Verification (যাচাই চলছে)
               </span>
             </div>
           </div>
@@ -306,19 +289,19 @@ export default function PaymentPage() {
               className="flex-1 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg"
             >
               <ArrowLeft size={14} />
-              <span>Back to Portfolio (হোমপেজ)</span>
+              <span>হোমপেজে ফিরে যান</span>
             </Link>
 
             <a
               href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-                `Hello Md. Mominul Islam,\n\nI have submitted a ${receipt.method} payment!\n\nPackage: ${receipt.package}\nReceipt: ${receipt.id}\nTrxID: ${receipt.trxId}\nAmount: ৳${receipt.amount} BDT\nSender: ${receipt.senderPhone}\n\nPlease check your email.`
+                `Hello Md. Mominul Islam,\nI have submitted a ${receipt.method} payment!\nTrxID: ${receipt.trxId}\nAmount: ৳${receipt.amount} BDT\nSender: ${receipt.senderPhone}\nReceipt: ${receipt.id}`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="py-3 px-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all"
             >
-              <FaWhatsapp size={14} className="text-[#25D366]" />
-              <span>WhatsApp (জরুরি প্রয়োজনে)</span>
+              <FaWhatsapp size={15} className="text-[#25D366]" />
+              <span>WhatsApp চ্যাট</span>
             </a>
           </div>
 
@@ -329,713 +312,380 @@ export default function PaymentPage() {
             }}
             className="text-xs text-slate-400 hover:text-white hover:underline block mx-auto pt-1 cursor-pointer"
           >
-            আরেকটি পেমেন্ট জমা দিন (Make another payment)
+            আরেকটি পেমেন্ট জমা দিন
           </button>
         </div>
       ) : !method ? (
         /* ============================================================== */
-        /* CASE 2: CLEAN, SPACIOUS, FREE METHOD SELECTION VIEW            */
+        /* CASE 2: METHOD SELECTION - CLEAN, STRIKING & LUXURY FINTECH    */
         /* ============================================================== */
-        <div className="w-full max-w-2xl relative z-10 space-y-6 sm:space-y-8">
+        <div className="w-full max-w-xl relative z-10 space-y-6">
           
-          {/* Top Bar & Title */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
-            <div>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors mb-2 group"
-              >
-                <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-                <span>Back to Portfolio</span>
-              </Link>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                Select Payment Method
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Choose your preferred payment gateway to view details and verify
-              </p>
+          {/* Top Header */}
+          <div className="text-center space-y-3 pb-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors group mb-1"
+            >
+              <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back to Portfolio</span>
+            </Link>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-bold uppercase tracking-wider mx-auto">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>256-Bit SSL Secure Gateway</span>
             </div>
 
-            <div className="flex items-center gap-2.5 self-start sm:self-auto px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 shadow-sm">
-              <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-emerald-400/50">
-                <img
-                  src="/images/hero-portrait-01.png"
-                  alt="Md. Mominul Islam"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-semibold text-slate-200">Md. Mominul Islam</span>
-              </div>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              পেমেন্ট মেথড নির্বাচন করুন
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto">
+              নিচের যেকোনো মেথডে খুব সহজে টাকা পাঠিয়ে তাৎক্ষণিক ভেরিফাই করুন
+            </p>
           </div>
 
-          {/* Selected Package Banner (When client selects a specific package or gig) */}
-          {selectedPackage && selectedPackage !== 'Online Service Payment' && (
-            <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent border border-emerald-500/30 flex items-center justify-between gap-3 shadow-lg">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 border border-emerald-500/40 shadow-sm">
-                  <Package size={18} />
+          {/* Selected Package Banner (if passed) */}
+          {selectedPackage && selectedPackage !== 'Service Payment' && (
+            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                  <Package size={16} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold block flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>নির্বাচিত প্যাকেজ / সেবা (Selected Package)</span>
-                  </span>
-                  <span className="text-sm sm:text-base font-bold text-white truncate block">
-                    {selectedPackage}
-                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase block">নির্বাচিত প্যাকেজ</span>
+                  <span className="text-xs sm:text-sm font-bold text-white truncate block">{selectedPackage}</span>
                 </div>
               </div>
-              <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase flex-shrink-0">
-                INVOICE ITEM
+              <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold uppercase">
+                INVOICE
               </span>
             </div>
           )}
 
-          {/* 4 Clean, Free, Breathable Payment Cards (2x2 Grid) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* 4 Eye-Catching Payment Method Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             
-            {/* Card 1: bKash */}
+            {/* 1. bKash */}
             <button
               type="button"
               onClick={() => setMethod('bkash')}
-              className="group p-5 rounded-3xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] hover:from-[#E2136E]/10 hover:to-transparent border border-white/10 hover:border-[#E2136E]/60 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(226,19,110,0.2)] hover:-translate-y-0.5"
+              className="group p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.01] hover:from-[#E2136E]/15 hover:to-transparent border border-white/10 hover:border-[#E2136E]/70 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_25px_rgba(226,19,110,0.25)] hover:-translate-y-0.5"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
-                  <img
-                    src="/images/bkash.jpg"
-                    alt="bKash"
-                    className="w-full h-full object-contain"
-                  />
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:scale-105 transition-transform overflow-hidden">
+                  <img src="/images/bkash.jpg" alt="bKash" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white group-hover:text-[#E2136E] transition-colors">
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#E2136E] transition-colors">
                     bKash বিকাশ
                   </h3>
-                  <span className="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E2136E]/15 text-[#E2136E]">
-                    Send Money
-                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">পার্সোনাল • Send Money</span>
                 </div>
               </div>
-
-              <div className="w-9 h-9 rounded-full bg-white/5 group-hover:bg-[#E2136E] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
-                <ChevronRight size={18} />
+              <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#E2136E] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+                <ChevronRight size={16} />
               </div>
             </button>
 
-            {/* Card 2: Nagad */}
+            {/* 2. Nagad */}
             <button
               type="button"
               onClick={() => setMethod('nagad')}
-              className="group p-5 rounded-3xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] hover:from-[#E53935]/10 hover:to-transparent border border-white/10 hover:border-[#E53935]/60 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(229,57,53,0.2)] hover:-translate-y-0.5"
+              className="group p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.01] hover:from-[#E53935]/15 hover:to-transparent border border-white/10 hover:border-[#E53935]/70 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_25px_rgba(229,57,53,0.25)] hover:-translate-y-0.5"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
-                  <img
-                    src="/images/nagad.jpg"
-                    alt="Nagad"
-                    className="w-full h-full object-contain"
-                  />
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:scale-105 transition-transform overflow-hidden">
+                  <img src="/images/nagad.jpg" alt="Nagad" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white group-hover:text-[#E53935] transition-colors">
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#E53935] transition-colors">
                     Nagad নগদ
                   </h3>
-                  <span className="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E53935]/15 text-[#E53935]">
-                    Send Money
-                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">পার্সোনাল • Send Money</span>
                 </div>
               </div>
-
-              <div className="w-9 h-9 rounded-full bg-white/5 group-hover:bg-[#E53935] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
-                <ChevronRight size={18} />
+              <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#E53935] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+                <ChevronRight size={16} />
               </div>
             </button>
 
-            {/* Card 3: Cellfin / Islami Bank */}
+            {/* 3. Cellfin */}
             <button
               type="button"
               onClick={() => setMethod('cellfin')}
-              className="group p-5 rounded-3xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] hover:from-[#0A7B3E]/10 hover:to-transparent border border-white/10 hover:border-[#0A7B3E]/60 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(10,123,62,0.2)] hover:-translate-y-0.5"
+              className="group p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.01] hover:from-[#0A7B3E]/15 hover:to-transparent border border-white/10 hover:border-[#0A7B3E]/70 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_25px_rgba(10,123,62,0.25)] hover:-translate-y-0.5"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
-                  <img
-                    src="/images/cellfin.png"
-                    alt="Cellfin Islami Bank"
-                    className="w-full h-full object-contain"
-                  />
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:scale-105 transition-transform overflow-hidden">
+                  <img src="/images/cellfin.png" alt="Cellfin" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
-                    Cellfin / Islami Bank
+                  <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">
+                    Cellfin / ইসলামী ব্যাংক
                   </h3>
-                  <span className="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#0A7B3E]/15 text-emerald-400">
-                    App &amp; A/C Transfer
-                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">অ্যাপ ও অ্যাকাউন্ট ট্রান্সফার</span>
                 </div>
               </div>
-
-              <div className="w-9 h-9 rounded-full bg-white/5 group-hover:bg-[#0A7B3E] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
-                <ChevronRight size={18} />
+              <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#0A7B3E] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+                <ChevronRight size={16} />
               </div>
             </button>
 
-            {/* Card 4: Mercantile Bank */}
+            {/* 4. Mercantile Bank */}
             <button
               type="button"
               onClick={() => setMethod('bank')}
-              className="group p-5 rounded-3xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] hover:from-[#0072BC]/10 hover:to-transparent border border-white/10 hover:border-[#0072BC]/60 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(0,114,188,0.2)] hover:-translate-y-0.5"
+              className="group p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.01] hover:from-[#0072BC]/15 hover:to-transparent border border-white/10 hover:border-[#0072BC]/70 transition-all text-left flex items-center justify-between cursor-pointer shadow-lg hover:shadow-[0_0_25px_rgba(0,114,188,0.25)] hover:-translate-y-0.5"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
-                  <img
-                    src="/images/mercantile.jpg"
-                    alt="Mercantile Bank"
-                    className="w-full h-full object-contain"
-                  />
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center flex-shrink-0 border border-white/20 group-hover:scale-105 transition-transform overflow-hidden">
+                  <img src="/images/mercantile.jpg" alt="Mercantile Bank" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white group-hover:text-[#0072BC] transition-colors">
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#0072BC] transition-colors">
                     Mercantile Bank
                   </h3>
-                  <span className="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#0072BC]/15 text-[#0072BC]">
-                    Bank Transfer (NPSB)
-                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">যেকোনো ব্যাংক থেকে NPSB</span>
                 </div>
               </div>
-
-              <div className="w-9 h-9 rounded-full bg-white/5 group-hover:bg-[#0072BC] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
-                <ChevronRight size={18} />
+              <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#0072BC] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+                <ChevronRight size={16} />
               </div>
             </button>
 
           </div>
 
-          {/* Clean Bottom Trust Ribbon */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-4 text-xs text-slate-400">
+          {/* Trust Badge */}
+          <div className="pt-4 flex items-center justify-center gap-6 text-xs text-slate-400">
             <span className="flex items-center gap-1.5">
               <ShieldCheck size={14} className="text-emerald-400" />
-              100% Secure Checkout
+              <span>১০০% নিরাপদ ট্রানজেকশন</span>
             </span>
             <span>•</span>
-            <span>Instant TrxID Verification</span>
-            <span>•</span>
-            <span>Direct WhatsApp Support</span>
+            <span className="flex items-center gap-1.5">
+              <Mail size={14} className="text-emerald-400" />
+              <span>সরাসরি ইমেইল নোটিফিকেশন</span>
+            </span>
           </div>
 
         </div>
       ) : (
         /* ============================================================== */
-        /* CASE 3: DETAILED SCREEN - CLEAN, UNCLUTTERED, FOCUSED VIEW     */
+        /* CASE 3: STREAMLINED PREMIUM FINTECH PAYMENT VIEW (NO CLUTTER)  */
         /* ============================================================== */
-        <div className="w-full max-w-xl bg-gradient-to-b from-[#111622] to-[#0A0D14] backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl p-5 sm:p-7 space-y-6 relative z-10">
+        <div className="w-full max-w-lg bg-gradient-to-b from-[#111726] to-[#090D15] rounded-3xl border border-white/10 shadow-2xl p-5 sm:p-7 space-y-5 relative z-10 animate-fade-in">
           
           {/* Top Bar */}
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <button
               onClick={() => setMethod(null)}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer group border border-white/5"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer border border-white/5 group"
             >
-              <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-              <span>All Payment Methods</span>
+              <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span>অন্য মেথড</span>
             </button>
 
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-              <BadgeCheck size={14} className="text-emerald-400" />
-              <span>Verified Gateway</span>
+            <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>{brandBangla}</span>
             </div>
           </div>
 
-          {/* Selected Package Indicator */}
-          {selectedPackage && selectedPackage !== 'Online Service Payment' && (
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent border border-emerald-500/30 flex items-center justify-between gap-3 shadow-md">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 border border-emerald-500/30">
-                  <Package size={15} />
+          {/* ============================================================== */}
+          {/* HERO LUXURY VIRTUAL FINTECH CARD                               */}
+          {/* ============================================================== */}
+          <div
+            className="p-5 sm:p-6 rounded-2xl relative overflow-hidden shadow-2xl border transition-all"
+            style={{
+              background:
+                method === 'bkash'
+                  ? 'linear-gradient(135deg, #1c0914 0%, #2e081c 50%, #15060f 100%)'
+                  : method === 'nagad'
+                  ? 'linear-gradient(135deg, #200908 0%, #300c0a 50%, #170605 100%)'
+                  : method === 'cellfin'
+                  ? 'linear-gradient(135deg, #06190f 0%, #0a2618 50%, #04120a 100%)'
+                  : 'linear-gradient(135deg, #071728 0%, #0a233d 50%, #05101d 100%)',
+              borderColor: `${themeColor}50`,
+              boxShadow: `0 10px 30px ${themeColor}20`,
+            }}
+          >
+            {/* Subtle Metallic Glow Background */}
+            <div
+              className="absolute -top-12 -right-12 w-40 h-40 rounded-full blur-[60px] opacity-40 pointer-events-none"
+              style={{ backgroundColor: themeColor }}
+            />
+
+            {/* Card Top: Logo & Provider */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-white p-1.5 shadow flex items-center justify-center overflow-hidden">
+                  <img src={brandLogo} alt={brandName} className="w-full h-full object-contain" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold block">
-                    প্যাকেজ (Paying For Package)
-                  </span>
-                  <span className="text-xs sm:text-sm font-bold text-white truncate block">
-                    {selectedPackage}
+                <div>
+                  <h3 className="font-bold text-white text-sm tracking-wide">{brandName}</h3>
+                  <span className="text-[10px] text-slate-300 font-mono block">
+                    {method === 'cellfin' || method === 'bank' ? 'Official Bank Account' : 'Personal Account'}
                   </span>
                 </div>
               </div>
-              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase flex-shrink-0">
-                INVOICE ITEM
+
+              <span
+                className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase"
+                style={{
+                  backgroundColor: `${themeColor}20`,
+                  color: themeColor,
+                  borderColor: `${themeColor}40`,
+                }}
+              >
+                {method === 'cellfin' || method === 'bank' ? 'A/C Transfer' : 'Send Money'}
               </span>
             </div>
-          )}
 
-          {/* ============================================================== */}
-          {/* METHOD 1: CELLFIN / ISLAMI BANK BANGLADESH LIMITED             */}
-          {/* ============================================================== */}
-          {method === 'cellfin' ? (
-            <div className="space-y-4">
-              
-              {/* Sleek Brand Header Banner */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0A7B3E]/15 via-[#0A7B3E]/5 to-transparent border border-[#0A7B3E]/30 flex items-center gap-3.5">
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 overflow-hidden border border-white/20">
-                  <img src="/images/cellfin.png" alt="Cellfin" className="w-full h-full object-contain" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base font-bold text-white tracking-tight truncate">
-                      {liveSettings.cellfinBankName}
-                    </h2>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0A7B3E]/20 text-emerald-400 border border-[#0A7B3E]/40">
-                      Cellfin &amp; NPSB
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 truncate mt-0.5">
-                    {liveSettings.cellfinBranch} • Official Bank Account
-                  </p>
-                </div>
+            {/* Card Middle: Prominent Number to Send Money */}
+            <div className="my-2 p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-[10px] text-slate-400 uppercase font-mono block">
+                  {method === 'cellfin' || method === 'bank' ? 'ব্যাংক একাউন্ট নম্বর (Account No)' : 'নম্বর (Send Money)'}
+                </span>
+                <span className="text-xl sm:text-2xl font-bold font-mono text-white tracking-wider truncate block select-all">
+                  {method === 'cellfin'
+                    ? liveSettings.cellfinAccountNumber
+                    : method === 'bank'
+                    ? liveSettings.bankAccountNumber
+                    : currentNumber}
+                </span>
               </div>
 
-              {/* Account Display Box */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-emerald-500/20 space-y-3 shadow-inner">
-                
-                {/* 1. Bank Account Number */}
-                <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <span className="text-[10px] text-slate-400 font-mono uppercase block flex items-center gap-1">
-                      <Building2 size={12} className="text-emerald-400" />
-                      <span>Bank Account Number</span>
-                    </span>
-                    <span className="font-mono font-bold text-lg sm:text-2xl text-emerald-400 tracking-wider truncate block select-all">
-                      {liveSettings.cellfinAccountNumber}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(liveSettings.cellfinAccountNumber, 'cellfin_acc')}
-                    className="px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer bg-[#0A7B3E] hover:bg-[#0c9049] text-white shadow-sm flex-shrink-0 active:scale-95"
-                  >
-                    {copiedKey === 'cellfin_acc' ? (
-                      <>
-                        <Check size={14} />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        <span>Copy A/C No</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* 2. Holder Name & Routing Number in 2 Grid Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  
-                  {/* Account Name */}
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <span className="text-[10px] text-slate-400 font-mono uppercase block">A/C Holder Name</span>
-                      <span className="font-mono font-bold text-xs sm:text-sm text-white truncate block select-all">
-                        {liveSettings.cellfinAccountName}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(liveSettings.cellfinAccountName, 'cellfin_name')}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1 flex-shrink-0 cursor-pointer transition-all active:scale-95"
-                      title="Copy A/C Holder Name"
-                    >
-                      {copiedKey === 'cellfin_name' ? (
-                        <>
-                          <Check size={12} className="text-emerald-400" />
-                          <span className="text-emerald-400">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} />
-                          <span>Copy Name</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Routing Number */}
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <span className="text-[10px] text-slate-400 font-mono uppercase block">Routing Number</span>
-                      <span className="font-mono font-bold text-xs sm:text-sm text-emerald-400 truncate block select-all">
-                        {liveSettings.cellfinRoutingNumber}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(liveSettings.cellfinRoutingNumber, 'cellfin_rout')}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1 flex-shrink-0 cursor-pointer transition-all active:scale-95"
-                      title="Copy Routing Number"
-                    >
-                      {copiedKey === 'cellfin_rout' ? (
-                        <>
-                          <Check size={12} className="text-emerald-400" />
-                          <span className="text-emerald-400">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} />
-                          <span>Copy Routing</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* 3-Step Guide */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[11px] flex items-center justify-center font-mono">1</span>
-                  <p className="font-semibold text-white">Open App</p>
-                  <p className="text-[11px] text-slate-400">Open Cellfin or your internet banking app</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[11px] flex items-center justify-center font-mono">2</span>
-                  <p className="font-semibold text-white">Fund Transfer</p>
-                  <p className="text-[11px] text-slate-400">Select Cellfin to A/C or NPSB transfer</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[11px] flex items-center justify-center font-mono">3</span>
-                  <p className="font-semibold text-white">Verify Below</p>
-                  <p className="text-[11px] text-slate-400">Copy the TrxID and submit form below</p>
-                </div>
-              </div>
-
-            </div>
-          ) : method === 'bank' ? (
-            /* ============================================================== */
-            /* METHOD 2: MERCANTILE BANK LIMITED                              */
-            /* ============================================================== */
-            <div className="space-y-4">
-              
-              {/* Sleek Brand Header Banner */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0072BC]/15 via-[#0072BC]/5 to-transparent border border-[#0072BC]/30 flex items-center gap-3.5">
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 overflow-hidden border border-white/20">
-                  <img src="/images/mercantile.jpg" alt="Mercantile Bank" className="w-full h-full object-contain" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base font-bold text-white tracking-tight truncate">
-                      {liveSettings.bankName}
-                    </h2>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0072BC]/20 text-[#0072BC] border border-[#0072BC]/40">
-                      NPSB / BEFTN
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 truncate mt-0.5">
-                    {liveSettings.bankBranch} • Official Bank Account
-                  </p>
-                </div>
-              </div>
-
-              {/* Account Display Box */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-[#0072BC]/30 space-y-3 shadow-inner">
-                
-                {/* 1. Bank Account Number */}
-                <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <span className="text-[10px] text-slate-400 font-mono uppercase block flex items-center gap-1">
-                      <Building2 size={12} className="text-[#0072BC]" />
-                      <span>Bank Account Number</span>
-                    </span>
-                    <span className="font-mono font-bold text-lg sm:text-2xl text-white tracking-wider truncate block select-all">
-                      {liveSettings.bankAccountNumber}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(liveSettings.bankAccountNumber, 'bank_acc')}
-                    className="px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer bg-[#0072BC] hover:bg-[#0086dd] text-white shadow-sm flex-shrink-0 active:scale-95"
-                  >
-                    {copiedKey === 'bank_acc' ? (
-                      <>
-                        <Check size={14} />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        <span>Copy A/C No</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* 2. Holder Name & Routing Number in 2 Grid Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  
-                  {/* Account Name */}
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <span className="text-[10px] text-slate-400 font-mono uppercase block">A/C Holder Name</span>
-                      <span className="font-mono font-bold text-xs sm:text-sm text-emerald-400 truncate block select-all">
-                        {liveSettings.bankAccountName}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(liveSettings.bankAccountName, 'bank_name')}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1 flex-shrink-0 cursor-pointer transition-all active:scale-95"
-                      title="Copy A/C Holder Name"
-                    >
-                      {copiedKey === 'bank_name' ? (
-                        <>
-                          <Check size={12} className="text-emerald-400" />
-                          <span className="text-emerald-400">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} />
-                          <span>Copy Name</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Routing Number */}
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <span className="text-[10px] text-slate-400 font-mono uppercase block">Routing Number</span>
-                      <span className="font-mono font-bold text-xs sm:text-sm text-[#0072BC] truncate block select-all">
-                        {liveSettings.bankRoutingNumber}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(liveSettings.bankRoutingNumber, 'bank_rout')}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1 flex-shrink-0 cursor-pointer transition-all active:scale-95"
-                      title="Copy Routing Number"
-                    >
-                      {copiedKey === 'bank_rout' ? (
-                        <>
-                          <Check size={12} className="text-emerald-400" />
-                          <span className="text-emerald-400">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={12} />
-                          <span>Copy Routing</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* 3-Step Guide */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-[#0072BC]/20 text-[#0072BC] font-bold text-[11px] flex items-center justify-center font-mono">1</span>
-                  <p className="font-semibold text-white">Any Bank App</p>
-                  <p className="text-[11px] text-slate-400">Open Citytouch, Astha, Cellfin or EBL</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-[#0072BC]/20 text-[#0072BC] font-bold text-[11px] flex items-center justify-center font-mono">2</span>
-                  <p className="font-semibold text-white">NPSB Transfer</p>
-                  <p className="text-[11px] text-slate-400">Transfer instant to Mercantile Bank A/C</p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-[#0072BC]/20 text-[#0072BC] font-bold text-[11px] flex items-center justify-center font-mono">3</span>
-                  <p className="font-semibold text-white">Verify Below</p>
-                  <p className="text-[11px] text-slate-400">Input your reference / TrxID below</p>
-                </div>
-              </div>
-
-            </div>
-          ) : (
-            /* ============================================================== */
-            /* METHOD 3 & 4: MOBILE BANKING (BKASH OR NAGAD)                  */
-            /* ============================================================== */
-            <div className="space-y-4">
-              
-              {/* Sleek Brand Header Banner */}
-              <div
-                className="p-4 rounded-2xl border flex items-center gap-3.5"
+              {/* 1-Click Glowing Copy Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  copyToClipboard(
+                    method === 'cellfin'
+                      ? liveSettings.cellfinAccountNumber
+                      : method === 'bank'
+                      ? liveSettings.bankAccountNumber
+                      : currentNumber,
+                    'card_main'
+                  )
+                }
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-white shadow-lg flex items-center gap-1.5 transition-all cursor-pointer flex-shrink-0 active:scale-95"
                 style={{
-                  background:
-                    method === 'bkash'
-                      ? 'linear-gradient(to right, rgba(226, 19, 110, 0.15), rgba(226, 19, 110, 0.05), transparent)'
-                      : 'linear-gradient(to right, rgba(229, 57, 53, 0.15), rgba(229, 57, 53, 0.05), transparent)',
-                  borderColor: method === 'bkash' ? 'rgba(226, 19, 110, 0.35)' : 'rgba(229, 57, 53, 0.35)',
+                  backgroundColor: themeColor,
+                  boxShadow: `0 0 15px ${themeColor}60`,
                 }}
               >
-                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-white p-2 shadow-md flex items-center justify-center flex-shrink-0 overflow-hidden border border-white/20">
-                  <img
-                    src={brandLogo}
-                    alt={brandName}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base font-bold text-white">
-                      {brandName} {brandBangla}
-                    </h2>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: method === 'bkash' ? 'rgba(226, 19, 110, 0.15)' : 'rgba(229, 57, 53, 0.15)',
-                        color: themeColor,
-                      }}
-                    >
-                      Send Money
+                {copiedKey === 'card_main' ? (
+                  <>
+                    <Check size={14} />
+                    <span>কপি হয়েছে!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} />
+                    <span>কপি করুন</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Additional Info for Bank / Cellfin (Compact Micro-Chips) */}
+            {(method === 'cellfin' || method === 'bank') && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10 text-xs font-mono">
+                {/* A/C Name */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-black/30 border border-white/5">
+                  <div className="min-w-0">
+                    <span className="text-[9px] text-slate-400 block uppercase">A/C Name</span>
+                    <span className="font-bold text-white text-[11px] truncate block select-all">
+                      {method === 'cellfin' ? liveSettings.cellfinAccountName : liveSettings.bankAccountName}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 truncate mt-0.5">
-                    Md. Mominul Islam • Personal Account
-                  </p>
-                </div>
-              </div>
-
-              {/* Phone Display Box */}
-              <div
-                className="p-4 sm:p-5 rounded-2xl bg-black/60 border space-y-3 shadow-inner"
-                style={{
-                  borderColor: method === 'bkash' ? 'rgba(226, 19, 110, 0.3)' : 'rgba(229, 57, 53, 0.3)',
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
-                    <Phone size={13} style={{ color: themeColor }} />
-                    <span>Recipient Number ({brandName} Personal):</span>
-                  </span>
                   <button
                     type="button"
-                    onClick={() => copyToClipboard(currentNumber, 'phone')}
-                    className="px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer text-white shadow-sm active:scale-95"
-                    style={{ backgroundColor: themeColor }}
+                    onClick={() =>
+                      copyToClipboard(
+                        method === 'cellfin' ? liveSettings.cellfinAccountName : liveSettings.bankAccountName,
+                        'card_name'
+                      )
+                    }
+                    className="p-1 text-slate-300 hover:text-white transition-colors"
+                    title="Copy Name"
                   >
-                    {copiedKey === 'phone' ? (
-                      <>
-                        <Check size={14} />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        <span>Copy Number</span>
-                      </>
-                    )}
+                    {copiedKey === 'card_name' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                   </button>
                 </div>
 
-                <div className="font-mono font-bold text-2xl sm:text-3xl text-white tracking-widest select-all">
-                  {currentNumber}
+                {/* Routing */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-black/30 border border-white/5">
+                  <div className="min-w-0">
+                    <span className="text-[9px] text-slate-400 block uppercase">Routing No</span>
+                    <span className="font-bold text-emerald-400 text-[11px] truncate block select-all">
+                      {method === 'cellfin' ? liveSettings.cellfinRoutingNumber : liveSettings.bankRoutingNumber}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyToClipboard(
+                        method === 'cellfin' ? liveSettings.cellfinRoutingNumber : liveSettings.bankRoutingNumber,
+                        'card_rout'
+                      )
+                    }
+                    className="p-1 text-slate-300 hover:text-white transition-colors"
+                    title="Copy Routing"
+                  >
+                    {copiedKey === 'card_rout' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                  </button>
                 </div>
               </div>
+            )}
 
-              {/* 3-Step Guide */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span
-                    className="w-5 h-5 rounded-full font-bold text-[11px] flex items-center justify-center font-mono"
-                    style={{
-                      backgroundColor: method === 'bkash' ? 'rgba(226, 19, 110, 0.2)' : 'rgba(229, 57, 53, 0.2)',
-                      color: themeColor,
-                    }}
-                  >
-                    1
-                  </span>
-                  <p className="font-semibold text-white">Open App</p>
-                  <p className="text-[11px] text-slate-400">
-                    Open {brandName} app or dial {method === 'bkash' ? '*247#' : '*167#'}
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span
-                    className="w-5 h-5 rounded-full font-bold text-[11px] flex items-center justify-center font-mono"
-                    style={{
-                      backgroundColor: method === 'bkash' ? 'rgba(226, 19, 110, 0.2)' : 'rgba(229, 57, 53, 0.2)',
-                      color: themeColor,
-                    }}
-                  >
-                    2
-                  </span>
-                  <p className="font-semibold text-white">Send Money</p>
-                  <p className="text-[11px] text-slate-400">
-                    Send amount to the recipient number above
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1">
-                  <span
-                    className="w-5 h-5 rounded-full font-bold text-[11px] flex items-center justify-center font-mono"
-                    style={{
-                      backgroundColor: method === 'bkash' ? 'rgba(226, 19, 110, 0.2)' : 'rgba(229, 57, 53, 0.2)',
-                      color: themeColor,
-                    }}
-                  >
-                    3
-                  </span>
-                  <p className="font-semibold text-white">Verify Below</p>
-                  <p className="text-[11px] text-slate-400">
-                    Copy the TrxID and submit form below
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          )}
+            {/* Instruction Cue */}
+            <p className="text-[11px] text-slate-300 mt-2 text-center">
+              💡 উপরের নম্বরে টাকা পাঠিয়ে নিচের ঘরে TrxID দিয়ে সাবমিট করুন
+            </p>
+          </div>
 
           {/* ============================================================== */}
-          {/* VERIFICATION FORM - CLEAN & SPACIOUS                           */}
+          {/* STREAMLINED 3-FIELD VERIFICATION FORM (NO CLUTTER)            */}
           {/* ============================================================== */}
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4 border-t border-white/10">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles size={14} style={{ color: themeColor }} />
-                <span>Verification Details</span>
-              </h3>
-              <span className="text-[10px] text-slate-400 font-mono">* Required fields</span>
-            </div>
-
-            {/* Field: Amount */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 block">
-                Payment Amount (BDT ৳)*
+            {/* Field 1: Amount */}
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
+                <span>১. টাকার পরিমাণ (Amount ৳)*</span>
+                <span className="text-[10px] text-slate-400 font-mono">সর্বনিম্ন ৳৩০০</span>
               </label>
+              
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">
                   ৳
-                </div>
+                </span>
                 <input
                   type="number"
                   name="amount"
                   required
                   value={form.amount}
                   onChange={handleChange}
-                  placeholder="Enter amount (e.g. 500, 1000, 5000)"
-                  className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-sm font-semibold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
+                  placeholder="টাকার অংক লিখুন (যেমন: ৫০০, ১০০০, ৫০০০)"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm font-semibold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
                 />
               </div>
 
               {/* Quick Amount Chips */}
-              <div className="flex items-center gap-1.5 pt-1 overflow-x-auto pb-1">
-                <span className="text-[10px] text-slate-400 mr-1 flex-shrink-0">Quick Amount:</span>
-                {['300', '500', '1000', '2000', '5000', '10000'].map((amt) => {
+              <div className="flex items-center gap-1.5 pt-1">
+                <span className="text-[10px] text-slate-400 mr-1">কুইক সিলেক্ট:</span>
+                {['500', '1000', '2000', '5000', '10000'].map((amt) => {
                   const isSelected = form.amount === amt
                   return (
                     <button
                       key={amt}
                       type="button"
                       onClick={() => handleSetQuickAmount(amt)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all cursor-pointer flex-shrink-0 ${
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-white text-slate-950 font-bold shadow-sm'
+                          ? 'bg-white text-slate-950 font-bold shadow'
                           : 'bg-white/5 hover:bg-white/10 text-slate-300'
                       }`}
                     >
@@ -1046,60 +696,50 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            {/* Field: Sender */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 block">
-                {method === 'cellfin'
-                  ? 'Your Sender Cellfin / Bank Account or Mobile*'
-                  : method === 'bank'
-                  ? 'Your Bank Name & Account / Mobile*'
-                  : `Your Sender ${brandName} Number*`}
+            {/* Field 2: Sender Number */}
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-200 block">
+                ২. আপনার প্রেরকের নম্বর (Sender Number)*
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  {method === 'bank' || method === 'cellfin' ? <Building2 size={14} /> : <Phone size={14} />}
-                </div>
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <Phone size={14} />
+                </span>
                 <input
                   type="text"
                   name="senderNumber"
                   required
                   value={form.senderNumber}
                   onChange={handleChange}
-                  placeholder={
-                    method === 'cellfin'
-                      ? 'e.g. Cellfin 017... or Islami Bank A/C'
-                      : method === 'bank'
-                      ? 'e.g. City Bank 123456 or Cellfin'
-                      : '01XXXXXXXXX'
-                  }
-                  className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-sm font-semibold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
+                  placeholder="যে নম্বর বা অ্যাকাউন্ট থেকে টাকা পাঠিয়েছেন (01XXXXXXXXX)"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm font-semibold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
                 />
               </div>
             </div>
 
-            {/* Field: TrxID */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 block">
-                {method === 'bank' || method === 'cellfin' ? 'Transaction / Reference ID*' : 'Transaction ID (TrxID)*'}
+            {/* Field 3: TrxID */}
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-200 block">
+                ৩. ট্রানজেকশন আইডি (TrxID)*
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                   <Hash size={14} />
-                </div>
+                </span>
                 <input
                   type="text"
                   name="trxId"
                   required
                   value={form.trxId}
                   onChange={handleChange}
-                  placeholder={method === 'bank' || method === 'cellfin' ? 'e.g. REF987654 or TrxID' : 'e.g. BKH98765432'}
-                  className="w-full pl-9 pr-20 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-sm font-mono uppercase font-bold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all"
+                  placeholder="মেসেজে আসা TrxID (যেমন: BKH98765432)"
+                  className="w-full pl-9 pr-20 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm font-mono uppercase font-bold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all"
                 />
                 <button
                   type="button"
                   onClick={handlePasteTrx}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-                  title="Paste from clipboard"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Paste TrxID from clipboard"
                 >
                   <ClipboardPaste size={12} />
                   <span>PASTE</span>
@@ -1107,70 +747,41 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            {/* Field: Package / Service Item */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
-                <span>প্যাকেজ / সেবার বিবরণ (Package / Service Item)</span>
-                <span className="text-[10px] text-emerald-400 font-mono">Invoice Item</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Package size={14} />
-                </div>
-                <select
-                  value={selectedPackage}
-                  onChange={(e) => setSelectedPackage(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-xs font-semibold focus:outline-none focus:border-white/30 transition-all font-mono"
-                >
-                  <option value="MVP Mobile / Web Starter">MVP Mobile / Web Starter (Basic Package)</option>
-                  <option value="Complete Full-Stack Application">Complete Full-Stack Application (Standard Package)</option>
-                  <option value="Advanced Enterprise Ecosystem">Advanced Enterprise Ecosystem (Premium Package)</option>
-                  <option value="Custom Android Mobile App">Custom Android Mobile App Project</option>
-                  <option value="Next.js Full-Stack Web Platform">Next.js Full-Stack Web Platform</option>
-                  <option value="Online Service Payment">Online Service Payment / Milestone</option>
-                </select>
-              </div>
-            </div>
+            {/* Optional Name & Email (Collapsible Toggle so it doesn't clutter!) */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowOptionalFields(!showOptionalFields)}
+                className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer select-none"
+              >
+                <span>{showOptionalFields ? '− সাধারণ তথ্য লুকান' : '+ আপনার নাম ও ইমেইল যোগ করুন (ঐচ্ছিক)'}</span>
+                {showOptionalFields ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              </button>
 
-            {/* Field: Client Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 block">
-                Your Name / Project Title (Optional)
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <User size={14} />
+              {showOptionalFields && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 animate-fade-in">
+                  <div>
+                    <input
+                      type="text"
+                      name="clientName"
+                      value={form.clientName}
+                      onChange={handleChange}
+                      placeholder="আপনার নাম (ঐচ্ছিক)"
+                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-white/30"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="email"
+                      name="clientEmail"
+                      value={form.clientEmail}
+                      onChange={handleChange}
+                      placeholder="ইমেইল এড্রেস (ঐচ্ছিক)"
+                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-white/30 font-mono"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="text"
-                  name="clientName"
-                  value={form.clientName}
-                  onChange={handleChange}
-                  placeholder="e.g. John Doe / Portfolio Website"
-                  className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Field: Client Email (Optional) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
-                <span>Your Email Address (Optional)</span>
-                <span className="text-[10px] text-emerald-400 font-mono">For Confirmation Copy</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Mail size={14} />
-                </div>
-                <input
-                  type="email"
-                  name="clientEmail"
-                  value={form.clientEmail}
-                  onChange={handleChange}
-                  placeholder="e.g. client@example.com"
-                  className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-black/50 border border-white/10 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
-                />
-              </div>
+              )}
             </div>
 
             {/* Error Message */}
@@ -1181,15 +792,15 @@ export default function PaymentPage() {
               </div>
             )}
 
-            {/* Submit Action */}
+            {/* Big Glowing CTA Button */}
             <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-wider text-white shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-110 active:scale-[0.99] disabled:opacity-70"
+                className="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:brightness-110 active:scale-[0.99] disabled:opacity-70"
                 style={{
                   backgroundColor: themeColor,
-                  boxShadow: `0 0 25px ${themeColor}40`,
+                  boxShadow: `0 0 25px ${themeColor}50`,
                 }}
               >
                 {loading ? (
@@ -1199,24 +810,23 @@ export default function PaymentPage() {
                   </>
                 ) : (
                   <>
-                    <Mail size={18} className="text-white" />
-                    <span>VERIFY &amp; SUBMIT PAYMENT (পেমেন্ট ভেরিফাই করুন)</span>
+                    <Send size={15} />
+                    <span>পেমেন্ট নিশ্চিত করুন (SUBMIT PAYMENT)</span>
                   </>
                 )}
               </button>
             </div>
 
-            {/* Trust and WhatsApp Support Link */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-center border-t border-white/5 pt-3">
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                <Lock size={12} className="text-emerald-400" />
-                <span>256-Bit SSL Encrypted Verification</span>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
-                <Mail size={12} />
-                <span>সরাসরি নোটিফিকেশন ইমেইল ডেলিভারি</span>
-              </div>
+            {/* Bottom Security Info */}
+            <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5">
+              <span className="flex items-center gap-1">
+                <Lock size={11} className="text-emerald-400" />
+                <span>SSL Encrypted</span>
+              </span>
+              <span className="flex items-center gap-1 text-emerald-400">
+                <Mail size={11} />
+                <span>তাৎক্ষণিক ইমেইল নোটিফিকেশন</span>
+              </span>
             </div>
 
           </form>
