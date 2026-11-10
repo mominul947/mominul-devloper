@@ -234,7 +234,7 @@ export default function PaymentPage() {
 
           <div>
             <span className="text-[10px] font-mono font-bold uppercase bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
-              ✓ Verification Submitted
+              Verification Submitted
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-white mt-3">
               Payment Submitted Successfully
@@ -642,7 +642,7 @@ export default function PaymentPage() {
 
             {/* Instruction Cue */}
             <p className="text-[11px] text-slate-300 mt-2 text-center">
-              💡 Transfer to the recipient number above, then submit your TrxID below
+              Transfer to the recipient number above, then submit your TrxID below
             </p>
           </div>
 
@@ -754,7 +754,7 @@ export default function PaymentPage() {
                 onClick={() => setShowOptionalFields(!showOptionalFields)}
                 className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer select-none"
               >
-                <span>{showOptionalFields ? '− Hide additional info' : '+ Add your name & email (Optional)'}</span>
+                <span>{showOptionalFields ? '- Hide additional info' : '+ Add your name & email (Optional)'}</span>
                 {showOptionalFields ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
 
