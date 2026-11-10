@@ -64,7 +64,7 @@ const apps: AppProject[] = [
       '/images/image3/444.jpeg',
     ],
     features: [
-      'Live Production Release on Google Play Store with 5K+ Downloads & 4.7★ Rating',
+      'Live Production Release on Google Play Store with 5K+ Downloads & 4.7 Rating',
       'Real-Time Driver & Vehicle GPS Geolocation on Interactive Map',
       'Automated Fare Engine for Hourly & Intercity Ride Booking',
       'Instant Digital Invoicing, Push Telemetry & Ride History Tracking',
@@ -384,7 +384,7 @@ export default function AppShowcase() {
                       )}
                     </p>
                     <p className="text-xs font-bold text-emerald-400 mt-0.5">
-                      {isPlayStore ? `${rating} ★ / 5.0` : app.performance}
+                      {isPlayStore ? `${rating} / 5.0 Rating` : app.performance}
                     </p>
                   </div>
                 </div>

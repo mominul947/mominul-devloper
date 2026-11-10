@@ -14,6 +14,8 @@ import {
   Compass,
   CheckCircle2,
   Box,
+  Lock,
+  ZoomIn,
 } from 'lucide-react'
 import { FaAndroid } from 'react-icons/fa6'
 import { useLanguage } from '@/context/LanguageContext'
@@ -246,7 +248,7 @@ export default function WebsiteShowcase() {
                     <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block" />
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-black/60 border border-white/10 text-[10px] font-mono text-slate-300 truncate max-w-[260px] sm:max-w-xs">
-                    <span className="text-emerald-400">🔒</span>
+                    <Lock size={10} className="text-emerald-400 shrink-0" />
                     <span className="truncate">https://www.carbookbd.com/</span>
                   </div>
                   <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white" title="Open Full">
@@ -413,8 +415,8 @@ export default function WebsiteShowcase() {
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center pointer-events-none">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold text-[9px] font-mono uppercase tracking-wider mb-1">
-                        🔍 Tap to Zoom
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold text-[9px] font-mono uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <ZoomIn size={10} /> Tap to Zoom
                       </span>
                       <span className="text-white font-bold text-xs">
                         Tablet Mode
@@ -539,7 +541,7 @@ export default function WebsiteShowcase() {
                   <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block" />
                 </div>
                 <div className="flex items-center gap-1.5 px-4 py-0.5 rounded-full bg-black/60 border border-white/10 text-[10px] font-mono text-slate-300 max-w-md truncate">
-                  <span className="text-emerald-400">🔒</span>
+                  <Lock size={10} className="text-emerald-400 shrink-0" />
                   <span className="truncate">https://www.carbookbd.com/</span>
                 </div>
                 <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white">
@@ -596,7 +598,7 @@ export default function WebsiteShowcase() {
               </div>
 
               <div className="w-full h-7 bg-[#18181b] rounded-t-xl px-3 flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
-                <span className="text-emerald-400">🔒 carbookbd.com</span>
+                <span className="text-emerald-400 flex items-center gap-1"><Lock size={10} /> carbookbd.com</span>
                 <span className="text-[9px] text-slate-500 uppercase font-bold">iPad Pro (768px)</span>
               </div>
 

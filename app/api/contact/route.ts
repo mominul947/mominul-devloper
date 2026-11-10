@@ -70,7 +70,7 @@ export async function POST(request: Request) {
           from: `"Client Inquiry" <${gmailUser}>`,
           to: recipientEmail,
           replyTo: safeEmail,
-          subject: `🚀 Portfolio Message: ${safeName} (${safeProjectType})`,
+          subject: `Portfolio Message: ${safeName} (${safeProjectType})`,
           text: `Client Name: ${safeName}\nEmail: ${safeEmail}\nPhone / WhatsApp: ${safePhone || 'Not provided'}\nCategory: ${safeProjectType}\n\nMessage Details:\n${safeMessage}`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #334155;">
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
             from: 'Portfolio <onboarding@resend.dev>',
             to: [recipientEmail],
             reply_to: safeEmail,
-            subject: `🚀 Portfolio Message: ${safeName} (${safeProjectType})`,
+            subject: `Portfolio Message: ${safeName} (${safeProjectType})`,
             text: `Client Name: ${safeName}\nEmail: ${safeEmail}\nPhone: ${safePhone || 'N/A'}\nCategory: ${safeProjectType}\n\nMessage:\n${safeMessage}`,
           }),
         })

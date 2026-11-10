@@ -168,7 +168,7 @@ export default function ExploreBangladesh() {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <p className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold flex items-center gap-1.5">
                 <Compass size={14} />
-                <span>🇧🇩 IMMERSIVE 3D WEBGL PLATFORM • UPCOMING LAUNCH</span>
+                <span>IMMERSIVE 3D WEBGL PLATFORM • UPCOMING LAUNCH</span>
               </p>
             </div>
             <h2 className="font-billboard text-3xl xs:text-4xl sm:text-5xl theme-text-main tracking-wide">
@@ -576,7 +576,7 @@ export default function ExploreBangladesh() {
               {/* Modal Footer Controls */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <div className="text-xs text-stone-400 font-mono">
-                  <span>📍 {selectedSpot.coordinates} • {selectedSpot.elevation}</span>
+                  <span className="flex items-center gap-1.5"><MapPin size={12} className="text-emerald-400 shrink-0" /> {selectedSpot.coordinates} • {selectedSpot.elevation}</span>
                 </div>
 
                 <div className="flex items-center gap-2.5 w-full sm:w-auto">

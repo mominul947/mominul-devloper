@@ -260,7 +260,7 @@ export default function Contact() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <a
                     href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-                      `হ্যালো মোঃ মোমিনুল ইসলাম,\nআমি আপনার পোর্টফোলিও ওয়েবসাইট থেকে বার্তা পাঠিয়েছি:\n👤 নাম: ${submittedData?.name || ''}\n✉️ ইমেইল: ${submittedData?.email || ''}\n📞 ফোন: ${submittedData?.phone || ''}\n📁 প্রজেক্ট: ${submittedData?.projectType || ''}\n📝 বার্তা:\n${submittedData?.message || ''}`
+                      `Hello Md. Mominul Islam,\nI sent an inquiry through your portfolio website:\nName: ${submittedData?.name || ''}\nEmail: ${submittedData?.email || ''}\nPhone: ${submittedData?.phone || ''}\nProject: ${submittedData?.projectType || ''}\nMessage:\n${submittedData?.message || ''}`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -273,7 +273,7 @@ export default function Contact() {
 
                   <a
                     href={`mailto:mominulwebwork@gmail.com?subject=${encodeURIComponent(
-                      `🚀 Portfolio Inquiry: ${submittedData?.name || 'Client'} (${submittedData?.projectType || 'Project'})`
+                      `Portfolio Inquiry: ${submittedData?.name || 'Client'} (${submittedData?.projectType || 'Project'})`
                     )}&body=${encodeURIComponent(
                       `Client Name: ${submittedData?.name || ''}\nClient Email: ${submittedData?.email || ''}\nPhone / WhatsApp: ${submittedData?.phone || ''}\nProject Category: ${submittedData?.projectType || ''}\n\nMessage Details:\n${submittedData?.message || ''}`
                     )}`}

@@ -120,7 +120,7 @@ export async function POST(request: Request) {
         await transporter.sendMail({
           from: `"Payment Verification" <${gmailUser}>`,
           to: recipientEmail,
-          subject: `💰 New Payment Received: ৳${parsedAmount} via ${safeMethod} (TrxID: ${safeTrxId})`,
+          subject: `New Payment Received: ৳${parsedAmount} via ${safeMethod} (TrxID: ${safeTrxId})`,
           text: `Payment Receipt: ${receiptId}\nAmount: ৳${parsedAmount}\nMethod: ${safeMethod}\nTrxID: ${safeTrxId}\nSender: ${safeSender}\nClient: ${safeClientName}\nPhone: ${safePhone}`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #334155;">
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
             await transporter.sendMail({
               from: `"Md. Mominul Islam" <${gmailUser}>`,
               to: safeEmail,
-              subject: `✅ Payment Verification Request Received (Receipt: ${receiptId})`,
+              subject: `Payment Verification Request Received (Receipt: ${receiptId})`,
               text: `Hello ${safeClientName},\n\nWe have received your payment verification request.\nReceipt ID: ${receiptId}\nAmount: ৳${parsedAmount}\nMethod: ${safeMethod}\nTrxID: ${safeTrxId}\n\nWe are currently reviewing the transaction and will confirm shortly.\n\nBest regards,\nMd. Mominul Islam`,
               html: `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #334155;">

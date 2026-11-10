@@ -327,7 +327,7 @@ export default function TechStack3DGlobe({ items, activeCategory, inView }: Tech
       <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-[11px] font-mono text-stone-400">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-          <span>🖐️ Drag or swipe to rotate 3D sphere</span>
+          <span>Drag or swipe to rotate 3D sphere</span>
         </span>
         <span className="text-stone-500 hidden sm:inline">•</span>
         <span className="text-stone-400 hidden sm:inline">
@@ -362,7 +362,7 @@ export default function TechStack3DGlobe({ items, activeCategory, inView }: Tech
             onClick={() => setSelectedTech(null)}
             className="text-stone-400 hover:text-white text-xs px-2 py-1 rounded-md bg-white/5 cursor-pointer"
           >
-            ✕
+            Close
           </button>
         </div>
       )}
