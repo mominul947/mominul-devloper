@@ -110,14 +110,14 @@ export default function PaymentPage() {
       ? 'Cellfin / Islami Bank'
       : 'Mercantile Bank'
 
-  const brandBangla =
+  const brandSubtitle =
     method === 'bkash'
-      ? 'বিকাশ পার্সোনাল'
+      ? 'Personal Account • Instant Send Money'
       : method === 'nagad'
-      ? 'নগদ পার্সোনাল'
+      ? 'Personal Account • Instant Send Money'
       : method === 'cellfin'
-      ? 'সেলফিন ও ইসলামী ব্যাংক'
-      : 'মার্কেন্টাইল ব্যাংক'
+      ? 'Islami Bank Bangladesh • App & A/C Transfer'
+      : 'Mercantile Bank Limited • Direct Bank Transfer'
 
   const brandLogo =
     method === 'bkash'
@@ -158,7 +158,7 @@ export default function PaymentPage() {
     setSubmitError(null)
 
     if (!form.senderNumber.trim() || !form.trxId.trim() || !form.amount.trim()) {
-      setSubmitError('অনুগ্রহ করে টাকার পরিমাণ, প্রেরকের নম্বর এবং TrxID পূরণ করুন।')
+      setSubmitError('Please enter the Amount, Sender Number, and Transaction ID.')
       return
     }
 
@@ -183,7 +183,7 @@ export default function PaymentPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'পেমেন্ট ভেরিফিকেশন জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।')
+        throw new Error(data.error || 'Failed to submit payment verification. Please try again.')
       }
 
       const newReceipt = {
@@ -210,7 +210,7 @@ export default function PaymentPage() {
       setReceipt(newReceipt)
     } catch (err: any) {
       console.error(err)
-      setSubmitError(err.message || 'পেমেন্ট ভেরিফিকেশন পাঠাতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
+      setSubmitError(err.message || 'Payment submission failed. Please verify your details and try again.')
     } finally {
       setLoading(false)
     }
@@ -234,50 +234,50 @@ export default function PaymentPage() {
 
           <div>
             <span className="text-[10px] font-mono font-bold uppercase bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
-              ✓ পেমেন্ট রিসিভ ও সাবমিট সম্পন্ন
+              ✓ Verification Submitted
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-white mt-3">
-              Payment Submitted Successfully!
+              Payment Submitted Successfully
             </h2>
             <p className="text-xs text-slate-300 mt-1 flex items-center justify-center gap-1.5">
               <Mail size={13} className="text-emerald-400 flex-shrink-0" />
-              <span>পেমেন্টের তথ্য সরাসরি মোঃ মোমিনুল ইসলামের কাছে পৌঁছে গেছে।</span>
+              <span>A direct confirmation notification has been sent to Md. Mominul Islam.</span>
             </p>
           </div>
 
           {/* Minimal Digital Receipt Card */}
           <div className="p-4 rounded-2xl bg-black/60 text-left text-xs font-mono space-y-2.5 border border-white/10">
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">রিসিট নং:</span>
+              <span className="text-slate-400">Receipt ID:</span>
               <span className="font-bold text-white">{receipt.id}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">মেথড:</span>
+              <span className="text-slate-400">Payment Gateway:</span>
               <span className="font-bold text-emerald-400">{receipt.method}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">টাকার পরিমাণ:</span>
+              <span className="text-slate-400">Amount Paid:</span>
               <span className="font-bold text-white text-base">৳{receipt.amount} BDT</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">TrxID:</span>
+              <span className="text-slate-400">Transaction ID (TrxID):</span>
               <span className="font-bold text-emerald-400 text-sm tracking-wider">{receipt.trxId}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">প্রেরক:</span>
+              <span className="text-slate-400">Sender Account:</span>
               <span className="font-bold text-white">{receipt.senderPhone}</span>
             </div>
             {receipt.package && (
               <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                <span className="text-slate-400">সার্ভিস / প্রজেক্ট:</span>
+                <span className="text-slate-400">Milestone / Service:</span>
                 <span className="font-bold text-white truncate max-w-[200px] text-right">{receipt.package}</span>
               </div>
             )}
             <div className="flex justify-between items-center pt-2 border-t border-white/10 text-emerald-400">
-              <span className="text-slate-400">স্ট্যাটাস:</span>
+              <span className="text-slate-400">Status:</span>
               <span className="font-bold flex items-center gap-1.5 text-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Under Verification (যাচাই চলছে)
+                Under Verification
               </span>
             </div>
           </div>
@@ -289,19 +289,19 @@ export default function PaymentPage() {
               className="flex-1 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg"
             >
               <ArrowLeft size={14} />
-              <span>হোমপেজে ফিরে যান</span>
+              <span>Back to Portfolio</span>
             </Link>
 
             <a
               href={`https://wa.me/8801303482412?text=${encodeURIComponent(
-                `Hello Md. Mominul Islam,\nI have submitted a ${receipt.method} payment!\nTrxID: ${receipt.trxId}\nAmount: ৳${receipt.amount} BDT\nSender: ${receipt.senderPhone}\nReceipt: ${receipt.id}`
+                `Hello Md. Mominul Islam,\n\nI have submitted a ${receipt.method} payment!\n\nReceipt: ${receipt.id}\nTrxID: ${receipt.trxId}\nAmount: ৳${receipt.amount} BDT\nSender: ${receipt.senderPhone}\n\nPlease check and verify.`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="py-3 px-4 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all"
             >
               <FaWhatsapp size={15} className="text-[#25D366]" />
-              <span>WhatsApp চ্যাট</span>
+              <span>WhatsApp Chat</span>
             </a>
           </div>
 
@@ -312,7 +312,7 @@ export default function PaymentPage() {
             }}
             className="text-xs text-slate-400 hover:text-white hover:underline block mx-auto pt-1 cursor-pointer"
           >
-            আরেকটি পেমেন্ট জমা দিন
+            Submit another payment
           </button>
         </div>
       ) : !method ? (
@@ -333,14 +333,14 @@ export default function PaymentPage() {
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-bold uppercase tracking-wider mx-auto">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>256-Bit SSL Secure Gateway</span>
+              <span>256-Bit SSL Encrypted Checkout</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              পেমেন্ট মেথড নির্বাচন করুন
+              Select Payment Method
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto">
-              নিচের যেকোনো মেথডে খুব সহজে টাকা পাঠিয়ে তাৎক্ষণিক ভেরিফাই করুন
+              Choose your preferred payment gateway to transfer and submit verification
             </p>
           </div>
 
@@ -352,12 +352,12 @@ export default function PaymentPage() {
                   <Package size={16} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] text-emerald-400 font-bold uppercase block">নির্বাচিত প্যাকেজ</span>
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase block">Selected Milestone / Item</span>
                   <span className="text-xs sm:text-sm font-bold text-white truncate block">{selectedPackage}</span>
                 </div>
               </div>
               <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold uppercase">
-                INVOICE
+                INVOICE ITEM
               </span>
             </div>
           )}
@@ -377,9 +377,9 @@ export default function PaymentPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white group-hover:text-[#E2136E] transition-colors">
-                    bKash বিকাশ
+                    bKash
                   </h3>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">পার্সোনাল • Send Money</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">Personal • Send Money</span>
                 </div>
               </div>
               <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#E2136E] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
@@ -399,9 +399,9 @@ export default function PaymentPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white group-hover:text-[#E53935] transition-colors">
-                    Nagad নগদ
+                    Nagad
                   </h3>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">পার্সোনাল • Send Money</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">Personal • Send Money</span>
                 </div>
               </div>
               <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#E53935] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
@@ -421,9 +421,9 @@ export default function PaymentPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">
-                    Cellfin / ইসলামী ব্যাংক
+                    Cellfin / Islami Bank
                   </h3>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">অ্যাপ ও অ্যাকাউন্ট ট্রান্সফার</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">App &amp; A/C Transfer (NPSB)</span>
                 </div>
               </div>
               <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#0A7B3E] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
@@ -445,7 +445,7 @@ export default function PaymentPage() {
                   <h3 className="text-sm font-bold text-white group-hover:text-[#0072BC] transition-colors">
                     Mercantile Bank
                   </h3>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">যেকোনো ব্যাংক থেকে NPSB</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">Direct Transfer from Any Bank</span>
                 </div>
               </div>
               <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-[#0072BC] text-slate-400 group-hover:text-white flex items-center justify-center transition-all flex-shrink-0">
@@ -459,19 +459,19 @@ export default function PaymentPage() {
           <div className="pt-4 flex items-center justify-center gap-6 text-xs text-slate-400">
             <span className="flex items-center gap-1.5">
               <ShieldCheck size={14} className="text-emerald-400" />
-              <span>১০০% নিরাপদ ট্রানজেকশন</span>
+              <span>100% Secure Checkout</span>
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
               <Mail size={14} className="text-emerald-400" />
-              <span>সরাসরি ইমেইল নোটিফিকেশন</span>
+              <span>Instant Email Notification</span>
             </span>
           </div>
 
         </div>
       ) : (
         /* ============================================================== */
-        /* CASE 3: STREAMLINED PREMIUM FINTECH PAYMENT VIEW (NO CLUTTER)  */
+        /* CASE 3: STREAMLINED PREMIUM FINTECH PAYMENT VIEW (PURE ENGLISH)*/
         /* ============================================================== */
         <div className="w-full max-w-lg bg-gradient-to-b from-[#111726] to-[#090D15] rounded-3xl border border-white/10 shadow-2xl p-5 sm:p-7 space-y-5 relative z-10 animate-fade-in">
           
@@ -482,12 +482,12 @@ export default function PaymentPage() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer border border-white/5 group"
             >
               <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
-              <span>অন্য মেথড</span>
+              <span>All Methods</span>
             </button>
 
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{brandBangla}</span>
+              <span>Verified Gateway</span>
             </div>
           </div>
 
@@ -541,11 +541,11 @@ export default function PaymentPage() {
               </span>
             </div>
 
-            {/* Card Middle: Prominent Number to Send Money */}
+            {/* Card Middle: Prominent Recipient Number / Account */}
             <div className="my-2 p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <span className="text-[10px] text-slate-400 uppercase font-mono block">
-                  {method === 'cellfin' || method === 'bank' ? 'ব্যাংক একাউন্ট নম্বর (Account No)' : 'নম্বর (Send Money)'}
+                  {method === 'cellfin' || method === 'bank' ? 'Bank Account Number' : 'Recipient Number (Send Money)'}
                 </span>
                 <span className="text-xl sm:text-2xl font-bold font-mono text-white tracking-wider truncate block select-all">
                   {method === 'cellfin'
@@ -578,12 +578,12 @@ export default function PaymentPage() {
                 {copiedKey === 'card_main' ? (
                   <>
                     <Check size={14} />
-                    <span>কপি হয়েছে!</span>
+                    <span>Copied!</span>
                   </>
                 ) : (
                   <>
                     <Copy size={14} />
-                    <span>কপি করুন</span>
+                    <span>Copy</span>
                   </>
                 )}
               </button>
@@ -595,7 +595,7 @@ export default function PaymentPage() {
                 {/* A/C Name */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-black/30 border border-white/5">
                   <div className="min-w-0">
-                    <span className="text-[9px] text-slate-400 block uppercase">A/C Name</span>
+                    <span className="text-[9px] text-slate-400 block uppercase">Account Name</span>
                     <span className="font-bold text-white text-[11px] truncate block select-all">
                       {method === 'cellfin' ? liveSettings.cellfinAccountName : liveSettings.bankAccountName}
                     </span>
@@ -609,7 +609,7 @@ export default function PaymentPage() {
                       )
                     }
                     className="p-1 text-slate-300 hover:text-white transition-colors"
-                    title="Copy Name"
+                    title="Copy Account Name"
                   >
                     {copiedKey === 'card_name' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                   </button>
@@ -618,7 +618,7 @@ export default function PaymentPage() {
                 {/* Routing */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-black/30 border border-white/5">
                   <div className="min-w-0">
-                    <span className="text-[9px] text-slate-400 block uppercase">Routing No</span>
+                    <span className="text-[9px] text-slate-400 block uppercase">Routing Number</span>
                     <span className="font-bold text-emerald-400 text-[11px] truncate block select-all">
                       {method === 'cellfin' ? liveSettings.cellfinRoutingNumber : liveSettings.bankRoutingNumber}
                     </span>
@@ -632,7 +632,7 @@ export default function PaymentPage() {
                       )
                     }
                     className="p-1 text-slate-300 hover:text-white transition-colors"
-                    title="Copy Routing"
+                    title="Copy Routing Number"
                   >
                     {copiedKey === 'card_rout' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                   </button>
@@ -642,7 +642,7 @@ export default function PaymentPage() {
 
             {/* Instruction Cue */}
             <p className="text-[11px] text-slate-300 mt-2 text-center">
-              💡 উপরের নম্বরে টাকা পাঠিয়ে নিচের ঘরে TrxID দিয়ে সাবমিট করুন
+              💡 Transfer to the recipient number above, then submit your TrxID below
             </p>
           </div>
 
@@ -654,8 +654,8 @@ export default function PaymentPage() {
             {/* Field 1: Amount */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
-                <span>১. টাকার পরিমাণ (Amount ৳)*</span>
-                <span className="text-[10px] text-slate-400 font-mono">সর্বনিম্ন ৳৩০০</span>
+                <span>1. Payment Amount (BDT ৳)*</span>
+                <span className="text-[10px] text-slate-400 font-mono">Min ৳300</span>
               </label>
               
               <div className="relative">
@@ -668,14 +668,14 @@ export default function PaymentPage() {
                   required
                   value={form.amount}
                   onChange={handleChange}
-                  placeholder="টাকার অংক লিখুন (যেমন: ৫০০, ১০০০, ৫০০০)"
+                  placeholder="Enter amount (e.g. 500, 1000, 5000)"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm font-semibold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
                 />
               </div>
 
               {/* Quick Amount Chips */}
               <div className="flex items-center gap-1.5 pt-1">
-                <span className="text-[10px] text-slate-400 mr-1">কুইক সিলেক্ট:</span>
+                <span className="text-[10px] text-slate-400 mr-1">Quick Select:</span>
                 {['500', '1000', '2000', '5000', '10000'].map((amt) => {
                   const isSelected = form.amount === amt
                   return (
@@ -699,7 +699,7 @@ export default function PaymentPage() {
             {/* Field 2: Sender Number */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-200 block">
-                ২. আপনার প্রেরকের নম্বর (Sender Number)*
+                2. Your Sender Number / Account*
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -711,7 +711,7 @@ export default function PaymentPage() {
                   required
                   value={form.senderNumber}
                   onChange={handleChange}
-                  placeholder="যে নম্বর বা অ্যাকাউন্ট থেকে টাকা পাঠিয়েছেন (01XXXXXXXXX)"
+                  placeholder="The number or account you sent from (01XXXXXXXXX)"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm font-semibold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all font-mono"
                 />
               </div>
@@ -720,7 +720,7 @@ export default function PaymentPage() {
             {/* Field 3: TrxID */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-200 block">
-                ৩. ট্রানজেকশন আইডি (TrxID)*
+                3. Transaction ID (TrxID)*
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -732,7 +732,7 @@ export default function PaymentPage() {
                   required
                   value={form.trxId}
                   onChange={handleChange}
-                  placeholder="মেসেজে আসা TrxID (যেমন: BKH98765432)"
+                  placeholder="Enter TrxID from SMS (e.g. BKH98765432)"
                   className="w-full pl-9 pr-20 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm font-mono uppercase font-bold placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all"
                 />
                 <button
@@ -754,7 +754,7 @@ export default function PaymentPage() {
                 onClick={() => setShowOptionalFields(!showOptionalFields)}
                 className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer select-none"
               >
-                <span>{showOptionalFields ? '− সাধারণ তথ্য লুকান' : '+ আপনার নাম ও ইমেইল যোগ করুন (ঐচ্ছিক)'}</span>
+                <span>{showOptionalFields ? '− Hide additional info' : '+ Add your name & email (Optional)'}</span>
                 {showOptionalFields ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
 
@@ -766,7 +766,7 @@ export default function PaymentPage() {
                       name="clientName"
                       value={form.clientName}
                       onChange={handleChange}
-                      placeholder="আপনার নাম (ঐচ্ছিক)"
+                      placeholder="Your name (optional)"
                       className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-white/30"
                     />
                   </div>
@@ -776,7 +776,7 @@ export default function PaymentPage() {
                       name="clientEmail"
                       value={form.clientEmail}
                       onChange={handleChange}
-                      placeholder="ইমেইল এড্রেস (ঐচ্ছিক)"
+                      placeholder="Your email address (optional)"
                       className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-white/30 font-mono"
                     />
                   </div>
@@ -806,12 +806,12 @@ export default function PaymentPage() {
                 {loading ? (
                   <>
                     <Loader size={16} className="animate-spin" />
-                    <span>ভেরিফাই হচ্ছে ও সরাসরি ইমেইল পাঠানো হচ্ছে...</span>
+                    <span>Verifying &amp; dispatching notification...</span>
                   </>
                 ) : (
                   <>
                     <Send size={15} />
-                    <span>পেমেন্ট নিশ্চিত করুন (SUBMIT PAYMENT)</span>
+                    <span>Verify &amp; Submit Payment</span>
                   </>
                 )}
               </button>
@@ -821,11 +821,11 @@ export default function PaymentPage() {
             <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5">
               <span className="flex items-center gap-1">
                 <Lock size={11} className="text-emerald-400" />
-                <span>SSL Encrypted</span>
+                <span>256-Bit SSL Encrypted</span>
               </span>
               <span className="flex items-center gap-1 text-emerald-400">
                 <Mail size={11} />
-                <span>তাৎক্ষণিক ইমেইল নোটিফিকেশন</span>
+                <span>Instant Notification Delivery</span>
               </span>
             </div>
 

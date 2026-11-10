@@ -29,21 +29,21 @@ export async function POST(request: Request) {
     // 1. Strict Validation
     if (!rawSender || !rawTrxId || !cleanAmount) {
       return NextResponse.json(
-        { error: 'প্রেরকের নম্বর, Transaction ID (TrxID) এবং টাকার পরিমাণ প্রদান করা আবশ্যক।' },
+        { error: 'Sender number, Transaction ID (TrxID), and Amount are required.' },
         { status: 400 }
       )
     }
 
     if (!isValidTrxId(rawTrxId)) {
       return NextResponse.json(
-        { error: 'অকার্যকর Transaction ID। অনুগ্রহ করে সঠিক TrxID লিখুন।' },
+        { error: 'Invalid Transaction ID. Please provide a valid TrxID.' },
         { status: 400 }
       )
     }
 
     if (!isValidPhone(rawSender)) {
       return NextResponse.json(
-        { error: 'অকার্যকর ফোন নম্বর। অনুগ্রহ করে সঠিক ১১ ডিজিটের নম্বর লিখুন।' },
+        { error: 'Invalid phone or account number. Please check and try again.' },
         { status: 400 }
       )
     }
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const parsedAmount = Number(cleanAmount)
     if (isNaN(parsedAmount) || parsedAmount < 10 || parsedAmount > 500000) {
       return NextResponse.json(
-        { error: 'টাকার পরিমাণ ১০ থেকে ৫,০০,০০০ টাকার মধ্যে হতে হবে।' },
+        { error: 'Amount must be between ৳10 and ৳500,000 BDT.' },
         { status: 400 }
       )
     }
