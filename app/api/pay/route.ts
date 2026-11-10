@@ -207,24 +207,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // 5. Send automated confirmation SMS in Bangla to the client via BulkSMSBD API
-    const bulksmsApiKey = process.env.BULKSMSBD_API_KEY || 'VGteWKqNueLhX6iFOrJ0'
-    const bulksmsSenderId = process.env.BULKSMSBD_SENDER_ID || '8809648910453'
-
-    if (safePhone && bulksmsApiKey) {
-      try {
-        let cleanPhone = safePhone.replace(/[^0-9]/g, '')
-        if (cleanPhone.startsWith('01')) cleanPhone = '88' + cleanPhone
-        if (cleanPhone.length >= 11) {
-          const banglaMsg = `প্রিয় ${safeClientName}, আপনার ৳${parsedAmount.toLocaleString('en-US')} টাকার পেমেন্ট সাবমিশন সফলভাবে গ্রহণ করা হয়েছে (TrxID: ${safeTrxId})। ভেরিফিকেশন সম্পন্ন হলে চূড়ান্ত কনফার্মেশন পাবেন। ধন্যবাদ - মোমিনুল ইসলাম।`
-          const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(bulksmsApiKey)}&senderid=${encodeURIComponent(bulksmsSenderId)}&number=${encodeURIComponent(cleanPhone)}&message=${encodeURIComponent(banglaMsg)}&type=text`
-          fetch(smsUrl).catch(e => console.error('BulkSMSBD dispatch error:', e))
-        }
-      } catch (smsErr) {
-        console.error('BulkSMSBD SMS error:', smsErr)
-      }
-    }
-
     return NextResponse.json({
       success: true,
       receiptId,
@@ -262,19 +244,6 @@ export async function PATCH(request: Request) {
     target.status = data.status
     target.updatedAt = new Date().toISOString()
     saveStoredPayments(payments)
-
-    // If approved, send celebratory Bengali confirmation SMS
-    if (data.status === 'approved' && target.clientPhone) {
-      const bulksmsApiKey = process.env.BULKSMSBD_API_KEY || 'VGteWKqNueLhX6iFOrJ0'
-      const bulksmsSenderId = process.env.BULKSMSBD_SENDER_ID || '8809648910453'
-      let cleanPhone = target.clientPhone.replace(/[^0-9]/g, '')
-      if (cleanPhone.startsWith('01')) cleanPhone = '88' + cleanPhone
-      if (cleanPhone.length >= 11) {
-        const approvedMsg = `প্রিয় ${target.clientName}, আপনার ৳${Number(target.amount).toLocaleString('en-US')} টাকার পেমেন্ট সফলভাবে ভেরিফাইড ও নিশ্চিত করা হয়েছে (TrxID: ${target.trxId})। আপনার সার্ভিসের কাজ শুরু হয়েছে। ধন্যবাদ - মোমিনুল ইসলাম।`
-        const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(bulksmsApiKey)}&senderid=${encodeURIComponent(bulksmsSenderId)}&number=${encodeURIComponent(cleanPhone)}&message=${encodeURIComponent(approvedMsg)}&type=text`
-        fetch(smsUrl).catch(e => console.error('BulkSMSBD approval SMS error:', e))
-      }
-    }
 
     return NextResponse.json({ success: true, payment: target })
   } catch (err: any) {
