@@ -359,3 +359,22 @@ iframe::-webkit-scrollbar {
   background: transparent !important;
 }
 
+/* -------------------------------------------------------------
+   SEAMLESS CONTINUOUS BANNER MARQUEE (RIGHT TO LEFT)
+------------------------------------------------------------- */
+@keyframes bannerMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-banner-marquee {
+  animation-name: bannerMarquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
