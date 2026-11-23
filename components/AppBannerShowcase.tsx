@@ -12,8 +12,6 @@ import {
   ChevronRight,
   Layers,
   CheckCircle2,
-  Play,
-  Pause,
   ArrowRight,
 } from 'lucide-react'
 import FiverrLogo from '@/components/FiverrLogo'
@@ -394,9 +392,15 @@ export default function AppBannerShowcase() {
   const [activeFilter, setActiveFilter] = useState<AppBanner['filterTag']>('all')
   const [zoomedBanner, setZoomedBanner] = useState<AppBanner | null>(null)
   const [currentIdx, setCurrentIdx] = useState<number>(0)
-  const [isPaused, setIsPaused] = useState<boolean>(false)
 
   const carouselRef = useRef<HTMLDivElement>(null)
+  const scrollPosRef = useRef<number>(0)
+  const singleSetWidthRef = useRef<number>(0)
+  const isInteractingRef = useRef<boolean>(false)
+  const isProgrammaticRef = useRef<boolean>(false)
+  const programmaticTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const animFrameRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number>(0)
   const { language } = useLanguage()
 
   const filterTabs = useMemo(() => [
@@ -414,68 +418,223 @@ export default function AppBannerShowcase() {
     return appBanners.filter((b) => b.filterTag === activeFilter)
   }, [activeFilter])
 
-  // Center/scroll to active card
-  const scrollToCard = useCallback((targetIdx: number) => {
-    if (!carouselRef.current) return
-    const container = carouselRef.current
-    const cards = container.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
-    if (cards[targetIdx]) {
-      const card = cards[targetIdx]
-      const containerWidth = container.clientWidth
-      const cardLeft = card.offsetLeft
-      const cardWidth = card.clientWidth
-      const targetScroll = cardLeft - (containerWidth - cardWidth) / 2
-      container.scrollTo({ left: targetScroll, behavior: 'smooth' })
-      setCurrentIdx(targetIdx)
+  // Tripled banner set for seamless infinite loop: [Set 0, Set 1, Set 2]
+  const { baseCount, displayBanners } = useMemo(() => {
+    if (filteredBanners.length === 0) return { baseCount: 0, displayBanners: [] }
+    let base = [...filteredBanners]
+    while (base.length < 8) {
+      base = [...base, ...filteredBanners]
     }
-  }, [])
+    return {
+      baseCount: base.length,
+      displayBanners: [...base, ...base, ...base],
+    }
+  }, [filteredBanners])
 
-  // Continuous auto-sliding mechanism (Smooth loop across both PC and Mobile)
+  // Measure single set width (from card 0 to card baseCount)
+  const measureSetWidth = useCallback(() => {
+    if (!carouselRef.current || baseCount === 0) return 0
+    const cards = carouselRef.current.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
+    if (cards.length >= baseCount * 2 && cards[0] && cards[baseCount]) {
+      const width = cards[baseCount].offsetLeft - cards[0].offsetLeft
+      if (width > 0) {
+        singleSetWidthRef.current = width
+        return width
+      }
+    }
+    return 0
+  }, [baseCount])
+
+  // Initialize position to Set 1 and listen to resize
   useEffect(() => {
-    if (isPaused || zoomedBanner) return
+    const el = carouselRef.current
+    if (!el) return
 
-    const interval = setInterval(() => {
-      setCurrentIdx((prev) => {
-        const next = (prev + 1) % filteredBanners.length
-        scrollToCard(next)
-        return next
-      })
-    }, 3200)
+    const initPosition = () => {
+      const width = measureSetWidth()
+      if (width > 0 && el) {
+        el.scrollLeft = width
+        scrollPosRef.current = width
+      }
+    }
 
-    return () => clearInterval(interval)
-  }, [isPaused, zoomedBanner, filteredBanners.length, scrollToCard])
+    const t1 = setTimeout(initPosition, 50)
+    const t2 = setTimeout(initPosition, 250)
+
+    const handleResize = () => {
+      measureSetWidth()
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [measureSetWidth, activeFilter])
+
+  // Continuous auto-sliding animation loop (Non-stop, steady, smooth "asta" sliding)
+  useEffect(() => {
+    if (zoomedBanner) return // only pause if fullscreen zoom modal is active
+
+    const speed = 36 // pixels per second — smooth, gentle, perfectly continuous (asta)
+    lastTimeRef.current = performance.now()
+
+    const step = (now: number) => {
+      const dt = Math.min((now - lastTimeRef.current) / 1000, 0.1) // prevent jump on tab switch
+      lastTimeRef.current = now
+
+      const el = carouselRef.current
+      const setWidth = singleSetWidthRef.current
+
+      if (el && setWidth > 0 && !isInteractingRef.current && !isProgrammaticRef.current) {
+        scrollPosRef.current += speed * dt
+
+        // Seamless wrap when reaching Set 2: shift back by setWidth to Set 1
+        if (scrollPosRef.current >= setWidth * 2) {
+          scrollPosRef.current -= setWidth
+        } else if (scrollPosRef.current < setWidth * 0.5) {
+          scrollPosRef.current += setWidth
+        }
+
+        el.scrollLeft = scrollPosRef.current
+      }
+
+      animFrameRef.current = requestAnimationFrame(step)
+    }
+
+    animFrameRef.current = requestAnimationFrame(step)
+
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+    }
+  }, [zoomedBanner])
 
   // Reset carousel index when filter changes
   useEffect(() => {
     setCurrentIdx(0)
-    if (carouselRef.current) {
-      carouselRef.current.scrollTo({ left: 0, behavior: 'smooth' })
-    }
+    isProgrammaticRef.current = false
   }, [activeFilter])
 
-  // Track active card when manually scrolled
+  // Track active card when scrolling
   const handleScroll = () => {
     if (!carouselRef.current) return
     const el = carouselRef.current
+    const setWidth = singleSetWidthRef.current
+    if (setWidth <= 0) return
+
     const cards = el.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
-    if (!cards || cards.length === 0) return
-    const cardWidth = cards[0].clientWidth
-    const scrollLeft = el.scrollLeft
-    const idx = Math.round(scrollLeft / (cardWidth + 16))
-    const clamped = Math.min(filteredBanners.length - 1, Math.max(0, idx))
-    if (clamped !== currentIdx) {
-      setCurrentIdx(clamped)
+    if (cards.length === 0) return
+
+    const cardWidth = cards[0].clientWidth + 20
+    const normalized = ((el.scrollLeft % setWidth) + setWidth) % setWidth
+    const idx = Math.floor(normalized / cardWidth) % filteredBanners.length
+    if (idx >= 0 && idx < filteredBanners.length && idx !== currentIdx) {
+      setCurrentIdx(idx)
     }
   }
 
-  const handlePrev = () => {
-    const prev = (currentIdx - 1 + filteredBanners.length) % filteredBanners.length
-    scrollToCard(prev)
+  const handleNext = () => {
+    if (!carouselRef.current) return
+    const el = carouselRef.current
+    const cards = el.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
+    const cardWidth = cards[0]?.clientWidth || 380
+    const stepDist = cardWidth + 20
+
+    isProgrammaticRef.current = true
+    if (programmaticTimeoutRef.current) clearTimeout(programmaticTimeoutRef.current)
+
+    el.scrollBy({ left: stepDist, behavior: 'smooth' })
+
+    programmaticTimeoutRef.current = setTimeout(() => {
+      if (carouselRef.current) {
+        scrollPosRef.current = carouselRef.current.scrollLeft
+        const setWidth = singleSetWidthRef.current
+        if (setWidth > 0 && scrollPosRef.current >= setWidth * 2) {
+          scrollPosRef.current -= setWidth
+          carouselRef.current.scrollLeft = scrollPosRef.current
+        }
+      }
+      isProgrammaticRef.current = false
+    }, 450)
   }
 
-  const handleNext = () => {
-    const next = (currentIdx + 1) % filteredBanners.length
-    scrollToCard(next)
+  const handlePrev = () => {
+    if (!carouselRef.current) return
+    const el = carouselRef.current
+    const cards = el.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
+    const cardWidth = cards[0]?.clientWidth || 380
+    const stepDist = cardWidth + 20
+
+    isProgrammaticRef.current = true
+    if (programmaticTimeoutRef.current) clearTimeout(programmaticTimeoutRef.current)
+
+    el.scrollBy({ left: -stepDist, behavior: 'smooth' })
+
+    programmaticTimeoutRef.current = setTimeout(() => {
+      if (carouselRef.current) {
+        scrollPosRef.current = carouselRef.current.scrollLeft
+        const setWidth = singleSetWidthRef.current
+        if (setWidth > 0 && scrollPosRef.current < setWidth) {
+          scrollPosRef.current += setWidth
+          carouselRef.current.scrollLeft = scrollPosRef.current
+        }
+      }
+      isProgrammaticRef.current = false
+    }, 450)
+  }
+
+  const handleDotClick = (dotIdx: number) => {
+    if (!carouselRef.current) return
+    const el = carouselRef.current
+    const setWidth = singleSetWidthRef.current
+    const cards = el.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
+    if (cards.length === 0 || setWidth <= 0) return
+
+    const cardWidth = cards[0].clientWidth + 20
+    const targetScroll = setWidth + (dotIdx * cardWidth)
+
+    isProgrammaticRef.current = true
+    if (programmaticTimeoutRef.current) clearTimeout(programmaticTimeoutRef.current)
+
+    el.scrollTo({ left: targetScroll, behavior: 'smooth' })
+    setCurrentIdx(dotIdx)
+
+    programmaticTimeoutRef.current = setTimeout(() => {
+      if (carouselRef.current) {
+        scrollPosRef.current = carouselRef.current.scrollLeft
+      }
+      isProgrammaticRef.current = false
+    }, 450)
+  }
+
+  const handleTouchStart = () => {
+    isInteractingRef.current = true
+  }
+
+  const handleTouchEnd = () => {
+    setTimeout(() => {
+      if (carouselRef.current) {
+        scrollPosRef.current = carouselRef.current.scrollLeft
+        const setWidth = singleSetWidthRef.current
+        if (setWidth > 0) {
+          if (scrollPosRef.current >= setWidth * 2) {
+            scrollPosRef.current -= setWidth
+            carouselRef.current.scrollLeft = scrollPosRef.current
+          } else if (scrollPosRef.current < setWidth * 0.5) {
+            scrollPosRef.current += setWidth
+            carouselRef.current.scrollLeft = scrollPosRef.current
+          }
+        }
+      }
+      isInteractingRef.current = false
+    }, 100)
+  }
+
+  const handleWheel = () => {
+    if (carouselRef.current) {
+      scrollPosRef.current = carouselRef.current.scrollLeft
+    }
   }
 
   // Lightbox keyboard navigation
@@ -506,7 +665,7 @@ export default function AppBannerShowcase() {
 
   return (
     <section id="app-banners" className="relative py-16 sm:py-20 lg:py-24 overflow-hidden theme-main-bg theme-text-main border-t theme-border">
-      
+
       {/* Background ambient lighting */}
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full blur-[140px] pointer-events-none opacity-10"
@@ -514,7 +673,7 @@ export default function AppBannerShowcase() {
       />
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
@@ -556,7 +715,7 @@ export default function AppBannerShowcase() {
 
         {/* Filter Pills & Auto-Slide Indicator Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
-          
+
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none max-w-full">
             {filterTabs.map((tab) => {
@@ -565,17 +724,15 @@ export default function AppBannerShowcase() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveFilter(tab.id as AppBanner['filterTag'])}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                    isActive
-                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
-                      : 'border theme-border theme-text-muted hover:theme-text-main bg-black/5 dark:bg-white/5 hover:border-emerald-500/40'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${isActive
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
+                    : 'border theme-border theme-text-muted hover:theme-text-main bg-black/5 dark:bg-white/5 hover:border-emerald-500/40'
+                    }`}
                 >
                   <span>{language === 'bn' ? tab.labelBn : tab.label}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                      isActive ? 'bg-black/20 text-slate-950' : 'bg-emerald-500/15 text-emerald-400'
-                    }`}
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-black/20 text-slate-950' : 'bg-emerald-500/15 text-emerald-400'
+                      }`}
                   >
                     {tab.count}
                   </span>
@@ -586,60 +743,51 @@ export default function AppBannerShowcase() {
 
           {/* Slider Status Pill (Auto-sliding active indicator) */}
           <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
-                isPaused
-                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-400'
-                  : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
-              }`}
-            >
-              {isPaused ? <Pause size={12} /> : <Play size={12} className="fill-emerald-400" />}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-xs font-mono transition-all">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
               <span className="font-bold">
                 {currentIdx + 1} of {filteredBanners.length}
               </span>
               <span className="hidden xs:inline text-[10px] opacity-80">
-                {isPaused
-                  ? (language === 'bn' ? '• স্থগিত' : '• Paused')
-                  : (language === 'bn' ? '• অটো-স্লাইড হচ্ছে' : '• Auto-Sliding')}
+                {language === 'bn' ? '• অবিরাম অটো-স্লাইড' : '• Continuous Auto-Slide'}
               </span>
             </div>
           </div>
         </div>
 
         {/* =========================================================================
-            UNIFIED AUTO-SLIDING CAROUSEL (BOTH PC & MOBILE):
-            - Auto-slides continuously and smoothly
-            - Pauses on mouse hover or touch
+            CONTINUOUS UNINTERRUPTED AUTO-SLIDING CAROUSEL:
+            - Smooth steady slow auto-sliding without stopping ("asta auto sliding, kono thambe na")
             - Left/Right manual arrows + dot pagination
-            - Responsive card sizing (1 on mobile, 2 on tablet, 3 on PC)
+            - Fullscreen lightbox zoom & order actions intact
            ========================================================================= */}
-        <div
-          className="relative group/slider"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
-        >
+        <div className="relative group/slider">
           {/* Slider Horizontal Track */}
           <div
             ref={carouselRef}
             onScroll={handleScroll}
-            className="flex items-stretch overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-5 lg:gap-6 pb-4 pt-1 px-1 sm:px-2 scrollbar-none scroll-smooth select-none"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onWheel={handleWheel}
+            className="flex items-stretch overflow-x-auto gap-4 sm:gap-5 lg:gap-6 pb-4 pt-1 px-1 sm:px-2 scrollbar-none select-none"
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            {filteredBanners.map((banner, idx) => {
-              const isCurrent = currentIdx === idx
+            {displayBanners.map((banner, idx) => {
+              const isCurrent = (idx % filteredBanners.length) === currentIdx
               return (
                 <div
-                  key={banner.id}
+                  key={`${banner.id}-${idx}`}
                   data-banner-card-wrapper
-                  className="w-[84vw] max-w-[340px] sm:w-[46vw] sm:max-w-[400px] lg:w-[31.5vw] lg:max-w-[440px] flex-shrink-0 snap-center transition-all duration-300"
+                  className="w-[84vw] max-w-[340px] sm:w-[46vw] sm:max-w-[400px] lg:w-[31.5vw] lg:max-w-[440px] flex-shrink-0 transition-all duration-300"
                 >
                   <div
-                    className={`flex flex-col rounded-3xl border transition-all duration-300 shadow-xl overflow-hidden relative h-full ${
-                      isCurrent
-                        ? 'border-emerald-500/60 shadow-emerald-500/10 ring-1 ring-emerald-500/30'
-                        : 'theme-border hover:border-emerald-500/40'
-                    }`}
+                    className={`flex flex-col rounded-3xl border transition-all duration-300 shadow-xl overflow-hidden relative h-full ${isCurrent
+                      ? 'border-emerald-500/60 shadow-emerald-500/10 ring-1 ring-emerald-500/30'
+                      : 'theme-border hover:border-emerald-500/40'
+                      }`}
                     style={{ backgroundColor: 'var(--bg-card)' }}
                   >
                     {/* Subtle Top Accent Ambient Glow */}
@@ -778,12 +926,11 @@ export default function AppBannerShowcase() {
               return (
                 <button
                   key={dotIdx}
-                  onClick={() => scrollToCard(dotIdx)}
-                  className={`transition-all rounded-full cursor-pointer ${
-                    isDotActive
-                      ? 'w-6 h-2 bg-emerald-500 shadow-md shadow-emerald-500/30'
-                      : 'w-2 h-2 bg-white/20 hover:bg-white/50'
-                  }`}
+                  onClick={() => handleDotClick(dotIdx)}
+                  className={`transition-all rounded-full cursor-pointer ${isDotActive
+                    ? 'w-6 h-2 bg-emerald-500 shadow-md shadow-emerald-500/30'
+                    : 'w-2 h-2 bg-white/20 hover:bg-white/50'
+                    }`}
                   title={`Go to banner ${dotIdx + 1}`}
                   aria-label={`Go to banner ${dotIdx + 1}`}
                 />
@@ -793,8 +940,8 @@ export default function AppBannerShowcase() {
 
           <p className="text-[11px] font-mono text-center theme-text-muted">
             {language === 'bn'
-              ? '✨ অটো স্লাইড হচ্ছে • মাউস বা হাত রাখলে সাময়িক থামবে • অ্যারো বা ডট চেপে সরাসরি নেভিগেট করুন'
-              : '✨ Smooth auto-sliding active • Pauses on hover/touch • Click arrows or dots to navigate'}
+              ? '✨ নিরবচ্ছিন্ন অটো-স্লাইড চালু রয়েছে • যেকোনো ব্যানারে ক্লিক করে পূর্ণাঙ্গ ভিউ দেখুন • অ্যারো বা ডট চেপে সরাসরি নেভিগেট করুন'
+              : '✨ Continuous auto-sliding active • Click any banner to zoom full preview • Use arrows or dots to navigate'}
           </p>
         </div>
 
