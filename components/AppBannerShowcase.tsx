@@ -11,12 +11,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Layers,
-  ArrowRight,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  SlidersHorizontal,
-  Grid,
+  Play,
+  Pause,
+  ArrowRight,
 } from 'lucide-react'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
@@ -395,9 +393,8 @@ export const appBanners: AppBanner[] = [
 export default function AppBannerShowcase() {
   const [activeFilter, setActiveFilter] = useState<AppBanner['filterTag']>('all')
   const [zoomedBanner, setZoomedBanner] = useState<AppBanner | null>(null)
-  const [mobileViewMode, setMobileViewMode] = useState<'carousel' | 'grid'>('carousel')
-  const [currentMobileIdx, setCurrentMobileIdx] = useState<number>(0)
-  const [expandedMobileGrid, setExpandedMobileGrid] = useState<boolean>(false)
+  const [currentIdx, setCurrentIdx] = useState<number>(0)
+  const [isPaused, setIsPaused] = useState<boolean>(false)
 
   const carouselRef = useRef<HTMLDivElement>(null)
   const { language } = useLanguage()
@@ -417,52 +414,79 @@ export default function AppBannerShowcase() {
     return appBanners.filter((b) => b.filterTag === activeFilter)
   }, [activeFilter])
 
+  // Center/scroll to active card
+  const scrollToCard = useCallback((targetIdx: number) => {
+    if (!carouselRef.current) return
+    const container = carouselRef.current
+    const cards = container.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
+    if (cards[targetIdx]) {
+      const card = cards[targetIdx]
+      const containerWidth = container.clientWidth
+      const cardLeft = card.offsetLeft
+      const cardWidth = card.clientWidth
+      const targetScroll = cardLeft - (containerWidth - cardWidth) / 2
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' })
+      setCurrentIdx(targetIdx)
+    }
+  }, [])
+
+  // Continuous auto-sliding mechanism (Smooth loop across both PC and Mobile)
+  useEffect(() => {
+    if (isPaused || zoomedBanner) return
+
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => {
+        const next = (prev + 1) % filteredBanners.length
+        scrollToCard(next)
+        return next
+      })
+    }, 3200)
+
+    return () => clearInterval(interval)
+  }, [isPaused, zoomedBanner, filteredBanners.length, scrollToCard])
+
   // Reset carousel index when filter changes
   useEffect(() => {
-    setCurrentMobileIdx(0)
+    setCurrentIdx(0)
     if (carouselRef.current) {
       carouselRef.current.scrollTo({ left: 0, behavior: 'smooth' })
     }
   }, [activeFilter])
 
-  // Handle horizontal scroll on carousel
-  const handleCarouselScroll = () => {
+  // Track active card when manually scrolled
+  const handleScroll = () => {
     if (!carouselRef.current) return
     const el = carouselRef.current
-    const cardWidth = el.querySelector('[data-banner-card]')?.clientWidth || 300
+    const cards = el.querySelectorAll<HTMLDivElement>('[data-banner-card-wrapper]')
+    if (!cards || cards.length === 0) return
+    const cardWidth = cards[0].clientWidth
     const scrollLeft = el.scrollLeft
-    const idx = Math.round(scrollLeft / (cardWidth + 14))
-    setCurrentMobileIdx(Math.min(filteredBanners.length - 1, Math.max(0, idx)))
-  }
-
-  const scrollToCard = (targetIdx: number) => {
-    if (!carouselRef.current) return
-    const cards = carouselRef.current.querySelectorAll<HTMLDivElement>('[data-banner-card]')
-    if (cards[targetIdx]) {
-      cards[targetIdx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
-      setCurrentMobileIdx(targetIdx)
+    const idx = Math.round(scrollLeft / (cardWidth + 16))
+    const clamped = Math.min(filteredBanners.length - 1, Math.max(0, idx))
+    if (clamped !== currentIdx) {
+      setCurrentIdx(clamped)
     }
   }
 
-  const scrollPrevCard = () => {
-    const nextIdx = Math.max(0, currentMobileIdx - 1)
-    scrollToCard(nextIdx)
+  const handlePrev = () => {
+    const prev = (currentIdx - 1 + filteredBanners.length) % filteredBanners.length
+    scrollToCard(prev)
   }
 
-  const scrollNextCard = () => {
-    const nextIdx = Math.min(filteredBanners.length - 1, currentMobileIdx + 1)
-    scrollToCard(nextIdx)
+  const handleNext = () => {
+    const next = (currentIdx + 1) % filteredBanners.length
+    scrollToCard(next)
   }
 
   // Lightbox keyboard navigation
-  const handlePrevBanner = useCallback(() => {
+  const handlePrevLightbox = useCallback(() => {
     if (!zoomedBanner) return
     const curIdx = appBanners.findIndex((b) => b.id === zoomedBanner.id)
     const prevIdx = (curIdx - 1 + appBanners.length) % appBanners.length
     setZoomedBanner(appBanners[prevIdx])
   }, [zoomedBanner])
 
-  const handleNextBanner = useCallback(() => {
+  const handleNextLightbox = useCallback(() => {
     if (!zoomedBanner) return
     const curIdx = appBanners.findIndex((b) => b.id === zoomedBanner.id)
     const nextIdx = (curIdx + 1) % appBanners.length
@@ -473,129 +497,12 @@ export default function AppBannerShowcase() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!zoomedBanner) return
       if (e.key === 'Escape') setZoomedBanner(null)
-      if (e.key === 'ArrowLeft') handlePrevBanner()
-      if (e.key === 'ArrowRight') handleNextBanner()
+      if (e.key === 'ArrowLeft') handlePrevLightbox()
+      if (e.key === 'ArrowRight') handleNextLightbox()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [zoomedBanner, handlePrevBanner, handleNextBanner])
-
-  // Reusable Single Banner Card Render
-  const renderBannerCard = (banner: AppBanner, idx: number, isCompact: boolean = false) => {
-    return (
-      <div
-        key={banner.id}
-        data-banner-card
-        className="flex flex-col rounded-3xl border theme-border hover:border-emerald-500/40 transition-all duration-300 shadow-xl overflow-hidden group relative h-full"
-        style={{ backgroundColor: 'var(--bg-card)' }}
-      >
-        {/* Subtle Top Accent Ambient Glow */}
-        <div
-          className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity"
-          style={{ backgroundColor: banner.accent }}
-        />
-
-        {/* Banner Image Container with Zoom Click */}
-        <div
-          className="relative w-full aspect-[16/10] bg-black/40 cursor-zoom-in overflow-hidden select-none"
-          onClick={() => setZoomedBanner(banner)}
-          title="Click to Zoom Fullscreen"
-        >
-          <Image
-            src={banner.image}
-            alt={banner.title}
-            fill
-            sizes="(max-width: 768px) 90vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-            priority={idx < 2}
-          />
-
-          {/* Gradient Overlay for Readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-60 group-hover:opacity-40 transition-opacity" />
-
-          {/* Category & Deliverable Badges on Image */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
-            <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-black/75 backdrop-blur-md text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{language === 'bn' ? banner.categoryBn : banner.category}</span>
-            </span>
-
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold bg-black/70 backdrop-blur-md text-stone-200 border border-white/15 shadow-md truncate max-w-[150px]">
-              {language === 'bn' ? banner.deliverableBn : banner.deliverable}
-            </span>
-          </div>
-
-          {/* Hover Zoom Prompt */}
-          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-            <span className="px-3 py-1.5 rounded-full bg-black/85 backdrop-blur-md text-xs font-mono text-white flex items-center gap-2 border border-white/20 shadow-xl">
-              <Maximize2 size={13} className="text-emerald-400" />
-              <span>{language === 'bn' ? 'বড় করে দেখুন' : 'Click to Zoom'}</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Banner Content Body */}
-        <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-1">
-          {/* Title */}
-          <h3 className="font-billboard text-lg sm:text-xl lg:text-2xl theme-text-main leading-tight tracking-wide mb-1.5 group-hover:text-emerald-400 transition-colors">
-            {language === 'bn' ? banner.titleBn : banner.title}
-          </h3>
-
-          {/* Tagline / Description */}
-          <p className="text-xs theme-text-muted leading-relaxed line-clamp-2 mb-3.5">
-            {language === 'bn' ? banner.taglineBn : banner.tagline}
-          </p>
-
-          {/* Highlights */}
-          <div className="space-y-1 pt-2.5 border-t theme-border mb-3.5 flex-1">
-            {(language === 'bn' ? banner.highlightsBn : banner.highlights).slice(0, 2).map((feat, fIdx) => (
-              <p key={fIdx} className="text-[11px] theme-text-muted leading-snug flex items-start gap-1.5">
-                <CheckCircle2 size={12} className="text-emerald-400 mt-0.5 flex-shrink-0" />
-                <span className="line-clamp-1">{feat}</span>
-              </p>
-            ))}
-          </div>
-
-          {/* Tech Stack Chips */}
-          <div className="flex flex-wrap gap-1 mb-4">
-            {banner.techStack.map((tech) => (
-              <span
-                key={tech}
-                className="px-2 py-0.5 rounded-md text-[10px] font-mono border theme-border bg-black/5 dark:bg-white/5 theme-text-muted font-medium"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t theme-border">
-            <button
-              onClick={() => setZoomedBanner(banner)}
-              className="py-2 sm:py-2.5 rounded-xl btn-theme-secondary font-mono text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer font-bold"
-            >
-              <Maximize2 size={12} />
-              <span>{language === 'bn' ? 'জুম ভিউ' : 'Zoom View'}</span>
-            </button>
-
-            <a
-              href="https://www.fiverr.com/s/WebEmax"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2 sm:py-2.5 rounded-xl btn-theme-primary font-mono text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 font-bold cursor-pointer shadow-md"
-            >
-              <FiverrLogo size={13} />
-              <span>{language === 'bn' ? 'অর্ডার করুন' : 'Order Build'}</span>
-              <ExternalLink size={10} />
-            </a>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Cards to show in mobile grid
-  const mobileGridBanners = expandedMobileGrid ? filteredBanners : filteredBanners.slice(0, 3)
+  }, [zoomedBanner, handlePrevLightbox, handleNextLightbox])
 
   return (
     <section id="app-banners" className="relative py-16 sm:py-20 lg:py-24 overflow-hidden theme-main-bg theme-text-main border-t theme-border">
@@ -606,7 +513,7 @@ export default function AppBannerShowcase() {
         style={{ background: 'radial-gradient(circle, #10b981 0%, transparent 70%)' }}
       />
 
-      <div className="max-w-[1550px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <motion.div
@@ -614,7 +521,7 @@ export default function AppBannerShowcase() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-10 border-b theme-border pb-4 sm:pb-6"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-8 border-b theme-border pb-4 sm:pb-6"
         >
           <div>
             <p className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold mb-1 flex items-center gap-1.5">
@@ -627,13 +534,13 @@ export default function AppBannerShowcase() {
             </p>
             <h2 className="font-billboard text-2xl xs:text-3xl sm:text-4xl lg:text-5xl theme-text-main tracking-wide">
               {language === 'bn'
-                ? 'ফিচার্ড অ্যাপস ও ড্যাশবোর্ড ব্যানার গ্যালারি'
-                : 'FEATURED APP BANNERS & SUITE SHOWCASE'}
+                ? 'ফিচার্ড অ্যাপস ও ড্যাশবোর্ড ব্যানার স্লাইডার'
+                : 'FEATURED APP BANNERS & SUITE SLIDER'}
             </h2>
             <p className="text-xs sm:text-sm theme-text-muted mt-1.5 max-w-2xl leading-relaxed">
               {language === 'bn'
-                ? 'বিভিন্ন দেশি-বিদেশি ক্লায়েন্ট ও বাণিজ্যিক প্রজেক্টের জন্য নির্মিত অ্যাপ ও ড্যাশবোর্ডের হাই-রেজোলিউশন প্রোডাকশন ব্যানার ও সিস্টেম আর্কিটেকচার।'
-                : 'Curated high-resolution production banners, system interfaces, and architecture deliverables engineered for global clients across multiple industries.'}
+                ? 'দেশি-বিদেশি ক্লায়েন্ট ও বাণিজ্যিক প্রজেক্টের জন্য নির্মিত অ্যাপ ও ড্যাশবোর্ডের হাই-রেজোলিউশন প্রোডাকশন ব্যানার — স্মুথ অটো স্লাইডিং শোকেস।'
+                : 'Curated high-resolution production banners, system interfaces, and architecture deliverables with smooth continuous auto-sliding.'}
             </p>
           </div>
 
@@ -647,224 +554,249 @@ export default function AppBannerShowcase() {
           </div>
         </motion.div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-5 sm:mb-8 scrollbar-none select-none">
-          {filterTabs.map((tab) => {
-            const isActive = activeFilter === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveFilter(tab.id as AppBanner['filterTag'])}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                  isActive
-                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
-                    : 'border theme-border theme-text-muted hover:theme-text-main bg-black/5 dark:bg-white/5 hover:border-emerald-500/40'
-                }`}
-              >
-                <span>{language === 'bn' ? tab.labelBn : tab.label}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isActive ? 'bg-black/20 text-slate-950' : 'bg-emerald-500/15 text-emerald-400'
+        {/* Filter Pills & Auto-Slide Indicator Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
+          
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none max-w-full">
+            {filterTabs.map((tab) => {
+              const isActive = activeFilter === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveFilter(tab.id as AppBanner['filterTag'])}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
+                      : 'border theme-border theme-text-muted hover:theme-text-main bg-black/5 dark:bg-white/5 hover:border-emerald-500/40'
                   }`}
                 >
-                  {tab.count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* =========================================================================
-            MOBILE VIEW (md:hidden):
-            NO MORE ENDLESS SCROLLING!
-            Features Touch Snap Carousel + Slider/Grid Toggle Mode + Show More
-           ========================================================================= */}
-        <div className="md:hidden space-y-4 mb-4">
-          
-          {/* Mobile Mode Switcher & Counter Bar */}
-          <div className="flex items-center justify-between gap-2 p-2 rounded-2xl border theme-border bg-black/10 dark:bg-black/30 backdrop-blur-md">
-            
-            {/* Left: Counter & Touch Hint */}
-            <div className="flex items-center gap-1.5 text-xs font-mono theme-text-muted min-w-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-              <span className="font-bold text-emerald-400">
-                {mobileViewMode === 'carousel'
-                  ? `${currentMobileIdx + 1} of ${filteredBanners.length}`
-                  : `${filteredBanners.length} ${language === 'bn' ? 'টি ব্যানার' : 'Banners'}`}
-              </span>
-              <span className="text-[10px] theme-text-muted truncate hidden xs:inline">
-                • {mobileViewMode === 'carousel' ? (language === 'bn' ? 'ডানে-বামে সোয়াইপ করুন' : 'Swipe left/right') : ''}
-              </span>
-            </div>
-
-            {/* Right: Mode Toggle (Slider vs Grid) */}
-            <div className="flex items-center gap-1 p-0.5 rounded-xl border theme-border bg-black/30 flex-shrink-0">
-              <button
-                onClick={() => setMobileViewMode('carousel')}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                  mobileViewMode === 'carousel'
-                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                    : 'theme-text-muted hover:theme-text-main'
-                }`}
-              >
-                <SlidersHorizontal size={11} />
-                <span>{language === 'bn' ? 'স্লাইডার' : 'Slider'}</span>
-              </button>
-              <button
-                onClick={() => setMobileViewMode('grid')}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                  mobileViewMode === 'grid'
-                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                    : 'theme-text-muted hover:theme-text-main'
-                }`}
-              >
-                <Grid size={11} />
-                <span>{language === 'bn' ? 'গ্রিড ভিউ' : 'Grid'}</span>
-              </button>
-            </div>
+                  <span>{language === 'bn' ? tab.labelBn : tab.label}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isActive ? 'bg-black/20 text-slate-950' : 'bg-emerald-500/15 text-emerald-400'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
-          {/* 1. MOBILE CAROUSEL MODE (Smooth Horizontal Snap Swipe - Zero Scroll Fatigue!) */}
-          {mobileViewMode === 'carousel' && (
-            <div className="space-y-3">
-              {/* Carousel Track */}
-              <div
-                ref={carouselRef}
-                onScroll={handleCarouselScroll}
-                className="flex items-stretch overflow-x-auto snap-x snap-mandatory gap-3.5 pb-2 pt-1 px-1 scrollbar-none scroll-smooth select-none"
-              >
-                {filteredBanners.map((banner, idx) => (
-                  <div
-                    key={banner.id}
-                    className="w-[84vw] max-w-[340px] flex-shrink-0 snap-center"
-                  >
-                    {renderBannerCard(banner, idx, true)}
-                  </div>
-                ))}
-              </div>
-
-              {/* Mobile Carousel Controls & Progress Dots */}
-              <div className="flex items-center justify-between gap-3 pt-1 px-1">
-                {/* Prev Button */}
-                <button
-                  onClick={scrollPrevCard}
-                  disabled={currentMobileIdx === 0}
-                  className={`w-9 h-9 rounded-full border theme-border flex items-center justify-center transition-all cursor-pointer shadow-md ${
-                    currentMobileIdx === 0
-                      ? 'opacity-30 cursor-not-allowed bg-black/10'
-                      : 'bg-stone-900 text-white hover:bg-emerald-500 hover:text-black border-stone-700'
-                  }`}
-                  aria-label="Previous card"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                {/* Dots Pagination Track */}
-                <div className="flex items-center gap-1.5 overflow-x-auto max-w-[200px] py-1 px-2 scrollbar-none justify-center">
-                  {filteredBanners.map((_, dotIdx) => {
-                    const isDotActive = currentMobileIdx === dotIdx
-                    return (
-                      <button
-                        key={dotIdx}
-                        onClick={() => scrollToCard(dotIdx)}
-                        className={`transition-all rounded-full cursor-pointer ${
-                          isDotActive
-                            ? 'w-5 h-2 bg-emerald-500 shadow-sm shadow-emerald-500/30'
-                            : 'w-2 h-2 bg-white/20 hover:bg-white/50'
-                        }`}
-                        title={`Go to banner ${dotIdx + 1}`}
-                        aria-label={`Go to banner ${dotIdx + 1}`}
-                      />
-                    )
-                  })}
-                </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={scrollNextCard}
-                  disabled={currentMobileIdx === filteredBanners.length - 1}
-                  className={`w-9 h-9 rounded-full border theme-border flex items-center justify-center transition-all cursor-pointer shadow-md ${
-                    currentMobileIdx === filteredBanners.length - 1
-                      ? 'opacity-30 cursor-not-allowed bg-black/10'
-                      : 'bg-stone-900 text-white hover:bg-emerald-500 hover:text-black border-stone-700'
-                  }`}
-                  aria-label="Next card"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-
-              <p className="text-[10px] font-mono text-center theme-text-muted">
-                {language === 'bn'
-                  ? '👈 বাটন বা আঙুল দিয়ে ডানে-বামে সোয়াইপ করে সব ব্যানার ব্রাউজ করুন'
-                  : '👈 Swipe left/right or use arrow buttons to explore all banners'}
-              </p>
+          {/* Slider Status Pill (Auto-sliding active indicator) */}
+          <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
+                isPaused
+                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-400'
+                  : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+              }`}
+            >
+              {isPaused ? <Pause size={12} /> : <Play size={12} className="fill-emerald-400" />}
+              <span className="font-bold">
+                {currentIdx + 1} of {filteredBanners.length}
+              </span>
+              <span className="hidden xs:inline text-[10px] opacity-80">
+                {isPaused
+                  ? (language === 'bn' ? '• স্থগিত' : '• Paused')
+                  : (language === 'bn' ? '• অটো-স্লাইড হচ্ছে' : '• Auto-Sliding')}
+              </span>
             </div>
-          )}
-
-          {/* 2. MOBILE GRID MODE WITH COMPACT EXPAND (Top 3 Cards + Show All Button) */}
-          {mobileViewMode === 'grid' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                {mobileGridBanners.map((banner, idx) => (
-                  <div key={banner.id}>
-                    {renderBannerCard(banner, idx, true)}
-                  </div>
-                ))}
-              </div>
-
-              {filteredBanners.length > 3 && (
-                <div className="pt-2 text-center">
-                  <button
-                    onClick={() => setExpandedMobileGrid((prev) => !prev)}
-                    className="w-full py-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-mono text-xs uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
-                  >
-                    {expandedMobileGrid ? (
-                      <>
-                        <ChevronUp size={14} />
-                        <span>{language === 'bn' ? 'সংক্ষেপ করুন (কমিয়ে দেখুন)' : 'Show Less Banners'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown size={14} />
-                        <span>
-                          {language === 'bn'
-                            ? `সবগুলো ব্যানার দেখুন (আরও ${filteredBanners.length - 3}টি বাকি)`
-                            : `Show All Banners (${filteredBanners.length - 3} more)`}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
+          </div>
         </div>
 
         {/* =========================================================================
-            DESKTOP & TABLET VIEW (hidden md:grid):
-            High-Resolution 2/3 Column Grid View (As shown in screenshot)
+            UNIFIED AUTO-SLIDING CAROUSEL (BOTH PC & MOBILE):
+            - Auto-slides continuously and smoothly
+            - Pauses on mouse hover or touch
+            - Left/Right manual arrows + dot pagination
+            - Responsive card sizing (1 on mobile, 2 on tablet, 3 on PC)
            ========================================================================= */}
-        <motion.div
-          layout
-          className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-7 items-stretch"
+        <div
+          className="relative group/slider"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
         >
-          <AnimatePresence>
-            {filteredBanners.map((banner, idx) => (
-              <motion.div
-                layout
-                key={banner.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.35, delay: idx * 0.03 }}
-              >
-                {renderBannerCard(banner, idx, false)}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+          {/* Slider Horizontal Track */}
+          <div
+            ref={carouselRef}
+            onScroll={handleScroll}
+            className="flex items-stretch overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-5 lg:gap-6 pb-4 pt-1 px-1 sm:px-2 scrollbar-none scroll-smooth select-none"
+          >
+            {filteredBanners.map((banner, idx) => {
+              const isCurrent = currentIdx === idx
+              return (
+                <div
+                  key={banner.id}
+                  data-banner-card-wrapper
+                  className="w-[84vw] max-w-[340px] sm:w-[46vw] sm:max-w-[400px] lg:w-[31.5vw] lg:max-w-[440px] flex-shrink-0 snap-center transition-all duration-300"
+                >
+                  <div
+                    className={`flex flex-col rounded-3xl border transition-all duration-300 shadow-xl overflow-hidden relative h-full ${
+                      isCurrent
+                        ? 'border-emerald-500/60 shadow-emerald-500/10 ring-1 ring-emerald-500/30'
+                        : 'theme-border hover:border-emerald-500/40'
+                    }`}
+                    style={{ backgroundColor: 'var(--bg-card)' }}
+                  >
+                    {/* Subtle Top Accent Ambient Glow */}
+                    <div
+                      className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity"
+                      style={{ backgroundColor: banner.accent }}
+                    />
+
+                    {/* Banner Image Container with Zoom Click */}
+                    <div
+                      className="relative w-full aspect-[16/10] bg-black/40 cursor-zoom-in overflow-hidden select-none"
+                      onClick={() => setZoomedBanner(banner)}
+                      title="Click to Zoom Fullscreen"
+                    >
+                      <Image
+                        src={banner.image}
+                        alt={banner.title}
+                        fill
+                        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover object-top transition-transform duration-500 hover:scale-105"
+                        priority={idx < 3}
+                      />
+
+                      {/* Gradient Overlay for Readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-60 hover:opacity-40 transition-opacity" />
+
+                      {/* Category & Deliverable Badges on Image */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+                        <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-black/75 backdrop-blur-md text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>{language === 'bn' ? banner.categoryBn : banner.category}</span>
+                        </span>
+
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold bg-black/70 backdrop-blur-md text-stone-200 border border-white/15 shadow-md truncate max-w-[150px]">
+                          {language === 'bn' ? banner.deliverableBn : banner.deliverable}
+                        </span>
+                      </div>
+
+                      {/* Hover Zoom Prompt */}
+                      <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <span className="px-3 py-1.5 rounded-full bg-black/85 backdrop-blur-md text-xs font-mono text-white flex items-center gap-2 border border-white/20 shadow-xl">
+                          <Maximize2 size={13} className="text-emerald-400" />
+                          <span>{language === 'bn' ? 'বড় করে দেখুন' : 'Click to Zoom'}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Banner Content Body */}
+                    <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-1">
+                      {/* Title */}
+                      <h3 className="font-billboard text-lg sm:text-xl lg:text-2xl theme-text-main leading-tight tracking-wide mb-1.5 group-hover:text-emerald-400 transition-colors">
+                        {language === 'bn' ? banner.titleBn : banner.title}
+                      </h3>
+
+                      {/* Tagline / Description */}
+                      <p className="text-xs theme-text-muted leading-relaxed line-clamp-2 mb-3.5">
+                        {language === 'bn' ? banner.taglineBn : banner.tagline}
+                      </p>
+
+                      {/* Highlights */}
+                      <div className="space-y-1 pt-2.5 border-t theme-border mb-3.5 flex-1">
+                        {(language === 'bn' ? banner.highlightsBn : banner.highlights).slice(0, 2).map((feat, fIdx) => (
+                          <p key={fIdx} className="text-[11px] theme-text-muted leading-snug flex items-start gap-1.5">
+                            <CheckCircle2 size={12} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                            <span className="line-clamp-1">{feat}</span>
+                          </p>
+                        ))}
+                      </div>
+
+                      {/* Tech Stack Chips */}
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {banner.techStack.map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-2 py-0.5 rounded-md text-[10px] font-mono border theme-border bg-black/5 dark:bg-white/5 theme-text-muted font-medium"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t theme-border">
+                        <button
+                          onClick={() => setZoomedBanner(banner)}
+                          className="py-2 sm:py-2.5 rounded-xl btn-theme-secondary font-mono text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer font-bold"
+                        >
+                          <Maximize2 size={12} />
+                          <span>{language === 'bn' ? 'জুম ভিউ' : 'Zoom View'}</span>
+                        </button>
+
+                        <a
+                          href="https://www.fiverr.com/s/WebEmax"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2 sm:py-2.5 rounded-xl btn-theme-primary font-mono text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 font-bold cursor-pointer shadow-md"
+                        >
+                          <FiverrLogo size={13} />
+                          <span>{language === 'bn' ? 'অর্ডার করুন' : 'Order Build'}</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Left Arrow Button (Visible on both PC and Mobile) */}
+          <button
+            onClick={handlePrev}
+            className="absolute -left-2 sm:-left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-2xl flex items-center justify-center cursor-pointer z-30 hover:bg-emerald-500 hover:text-black transition-all hover:scale-110 active:scale-95"
+            title="Previous banner"
+            aria-label="Previous banner"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          {/* Right Arrow Button (Visible on both PC and Mobile) */}
+          <button
+            onClick={handleNext}
+            className="absolute -right-2 sm:-right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-stone-900/90 text-white border border-stone-700 shadow-2xl flex items-center justify-center cursor-pointer z-30 hover:bg-emerald-500 hover:text-black transition-all hover:scale-110 active:scale-95"
+            title="Next banner"
+            aria-label="Next banner"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+
+        {/* Bottom Progress Navigation Dots & Hint */}
+        <div className="flex flex-col items-center justify-center gap-2.5 mt-5">
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full py-1.5 px-3 rounded-full border theme-border bg-black/20 backdrop-blur-sm scrollbar-none">
+            {filteredBanners.map((_, dotIdx) => {
+              const isDotActive = currentIdx === dotIdx
+              return (
+                <button
+                  key={dotIdx}
+                  onClick={() => scrollToCard(dotIdx)}
+                  className={`transition-all rounded-full cursor-pointer ${
+                    isDotActive
+                      ? 'w-6 h-2 bg-emerald-500 shadow-md shadow-emerald-500/30'
+                      : 'w-2 h-2 bg-white/20 hover:bg-white/50'
+                  }`}
+                  title={`Go to banner ${dotIdx + 1}`}
+                  aria-label={`Go to banner ${dotIdx + 1}`}
+                />
+              )
+            })}
+          </div>
+
+          <p className="text-[11px] font-mono text-center theme-text-muted">
+            {language === 'bn'
+              ? '✨ অটো স্লাইড হচ্ছে • মাউস বা হাত রাখলে সাময়িক থামবে • অ্যারো বা ডট চেপে সরাসরি নেভিগেট করুন'
+              : '✨ Smooth auto-sliding active • Pauses on hover/touch • Click arrows or dots to navigate'}
+          </p>
+        </div>
 
       </div>
 
@@ -930,7 +862,7 @@ export default function AppBannerShowcase() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
-                    handlePrevBanner()
+                    handlePrevLightbox()
                   }}
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-emerald-500 hover:text-black text-white border border-white/20 shadow-xl flex items-center justify-center transition-all cursor-pointer z-30"
                   title="Previous banner (Left Arrow)"
@@ -943,7 +875,7 @@ export default function AppBannerShowcase() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleNextBanner()
+                    handleNextLightbox()
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-emerald-500 hover:text-black text-white border border-white/20 shadow-xl flex items-center justify-center transition-all cursor-pointer z-30"
                   title="Next banner (Right Arrow)"
