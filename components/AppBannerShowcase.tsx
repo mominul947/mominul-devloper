@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sparkles,
@@ -13,6 +14,7 @@ import {
   Layers,
   CheckCircle2,
   ArrowRight,
+  ArrowUpRight,
 } from 'lucide-react'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
@@ -391,9 +393,15 @@ export const appBanners: AppBanner[] = [
 export default function AppBannerShowcase() {
   const [activeFilter, setActiveFilter] = useState<AppBanner['filterTag']>('all')
   const [zoomedBanner, setZoomedBanner] = useState<AppBanner | null>(null)
-  const [scrollSpeed, setScrollSpeed] = useState<number>(1)
-  const [scrollDirection, setScrollDirection] = useState<'normal' | 'reverse'>('normal')
   const { language } = useLanguage()
+
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const isDownRef = useRef(false)
+  const startXRef = useRef(0)
+  const scrollLeftRef = useRef(0)
+  const hasDraggedRef = useRef(false)
+  const isInteractingRef = useRef(false)
+  const resumeTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const filterTabs = useMemo(() => [
     { id: 'all', label: 'All Banners', labelBn: 'সবগুলো ব্যানার', count: 14 },
@@ -410,7 +418,7 @@ export default function AppBannerShowcase() {
     return appBanners.filter((b) => b.filterTag === activeFilter)
   }, [activeFilter])
 
-  // Repeated base set of banners so that it has at least 8 banners, then duplicated for seamless -50% marquee loop
+  // Repeated base set of banners so that it has at least 8 banners, then duplicated for seamless scroll
   const marqueeBanners = useMemo(() => {
     if (filteredBanners.length === 0) return []
     let base = [...filteredBanners]
@@ -420,11 +428,91 @@ export default function AppBannerShowcase() {
     return [...base, ...base]
   }, [filteredBanners])
 
-  // Duration in seconds: ~6.5s per item in base set at 1x speed, perfectly smooth & calm pace
-  const animationDuration = useMemo(() => {
-    const baseCount = Math.max(8, filteredBanners.length)
-    return Math.round((baseCount * 6.5) / scrollSpeed)
-  }, [filteredBanners.length, scrollSpeed])
+  // Mouse Drag Handlers (PC: Grab & Drag horizontally)
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!carouselRef.current) return
+    isDownRef.current = true
+    hasDraggedRef.current = false
+    isInteractingRef.current = true
+    startXRef.current = e.pageX - carouselRef.current.offsetLeft
+    scrollLeftRef.current = carouselRef.current.scrollLeft
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
+  }
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDownRef.current || !carouselRef.current) return
+    e.preventDefault()
+    const x = e.pageX - carouselRef.current.offsetLeft
+    const walk = (x - startXRef.current) * 1.5
+    if (Math.abs(walk) > 4) {
+      hasDraggedRef.current = true
+    }
+    carouselRef.current.scrollLeft = scrollLeftRef.current - walk
+  }
+
+  const onMouseUpOrLeave = () => {
+    if (!isDownRef.current) return
+    isDownRef.current = false
+    // Resume auto-slide after 1 second of releasing
+    resumeTimerRef.current = setTimeout(() => {
+      isInteractingRef.current = false
+      hasDraggedRef.current = false
+    }, 1000)
+  }
+
+  // Touch Swipe Handlers (Mobile: Touch Drag with hand)
+  const onTouchStart = () => {
+    isInteractingRef.current = true
+    hasDraggedRef.current = false
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
+  }
+
+  const onTouchMove = () => {
+    hasDraggedRef.current = true
+  }
+
+  const onTouchEnd = () => {
+    resumeTimerRef.current = setTimeout(() => {
+      isInteractingRef.current = false
+      hasDraggedRef.current = false
+    }, 1000)
+  }
+
+  // Continuous Auto-Sliding (Smooth Right-to-Left Infinite Loop)
+  useEffect(() => {
+    if (zoomedBanner) return
+
+    const speed = 36 // pixels per second — smooth, calming, steady pace
+    let lastTime = performance.now()
+    let animId: number
+
+    const tick = (now: number) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.1)
+      lastTime = now
+
+      const el = carouselRef.current
+      if (el && !isInteractingRef.current) {
+        el.scrollLeft += speed * dt
+
+        const halfWidth = el.scrollWidth / 2
+        if (halfWidth > 0) {
+          if (el.scrollLeft >= halfWidth) {
+            el.scrollLeft -= halfWidth
+          } else if (el.scrollLeft <= 0) {
+            el.scrollLeft += halfWidth
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(tick)
+    }
+
+    animId = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(animId)
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
+    }
+  }, [zoomedBanner])
 
   // Lightbox keyboard navigation
   const handlePrevLightbox = useCallback(() => {
@@ -492,8 +580,17 @@ export default function AppBannerShowcase() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs font-mono px-3.5 py-1.5 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-bold flex items-center gap-1.5">
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+            <Link
+              href="/apps"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 transition-all flex-shrink-0"
+            >
+              <Layers size={14} />
+              <span>{language === 'bn' ? 'সব অ্যাপস দেখুন (View All)' : 'View All Apps'}</span>
+              <ArrowUpRight size={14} />
+            </Link>
+
+            <span className="text-xs font-mono px-3.5 py-1.5 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-bold flex items-center gap-1.5 flex-shrink-0">
               <Sparkles size={12} />
               <span>
                 {language === 'bn' ? '১৪টি প্রোডাকশন ব্যানার' : '14 PRODUCTION BANNERS'}
@@ -530,45 +627,44 @@ export default function AppBannerShowcase() {
             })}
           </div>
 
-          {/* Continuous Auto-Sliding Active Indicator */}
+          {/* Continuous Auto-Sliding Active Indicator & Subdomain Direct Link */}
           <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-xs font-mono shadow-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="font-bold">
-                {language === 'bn' ? 'অবিরাম অটো-স্লাইড (ডান → বাম)' : 'Auto-Sliding (R → L)'}
-              </span>
-              <span className="hidden xs:inline text-[10px] opacity-80">
-                {scrollDirection === 'reverse'
-                  ? (language === 'bn' ? '• বামে চলছে' : '• Left')
-                  : (language === 'bn' ? '• চলছে' : '• Active')}
-              </span>
-            </div>
+            <Link
+              href="/apps"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500 hover:text-black text-emerald-400 text-xs font-mono font-bold transition-all shadow-sm"
+              title="Open full catalog on apps.mominul.dev"
+            >
+              <Sparkles size={12} />
+              <span>apps.mominul.dev</span>
+              <ArrowUpRight size={12} />
+            </Link>
           </div>
         </div>
 
         {/* =========================================================================
-            HARDWARE-ACCELERATED CONTINUOUS NON-STOP MARQUEE (RIGHT TO LEFT):
-            - Auto-slides from right to left continuously ("dane thake bame jaitei thakbe")
-            - Completely automatic, never stops ("akdom auto, thambe na")
-            - 60fps/120fps GPU compositor layer
-            - 2 identical sets for seamless infinite -50% translation
+            AUTO-SLIDING + HAND-DRAG & MOUSE-DRAG CAROUSEL:
+            - Continuous auto-slide from right to left non-stop ("dane thake bame jaitei thakbe, thambe na")
+            - Hand drag on phone / mouse drag on PC ("phone ba pc te hat diye tane dekhte parbe")
+            - No side arrow buttons ("2 site theke ero button sorao")
+            - Seamless infinite modulo wrap via scrollWidth / 2
            ========================================================================= */}
         <div className="relative group/slider overflow-hidden py-2 select-none">
-          {/* Edge fade gradients */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 z-20 pointer-events-none bg-gradient-to-r from-[var(--bg-main)] to-transparent" />
-          <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 z-20 pointer-events-none bg-gradient-to-l from-[var(--bg-main)] to-transparent" />
+          {/* Edge fade masks */}
+          <div className="absolute left-0 top-0 bottom-0 w-6 sm:w-12 z-20 pointer-events-none bg-gradient-to-r from-[var(--bg-main)] to-transparent" />
+          <div className="absolute right-0 top-0 bottom-0 w-6 sm:w-12 z-20 pointer-events-none bg-gradient-to-l from-[var(--bg-main)] to-transparent" />
 
-          {/* Marquee Track */}
+          {/* Marquee Track (Drag on PC + Swipe on Mobile + Auto-Slide) */}
           <div
-            className="flex items-stretch gap-4 sm:gap-5 lg:gap-6 w-max animate-banner-marquee"
-            style={{
-              animationDuration: `${animationDuration}s`,
-              animationDirection: scrollDirection,
-              animationPlayState: zoomedBanner ? 'paused' : 'running',
-            }}
+            ref={carouselRef}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUpOrLeave}
+            onMouseLeave={onMouseUpOrLeave}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            className="flex items-stretch overflow-x-auto gap-4 sm:gap-5 lg:gap-6 pb-4 pt-1 px-1 sm:px-2 scrollbar-none select-none cursor-grab active:cursor-grabbing"
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
             {marqueeBanners.map((banner, idx) => {
               return (
@@ -589,7 +685,11 @@ export default function AppBannerShowcase() {
                     {/* Banner Image Container with Zoom Click */}
                     <div
                       className="relative w-full aspect-[16/10] bg-black/40 cursor-zoom-in overflow-hidden select-none"
-                      onClick={() => setZoomedBanner(banner)}
+                      onClick={() => {
+                        if (!hasDraggedRef.current) {
+                          setZoomedBanner(banner)
+                        }
+                      }}
                       title="Click to Zoom Fullscreen"
                     >
                       <Image
@@ -597,15 +697,16 @@ export default function AppBannerShowcase() {
                         alt={banner.title}
                         fill
                         sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover object-top transition-transform duration-500 hover:scale-105"
+                        className="object-cover object-top transition-transform duration-500 hover:scale-105 pointer-events-none"
                         priority={idx < 3}
+                        draggable={false}
                       />
 
                       {/* Gradient Overlay for Readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-60 hover:opacity-40 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-60 hover:opacity-40 transition-opacity pointer-events-none" />
 
                       {/* Category & Deliverable Badges on Image */}
-                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10 pointer-events-none">
                         <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-black/75 backdrop-blur-md text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-md">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                           <span>{language === 'bn' ? banner.categoryBn : banner.category}</span>
@@ -662,7 +763,11 @@ export default function AppBannerShowcase() {
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t theme-border">
                         <button
-                          onClick={() => setZoomedBanner(banner)}
+                          onClick={() => {
+                            if (!hasDraggedRef.current) {
+                              setZoomedBanner(banner)
+                            }
+                          }}
                           className="py-2 sm:py-2.5 rounded-xl btn-theme-secondary font-mono text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer font-bold"
                         >
                           <Maximize2 size={12} />
@@ -686,86 +791,14 @@ export default function AppBannerShowcase() {
               )
             })}
           </div>
-
-          {/* Left Arrow Button: Reverses flow (left to right) */}
-          <button
-            onClick={() => setScrollDirection((prev) => (prev === 'normal' ? 'reverse' : 'normal'))}
-            className={`absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full border shadow-2xl flex items-center justify-center cursor-pointer z-30 transition-all hover:scale-110 active:scale-95 ${
-              scrollDirection === 'reverse'
-                ? 'bg-emerald-500 text-black border-emerald-400 ring-2 ring-emerald-500/40 shadow-emerald-500/30'
-                : 'bg-stone-900/90 text-white border-stone-700 hover:bg-emerald-500 hover:text-black'
-            }`}
-            title={language === 'bn' ? 'বাম দিকে স্লাইড করুন' : 'Slide left to right'}
-            aria-label="Slide Left to Right"
-          >
-            <ChevronLeft size={20} />
-          </button>
-
-          {/* Right Arrow Button: Speeds up temporarily or normal right-to-left */}
-          <button
-            onClick={() => {
-              setScrollDirection('normal')
-              setScrollSpeed((prev) => (prev === 1 ? 2 : 1))
-            }}
-            className={`absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 rounded-full border shadow-2xl flex items-center justify-center cursor-pointer z-30 transition-all hover:scale-110 active:scale-95 ${
-              scrollSpeed > 1
-                ? 'bg-emerald-500 text-black border-emerald-400 ring-2 ring-emerald-500/40 shadow-emerald-500/30'
-                : 'bg-stone-900/90 text-white border-stone-700 hover:bg-emerald-500 hover:text-black'
-            }`}
-            title={language === 'bn' ? 'গতি বাড়ান বা ডান-থেকে-বামে স্লাইড' : 'Speed up or normal direction'}
-            aria-label="Speed up or normal direction"
-          >
-            <ChevronRight size={20} />
-          </button>
         </div>
 
-        {/* Bottom Control Pills & Hint */}
-        <div className="flex flex-col items-center justify-center gap-3 mt-6">
-          <div className="flex items-center gap-2 p-1.5 rounded-full border theme-border bg-black/30 backdrop-blur-md">
-            <button
-              onClick={() => {
-                setScrollDirection('normal')
-                setScrollSpeed(1)
-              }}
-              className={`px-3.5 py-1 rounded-full text-xs font-mono font-bold transition-all cursor-pointer ${
-                scrollDirection === 'normal' && scrollSpeed === 1
-                  ? 'bg-emerald-500 text-black shadow-md'
-                  : 'theme-text-muted hover:theme-text-main'
-              }`}
-            >
-              {language === 'bn' ? 'স্বাভাবিক গতি (ডান → বাম)' : 'Normal (R → L)'}
-            </button>
-            <button
-              onClick={() => {
-                setScrollDirection('normal')
-                setScrollSpeed(2)
-              }}
-              className={`px-3.5 py-1 rounded-full text-xs font-mono font-bold transition-all cursor-pointer ${
-                scrollDirection === 'normal' && scrollSpeed === 2
-                  ? 'bg-emerald-500 text-black shadow-md'
-                  : 'theme-text-muted hover:theme-text-main'
-              }`}
-            >
-              {language === 'bn' ? 'দ্রুত গতি (২x)' : 'Fast (2x)'}
-            </button>
-            <button
-              onClick={() => setScrollDirection((prev) => (prev === 'normal' ? 'reverse' : 'normal'))}
-              className={`px-3.5 py-1 rounded-full text-xs font-mono font-bold transition-all cursor-pointer ${
-                scrollDirection === 'reverse'
-                  ? 'bg-emerald-500 text-black shadow-md'
-                  : 'theme-text-muted hover:theme-text-main'
-              }`}
-            >
-              {language === 'bn' ? 'বাম → ডান' : 'Reverse (L → R)'}
-            </button>
-          </div>
-
-          <p className="text-[11px] font-mono text-center theme-text-muted">
-            {language === 'bn'
-              ? '✨ ডান থেকে বামে অবিরত অটো-স্লাইড হচ্ছে (কখনো থামবে না) • যেকোনো ব্যানারে ক্লিক করে পূর্ণাঙ্গ জুম দেখুন'
-              : '✨ Non-stop continuous auto-sliding active (Right → Left) • Click any banner to zoom fullscreen preview'}
-          </p>
-        </div>
+        {/* Bottom Drag Hint */}
+        <p className="text-[11px] font-mono text-center theme-text-muted mt-5">
+          {language === 'bn'
+            ? '✨ অবিরত ডান থেকে বামে অটো-স্লাইড হচ্ছে • মাউস বা হাত দিয়ে টেনে ইচ্ছেমতো যেকোনো কার্ড দেখতে পারেন'
+            : '✨ Continuous auto-sliding from right to left • Drag with hand or mouse to inspect any banner'}
+        </p>
 
       </div>
 

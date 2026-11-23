@@ -197,12 +197,22 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 4. Handle Subdomain Routing (e.g. pay.mominul.dev)
+  // 4. Handle Subdomain Routing (e.g. pay.mominul.dev, apps.mominul.dev)
   const hostname = request.headers.get('host') || ''
   if (hostname.startsWith('pay.')) {
     const url = request.nextUrl.clone()
     if (url.pathname === '/') {
       url.pathname = '/pay'
+      const response = NextResponse.rewrite(url)
+      applySecurityHeaders(response)
+      return response
+    }
+  }
+
+  if (hostname.startsWith('apps.')) {
+    const url = request.nextUrl.clone()
+    if (url.pathname === '/') {
+      url.pathname = '/apps'
       const response = NextResponse.rewrite(url)
       applySecurityHeaders(response)
       return response
