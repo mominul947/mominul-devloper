@@ -12,7 +12,7 @@ interface AppPlayStats {
 const cacheMap = new Map<string, AppPlayStats>()
 
 const APP_DEFAULTS: Record<string, { downloads: string; rating: string }> = {
-  'com.appuser.carbook': { downloads: '5K+', rating: '4.7' },
+  'com.appuser.carbook': { downloads: '10K+', rating: '4.7' },
   'com.appuser.repaimatepro': { downloads: 'Live', rating: '5.0' },
 }
 
@@ -64,7 +64,8 @@ export async function GET(request: Request) {
 
     let downloads = defaults.downloads
     const dlMatch =
-      html.match(/<div class="ClM7O">([^<]+)<\/div><div class="g1rdde">Downloads<\/div>/i) ||
+      html.match(/<div class="ClM7O">([^<]+)<\/div>\s*<div class="g1rdde">Downloads<\/div>/i) ||
+      html.match(/class="ClM7O">([^<]+)<\/div>/i) ||
       html.match(/(\d+[\.,]?\d*[KMBkmb]?\+?)\s*Downloads/i) ||
       html.match(/"(\d+[\+KMBkmb]?)\s*downloads"/i)
 

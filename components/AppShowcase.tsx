@@ -52,10 +52,10 @@ const apps: AppProject[] = [
     platform: 'Android (Google Play)',
     accent: '#10b981',
     playStoreUrl: 'https://play.google.com/store/apps/details?id=com.appuser.carbook',
-    downloads: '5K+',
+    downloads: '10K+',
     rating: '4.7',
     description:
-      'Full-featured on-demand car rental and intercity travel platform live on Google Play with 5,000+ active downloads. Features instant vehicle reservations, real-time driver GPS tracking, automated fare calculation, multi-stop routing, digital ride invoicing, and seamless trip management.',
+      'Full-featured on-demand car rental and intercity travel platform live on Google Play with 10,000+ active downloads. Features instant vehicle reservations, real-time driver GPS tracking, automated fare calculation, multi-stop routing, digital ride invoicing, and seamless trip management.',
     techStack: ['Flutter', 'Android Native', 'Node.js', 'Google Maps API', 'Firebase', 'Cloud VPS'],
     screenshots: [
       '/images/image3/111.jpeg',
@@ -64,7 +64,7 @@ const apps: AppProject[] = [
       '/images/image3/444.jpeg',
     ],
     features: [
-      'Live Production Release on Google Play Store with 5K+ Downloads & 4.7 Rating',
+      'Live Production Release on Google Play Store with 10K+ Downloads & 4.7 Rating',
       'Real-Time Driver & Vehicle GPS Geolocation on Interactive Map',
       'Automated Fare Engine for Hourly & Intercity Ride Booking',
       'Instant Digital Invoicing, Push Telemetry & Ride History Tracking',
@@ -200,7 +200,7 @@ export default function AppShowcase() {
 
   // Live Google Play stats for apps
   const [playStats, setPlayStats] = useState<Record<string, { downloads: string; rating: string }>>({
-    carbook: { downloads: '5K+', rating: '4.7' },
+    carbook: { downloads: '10K+', rating: '4.7' },
     repairmate: { downloads: 'Live', rating: '5.0' },
   })
 
