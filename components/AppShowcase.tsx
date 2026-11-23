@@ -371,9 +371,9 @@ export default function AppShowcase() {
                 </div>
 
                 {/* App Name & Tagline - Fixed height so 1-line and multi-line titles fit without truncation and all phones align identically */}
-                <div className="mb-3 h-[78px] flex flex-col justify-start">
-                  <div className="min-h-[34px] flex items-center">
-                    <h3 className="font-billboard text-xl xl:text-2xl theme-text-main leading-tight tracking-wide">
+                <div className="mb-3 h-[86px] flex flex-col justify-start overflow-hidden">
+                  <div className="min-h-[46px] flex items-center">
+                    <h3 className="font-billboard text-xl xl:text-2xl theme-text-main leading-tight tracking-wide line-clamp-2">
                       {app.name}
                     </h3>
                   </div>
@@ -383,8 +383,8 @@ export default function AppShowcase() {
                 </div>
 
                 {/* Key Metrics Strip - Fixed height */}
-                <div className="grid grid-cols-2 gap-2 mb-4 p-2.5 rounded-2xl border theme-border bg-black/10 dark:bg-black/30 h-[58px] items-center">
-                  <div className="text-center">
+                <div className="grid grid-cols-2 gap-2 mb-4 p-2.5 rounded-2xl border theme-border bg-black/10 dark:bg-black/30 h-[58px] items-center overflow-hidden">
+                  <div className="text-center min-w-0">
                     <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
                       {isPlayStore ? (
                         <>
@@ -402,7 +402,7 @@ export default function AppShowcase() {
                       {isPlayStore ? `${downloads} Live` : app.deliverable}
                     </p>
                   </div>
-                  <div className="text-center border-l theme-border">
+                  <div className="text-center border-l theme-border min-w-0">
                     <p className="text-[10px] font-mono theme-text-muted flex items-center justify-center gap-1">
                       {isPlayStore ? (
                         <>
@@ -416,43 +416,32 @@ export default function AppShowcase() {
                         </>
                       )}
                     </p>
-                    <p className="text-xs font-bold text-emerald-400 mt-0.5">
+                    <p className="text-xs font-bold text-emerald-400 mt-0.5 truncate px-1">
                       {isPlayStore ? `${rating} / 5.0 Rating` : app.performance}
                     </p>
                   </div>
                 </div>
 
-                {/* DEDICATED PHONE MOCKUP FOR THIS PROJECT (Identical fixed dimensions on desktop) */}
-                <div className="relative flex flex-col items-center justify-center my-1">
-                  <div className="relative w-full max-w-[215px] xl:max-w-[230px] rounded-[34px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
+                {/* DEDICATED PHONE MOCKUP FOR THIS PROJECT (100% Identical Fixed Dimensions for all 5 phones) */}
+                <div className="relative flex flex-col items-center justify-center my-1 w-full">
+                  <div className="relative w-full max-w-[215px] xl:max-w-[230px] rounded-[36px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300 group-hover:scale-[1.02]">
                     
                     {/* Hardware Buttons */}
                     <div className="absolute -right-[4.5px] top-20 w-[2.5px] h-8 rounded-r bg-[#3f3f46]" />
                     <div className="absolute -left-[4.5px] top-16 w-[2.5px] h-7 rounded-l bg-[#3f3f46]" />
                     <div className="absolute -left-[4.5px] top-26 w-[2.5px] h-7 rounded-l bg-[#3f3f46]" />
 
-                    {/* Phone Screen Container */}
-                    <div className="w-full rounded-[28px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
+                    {/* Phone Screen Container - Identical fixed aspect-ratio for all 5 phones */}
+                    <div className="w-full aspect-[390/844] rounded-[28px] overflow-hidden bg-[#09090b] relative shadow-inner select-none">
                       
-                      {/* Android Status Bar (Omitted when app screenshots already contain status bar) */}
-                      {!app.hasOwnStatusBar && (
-                        <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
-                          <span className="font-bold text-[9px]">9:41</span>
-                          <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
-                            <span className="w-1 h-1 rounded-full bg-[#18181b]" />
-                          </div>
-                          <div className="flex items-center gap-1 text-stone-700">
-                            <span className="text-[8px] font-bold">5G</span>
-                            <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
-                              <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      {/* Punch-hole camera (Centered overlay - zero layout shift) */}
+                      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-black border border-neutral-800 shadow-inner z-30 flex items-center justify-center pointer-events-none">
+                        <span className="w-1 h-1 rounded-full bg-[#18181b]" />
+                      </div>
 
                       {/* Main Screenshot Screen with Zoom Lightbox Click */}
                       <div
-                        className="relative w-full aspect-[390/884] bg-white cursor-zoom-in group/screen select-none overflow-hidden"
+                        className="relative w-full h-full bg-white cursor-zoom-in group/screen select-none overflow-hidden"
                         onClick={() => setZoomedImage(activeScreenshot)}
                         title="Click to Zoom Fullscreen"
                       >
@@ -509,10 +498,8 @@ export default function AppShowcase() {
                         </button>
                       </div>
 
-                      {/* Android Home Navigation Bar */}
-                      <div className="w-full h-3 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
-                        <div className="w-14 h-0.5 rounded-full bg-stone-300" />
-                      </div>
+                      {/* Bottom Gesture Bar Overlay */}
+                      <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-14 h-1 rounded-full bg-black/25 dark:bg-white/30 backdrop-blur-xs pointer-events-none z-30" />
                     </div>
                   </div>
                 </div>
@@ -694,28 +681,18 @@ export default function AppShowcase() {
                 <ChevronLeft size={16} />
               </button>
 
-              {/* Medium Phone Container (Balanced "Majhari" Size) */}
-              <div className="relative z-20 w-full max-w-[205px] xs:max-w-[215px] sm:max-w-[230px] rounded-[34px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300">
-                <div className="w-full rounded-[26px] overflow-hidden bg-white text-stone-900 flex flex-col relative shadow-inner">
-                  {/* Status Bar (Omitted when app screenshots already contain status bar) */}
-                  {!selectedMobileApp.hasOwnStatusBar && (
-                    <div className="w-full h-5 px-3 flex items-center justify-between text-[9px] font-mono select-none bg-white text-stone-800 z-20 flex-shrink-0 pt-0.5">
-                      <span className="font-bold text-[9px]">9:41</span>
-                      <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center border border-neutral-700/60 shadow-inner">
-                        <span className="w-1 h-1 rounded-full bg-[#18181b]" />
-                      </div>
-                      <div className="flex items-center gap-1 text-stone-700">
-                        <span className="text-[8px] font-bold">5G</span>
-                        <div className="w-3 h-1.5 rounded-[1px] border border-stone-700 flex items-center p-0.2">
-                          <div className="w-full h-full bg-stone-700 rounded-[0.5px]" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+              {/* Medium Phone Container (Balanced "Majhari" Size - 100% Identical Height for All Apps) */}
+              <div className="relative z-20 w-full max-w-[205px] xs:max-w-[215px] sm:max-w-[230px] rounded-[36px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.65)] border-[3.5px] border-[#27272a] bg-[#09090b] transition-transform duration-300">
+                <div className="w-full aspect-[390/844] rounded-[28px] overflow-hidden bg-[#09090b] relative shadow-inner select-none">
+                  
+                  {/* Punch-hole camera overlay */}
+                  <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-black border border-neutral-800 shadow-inner z-30 flex items-center justify-center pointer-events-none">
+                    <span className="w-1 h-1 rounded-full bg-[#18181b]" />
+                  </div>
 
                   {/* Screenshot Image with Lightbox Zoom */}
                   <div
-                    className="relative w-full aspect-[390/884] bg-white cursor-zoom-in group select-none overflow-hidden"
+                    className="relative w-full h-full bg-white cursor-zoom-in group select-none overflow-hidden"
                     onClick={() => {
                       const cur = screenshotIndices[selectedMobileApp.id] || 0
                       setZoomedImage(selectedMobileApp.screenshots[cur])
@@ -732,10 +709,8 @@ export default function AppShowcase() {
                     />
                   </div>
 
-                  {/* Android Home Bar */}
-                  <div className="w-full h-3 bg-white flex items-center justify-center flex-shrink-0 z-20 pb-0.5">
-                    <div className="w-14 h-0.5 rounded-full bg-stone-300" />
-                  </div>
+                  {/* Android Home Gesture Bar Overlay */}
+                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-14 h-1 rounded-full bg-black/25 dark:bg-white/30 backdrop-blur-xs pointer-events-none z-30" />
                 </div>
               </div>
 
