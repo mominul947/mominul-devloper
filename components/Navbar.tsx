@@ -30,11 +30,12 @@ export default function Navbar() {
         window.requestAnimationFrame(() => {
           setScrolled(window.scrollY > 30)
 
-          const sections = ['hero', 'about', 'apps', 'website', 'projects', 'contact']
+          const sections = ['hero', 'about', 'apps', 'app-banners', 'website', 'projects', 'contact']
           for (let i = sections.length - 1; i >= 0; i--) {
-            const el = document.getElementById(sections[i])
+            const sec = sections[i]
+            const el = document.getElementById(sec)
             if (el && el.getBoundingClientRect().top <= 140) {
-              setActiveSection(sections[i])
+              setActiveSection(sec === 'app-banners' ? 'apps' : sec)
               break
             }
           }

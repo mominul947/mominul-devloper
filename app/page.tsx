@@ -7,6 +7,7 @@ import Hero from '@/components/Hero'
 import About from '@/components/About'
 import Projects from '@/components/Projects'
 import AppShowcase from '@/components/AppShowcase'
+import AppBannerShowcase from '@/components/AppBannerShowcase'
 import WebsiteShowcase from '@/components/WebsiteShowcase'
 import BoguraCityTeaser from '@/components/BoguraCityTeaser'
 import Skills from '@/components/Skills'
@@ -30,6 +31,7 @@ export default function Home() {
             <Hero />
             <About />
             <AppShowcase />
+            <AppBannerShowcase />
             <WebsiteShowcase />
             <BoguraCityTeaser />
             <Projects />

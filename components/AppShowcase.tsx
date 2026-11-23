@@ -73,6 +73,32 @@ const apps: AppProject[] = [
     hasOwnStatusBar: true,
   },
   {
+    id: 'foodgo',
+    name: 'FoodGo Gourmet',
+    tagline: 'On-Demand Artisan Food Delivery, Michelin Menus & Fast Courier',
+    category: 'Food & Dining',
+    deliverable: 'Custom Client Mobile Build',
+    performance: '60fps Native Android UI',
+    platform: 'Android & iOS',
+    accent: '#f59e0b',
+    description:
+      'High-performance on-demand gourmet food delivery application. Features curated restaurant discovery, artisanal culinary creations, dynamic voucher system (FEAST40), multi-cuisine filtering, real-time cart invoicing, and sub-45 minute express dispatch.',
+    techStack: ['Flutter', 'Android Native', 'Node.js', 'Firebase', 'Google Maps API', 'Stripe'],
+    screenshots: [
+      '/images/foodgo/1.png',
+      '/images/foodgo/2.png',
+      '/images/foodgo/3.png',
+      '/images/foodgo/4.png',
+    ],
+    features: [
+      'Artisanal Restaurant Discovery & Michelin-Selected Dining Categories',
+      'Dynamic Multi-Cuisine Interactive Filtering & Fast Delivery Dispatch',
+      'Interactive Dish Customization & Instant In-App Cart Invoicing',
+      'Custom Engineered Client Application (Private Client Release)',
+    ],
+    isPrivateBuild: true,
+  },
+  {
     id: 'repairmate',
     name: 'Repairmate Pro',
     tagline: 'Smart Task Management, Workflow Organizer & Productivity Utility',
@@ -160,6 +186,7 @@ export default function AppShowcase() {
   // Independent screenshot indices for each project
   const [screenshotIndices, setScreenshotIndices] = useState<Record<string, number>>({
     carbook: 0,
+    foodgo: 0,
     repairmate: 0,
     servicego: 0,
     tournament: 0,
@@ -259,7 +286,7 @@ export default function AppShowcase() {
 
   return (
     <section id="apps" className="relative py-20 sm:py-24 overflow-hidden theme-surface-bg theme-text-main border-t theme-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1550px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <motion.div
@@ -278,19 +305,25 @@ export default function AppShowcase() {
               {t.apps.heading}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono px-3 py-1 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-bold">
-              {language === 'bn' ? '৪টি প্রোডাকশন অ্যাপ • ২টি গুগল প্লে স্টোরে লাইভ' : '4 APPS • 2 LIVE ON GOOGLE PLAY'}
+              {language === 'bn' ? '৫টি প্রোডাকশন অ্যাপ • ২টি গুগল প্লে স্টোরে লাইভ' : '5 APPS • 2 LIVE ON GOOGLE PLAY'}
             </span>
+            <a
+              href="#app-banners"
+              className="text-xs font-mono px-3 py-1 rounded-full border theme-border theme-text-muted hover:theme-text-main hover:border-emerald-500/50 bg-black/10 dark:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer font-bold"
+            >
+              <span>{language === 'bn' ? '১৪টি ব্যানার দেখুন ↓' : 'View 14 Banners ↓'}</span>
+            </a>
           </div>
         </motion.div>
 
         {/* =========================================================================
             DESKTOP PC VIEW:
-            4 PROJECTS = 4 DEDICATED PHONE SHOWCASES
+            5 PROJECTS = 5 DEDICATED PHONE SHOWCASES
            ========================================================================= */}
         <div
-          className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-4 gap-5 xl:gap-6 items-stretch"
+          className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-5 xl:gap-5 items-stretch"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -587,12 +620,12 @@ export default function AppShowcase() {
 
         {/* =========================================================================
             MOBILE VIEW (lg:hidden):
-            Interactive tabs for all 4 apps
+            Interactive tabs for all 5 apps
            ========================================================================= */}
         <div className="lg:hidden space-y-6">
           
-          {/* Mobile 4 Mini Phone Previews (All 4 apps visible together in small phone size) */}
-          <div className="grid grid-cols-4 gap-2 sm:gap-2.5 mb-2">
+          {/* Mobile 5 Mini Phone Previews (All 5 apps visible together in small phone size) */}
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-2">
             {apps.map((app, idx) => {
               const isActive = selectedMobileApp.id === app.id
               const isPlay = Boolean(app.playStoreUrl)
