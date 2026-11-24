@@ -54,7 +54,7 @@ const repositories: Repository[] = [
     languageColor: '#3178c6',
     stars: '12+',
     forks: '4',
-    topics: ['nextjs14', 'typescript', 'threejs', 'framer-motion', 'tailwind', 'portfolio'],
+    topics: ['nextjs14', 'typescript', 'threejs', 'tailwind'],
     githubUrl: 'https://github.com/mominul947/mominul-devloper',
     demoUrl: 'https://mominul-devloper-bd.vercel.app',
     highlights: [
@@ -83,7 +83,7 @@ const repositories: Repository[] = [
     languageColor: '#8957e5',
     stars: '8+',
     forks: '2',
-    topics: ['github-profile', 'readme', 'svg-animation', 'app-showcase', 'ui-ux'],
+    topics: ['github-profile', 'readme', 'svg-animation', 'ui-ux'],
     githubUrl: 'https://github.com/mominul947/mominul947',
     highlights: [
       'Showcases 14 production mobile & web app UI/UX architectures',
@@ -111,7 +111,7 @@ const repositories: Repository[] = [
     languageColor: '#00b4ab',
     stars: '6+',
     forks: '3',
-    topics: ['flutter', 'dart', 'android', 'playstore-release', 'fintech-telecom'],
+    topics: ['flutter', 'dart', 'android', 'playstore-release'],
     githubUrl: 'https://github.com/mominul947/amar-recharge-play-store',
     highlights: [
       'Google Play 64-bit release AAB & signed APK architecture',
@@ -139,7 +139,7 @@ const repositories: Repository[] = [
     languageColor: '#f59e0b',
     stars: '5+',
     forks: '2',
-    topics: ['flutter-v2', 'material-3', 'cloud-messaging', 'android-native'],
+    topics: ['flutter-v2', 'material-3', 'cloud-messaging'],
     githubUrl: 'https://github.com/mominul947/amarrecharge2-play-',
     highlights: [
       'Upgraded Material Design 3 interface with dark/light themes',
@@ -167,7 +167,7 @@ const repositories: Repository[] = [
     languageColor: '#00b4ab',
     stars: '7+',
     forks: '3',
-    topics: ['flutter-package', 'custom-painter', 'bottom-navigation', 'bezier-curve'],
+    topics: ['flutter-package', 'bottom-navigation', 'custom-painter'],
     githubUrl: 'https://github.com/mominul947/T_Magic_NavigationMenu_Indicator',
     highlights: [
       'Custom Bezier curve path computation for seamless notch morphing',
@@ -202,76 +202,79 @@ export default function GitHubSection() {
   return (
     <section
       id="github"
-      className="relative py-16 sm:py-24 md:py-32 overflow-hidden theme-surface-bg theme-text-main border-t border-b theme-border"
+      className="relative py-10 sm:py-20 md:py-28 overflow-hidden theme-surface-bg theme-text-main border-t border-b theme-border"
     >
       {/* Massive Background Typography ("GITHUB") */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen text-center pointer-events-none select-none z-0 overflow-hidden">
         <h2
-          className="font-billboard text-[22vw] sm:text-[18vw] leading-none tracking-tight font-black whitespace-nowrap transition-colors duration-300"
+          className="font-billboard text-[20vw] sm:text-[18vw] leading-none tracking-tight font-black whitespace-nowrap transition-colors duration-300"
           style={{
             color: 'var(--billboard-color)',
-            opacity: 'calc(var(--billboard-opacity) * 0.8)',
+            opacity: 'calc(var(--billboard-opacity) * 0.75)',
           }}
         >
           GITHUB
         </h2>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 space-y-10 sm:space-y-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 space-y-5 sm:space-y-10">
         {/* Section Subhead & Billboard Title */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b theme-border pb-8">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-widest border theme-border" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <FaGithub className="theme-text-accent" size={14} />
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-6 border-b theme-border pb-4 sm:pb-8">
+          <div className="space-y-1.5 sm:space-y-3">
+            <div
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-mono uppercase tracking-widest border theme-border"
+              style={{ backgroundColor: 'var(--bg-card)' }}
+            >
+              <FaGithub className="theme-text-accent" size={13} />
               <span className="font-bold theme-text-accent">
                 {language === 'bn' ? 'ওপেন সোর্স কোডবেস' : 'OPEN SOURCE & REPOSITORIES'}
               </span>
             </div>
 
-            <h2 className="font-billboard text-4xl sm:text-6xl lg:text-7xl theme-text-main tracking-wide leading-[0.95]">
+            <h2 className="font-billboard text-3xl sm:text-5xl lg:text-7xl theme-text-main tracking-wide leading-[0.95]">
               {language === 'bn' ? 'গিটহাব আর্কিটেকচার' : 'GITHUB CODE'}{' '}
               <span className="theme-text-accent">
                 {language === 'bn' ? '& রিপোজিটরি' : '& ARCHITECTURE'}
               </span>
             </h2>
 
-            <p className="text-xs sm:text-sm theme-text-muted max-w-2xl leading-relaxed font-normal">
+            <p className="text-xs sm:text-sm theme-text-muted max-w-2xl leading-relaxed font-normal line-clamp-2 sm:line-clamp-none">
               {language === 'bn'
-                ? 'আমার সমস্ত প্রোডাকশন অ্যাপ, রিলিজ বিল্ড, Next.js আর্কিটেকচার এবং ওপেন সোর্স ইউআই কম্পোনেন্ট সরাসরি গিটহাবে হোস্ট করা আছে। ক্লিন কোড ও স্কেলেবিলিটির বাস্তব রূপ দেখুন।'
+                ? 'আমার সমস্ত প্রোডাকশন অ্যাপ, রিলিজ বিল্ড, Next.js আর্কিটেকচার এবং ওপেন সোর্স ইউআই কম্পোনেন্ট সরাসরি গিটহাবে হোস্ট করা আছে।'
                 : 'Explore production-grade Android builds, Next.js platforms, UI packages, and scalable architecture repos hosted live on my GitHub profile.'}
             </p>
           </div>
 
           {/* Quick CTA to GitHub Profile */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
             <a
               href="https://github.com/mominul947"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-theme-primary px-5 py-3 rounded-xl text-xs uppercase tracking-wider font-bold flex items-center gap-2 shadow-lg hover:scale-105 transition-all cursor-pointer"
+              className="btn-theme-primary px-3.5 py-2 sm:px-5 sm:py-3 rounded-xl text-[11px] sm:text-xs uppercase tracking-wider font-bold flex items-center gap-1.5 shadow-md hover:scale-105 transition-all cursor-pointer"
             >
-              <FaGithub size={16} />
+              <FaGithub size={14} />
               <span>{language === 'bn' ? 'গিটহাব প্রোফাইল' : 'View GitHub Profile'}</span>
-              <ArrowUpRight size={14} />
+              <ArrowUpRight size={13} />
             </a>
           </div>
         </div>
 
         {/* Profile Card & Terminal Bento Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Left: GitHub Identity Card (7 cols) */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-5">
+          {/* Left: GitHub Identity Card (Full width on mobile, 7 cols on md+) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-7 p-6 sm:p-7 rounded-3xl border theme-border flex flex-col justify-between relative overflow-hidden"
+            transition={{ duration: 0.4 }}
+            className="md:col-span-7 p-4 sm:p-6 sm:p-7 rounded-2xl sm:rounded-3xl border theme-border flex flex-col justify-between relative overflow-hidden"
             style={{ backgroundColor: 'var(--bg-card)' }}
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b theme-border">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-3 pb-3 sm:pb-4 border-b theme-border">
+              <div className="flex items-center gap-3">
                 <div
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border-2 flex-shrink-0 shadow-md"
+                  className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden border-2 flex-shrink-0 shadow-md"
                   style={{ borderColor: 'var(--accent)' }}
                 >
                   <img
@@ -280,16 +283,16 @@ export default function GitHubSection() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-billboard text-2xl sm:text-3xl theme-text-main tracking-wide">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-billboard text-xl sm:text-3xl theme-text-main tracking-wide truncate">
                       Mominul Islam
                     </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
                       ACTIVE
                     </span>
                   </div>
-                  <p className="text-xs font-mono theme-text-accent">
+                  <p className="text-[11px] sm:text-xs font-mono theme-text-accent truncate">
                     @mominul947 • Founder @ Mom Tech BD
                   </p>
                 </div>
@@ -299,81 +302,93 @@ export default function GitHubSection() {
                 href="https://github.com/mominul947?tab=followers"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="self-start sm:self-auto px-3 py-1.5 rounded-xl border theme-border text-xs font-mono hover:border-emerald-500 transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl border theme-border text-[11px] sm:text-xs font-mono hover:border-emerald-500 transition-colors flex items-center gap-1 flex-shrink-0"
                 style={{ backgroundColor: 'var(--bg-surface)' }}
               >
-                <FaGithub size={13} />
-                <span>Followers</span>
+                <FaGithub size={12} />
+                <span className="hidden xs:inline">Followers:</span>
                 <span className="font-bold theme-text-accent">1</span>
               </a>
             </div>
 
-            {/* Quick Metrics Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-5">
-              <div className="p-3 rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
-                <p className="font-billboard text-2xl theme-text-accent leading-none">5+</p>
-                <p className="text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-1">Public Repos</p>
+            {/* Quick Metrics Badges (Compact 4-column row on mobile) */}
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-3 py-3 sm:py-4">
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                <p className="font-billboard text-lg sm:text-2xl theme-text-accent leading-none">5+</p>
+                <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-0.5 truncate">Repos</p>
               </div>
-              <div className="p-3 rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
-                <p className="font-billboard text-2xl text-emerald-500 leading-none">50+</p>
-                <p className="text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-1">Total Commits</p>
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                <p className="font-billboard text-lg sm:text-2xl text-emerald-500 leading-none">50+</p>
+                <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-0.5 truncate">Commits</p>
               </div>
-              <div className="p-3 rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
-                <p className="font-billboard text-2xl text-sky-400 leading-none">14</p>
-                <p className="text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-1">App Designs</p>
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                <p className="font-billboard text-lg sm:text-2xl text-sky-400 leading-none">14</p>
+                <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-0.5 truncate">Designs</p>
               </div>
-              <div className="p-3 rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
-                <p className="font-billboard text-2xl text-amber-400 leading-none">100%</p>
-                <p className="text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-1">Open Source</p>
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl border theme-border text-center" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                <p className="font-billboard text-lg sm:text-2xl text-amber-400 leading-none">100%</p>
+                <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider theme-text-muted mt-0.5 truncate">Open</p>
               </div>
             </div>
 
-            {/* Bio quote */}
-            <p className="text-xs font-mono theme-text-muted leading-relaxed pt-2 border-t theme-border flex items-center gap-2">
+            {/* Compact Mobile Clone Pill */}
+            <div className="flex md:hidden items-center justify-between gap-2 p-2 rounded-xl bg-black/40 border border-white/10 text-[10px] font-mono text-zinc-300">
+              <code className="truncate text-emerald-400">git clone mominul-devloper</code>
+              <button
+                onClick={handleCopy}
+                className="p-1 rounded bg-white/10 hover:bg-white/20 text-white flex-shrink-0 cursor-pointer"
+                title="Copy command"
+              >
+                {copiedClone ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+              </button>
+            </div>
+
+            {/* Bio quote (Visible on sm+) */}
+            <p className="hidden sm:flex text-xs font-mono theme-text-muted leading-relaxed pt-2 border-t theme-border items-center gap-2">
               <Terminal size={14} className="theme-text-accent flex-shrink-0" />
-              <span>Full-Stack Web & Mobile App Architect • Next.js, Flutter, TypeScript & Cloud VPS</span>
+              <span className="truncate">Full-Stack Web & Mobile App Architect • Next.js, Flutter, TypeScript & Cloud VPS</span>
             </p>
           </motion.div>
 
-          {/* Right: Quick Terminal Clone Box (5 cols) */}
+          {/* Right: Quick Terminal Clone Box (Visible only on md+) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="lg:col-span-5 p-6 rounded-3xl border theme-border flex flex-col justify-between font-mono"
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="hidden md:flex md:col-span-5 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border theme-border flex-col justify-between font-mono"
             style={{ backgroundColor: 'var(--bg-card)' }}
           >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between pb-3 border-b theme-border">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between pb-2.5 border-b theme-border">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="text-[11px] theme-text-muted tracking-wider">bash — mominul@dev</span>
+                <span className="text-[10px] theme-text-muted tracking-wider">bash — mominul@dev</span>
               </div>
 
-              <div className="space-y-1.5 text-xs">
-                <p className="text-emerald-400">$ # Clone 3D portfolio source repository</p>
-                <div className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-2 overflow-x-auto text-[11px] text-zinc-300">
+              <div className="space-y-1 text-xs">
+                <p className="text-emerald-400 text-[11px]">$ # Clone 3D portfolio source repository</p>
+                <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-2 overflow-x-auto text-[11px] text-zinc-300">
                   <code className="truncate">{cloneCommand}</code>
                   <button
                     onClick={handleCopy}
-                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex-shrink-0 cursor-pointer"
+                    className="p-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex-shrink-0 cursor-pointer"
                     title="Copy command"
                   >
-                    {copiedClone ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    {copiedClone ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
                   </button>
                 </div>
-                <p className="text-sky-400 pt-1">$ cd mominul-devloper &amp;&amp; npm install</p>
-                <p className="text-amber-400">$ npm run dev # &gt; ready on localhost:3000</p>
+                <p className="text-sky-400 pt-0.5 text-[11px]">$ cd mominul-devloper &amp;&amp; npm install</p>
+                <p className="text-amber-400 text-[11px]">$ npm run dev # &gt; ready on :3000</p>
               </div>
             </div>
 
-            <div className="pt-4 mt-4 border-t theme-border flex items-center justify-between text-[11px] theme-text-muted">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 size={13} className="text-emerald-500" />
+            <div className="pt-3 mt-3 border-t theme-border flex items-center justify-between text-[10px] theme-text-muted">
+              <span className="flex items-center gap-1">
+                <CheckCircle2 size={12} className="text-emerald-500" />
                 <span>Verified Clean Architecture</span>
               </span>
               <a
@@ -383,7 +398,7 @@ export default function GitHubSection() {
                 className="theme-text-accent hover:underline flex items-center gap-1 font-bold"
               >
                 <span>Repo Details</span>
-                <ExternalLink size={11} />
+                <ExternalLink size={10} />
               </a>
             </div>
           </motion.div>
@@ -391,150 +406,161 @@ export default function GitHubSection() {
 
         {/* Tab Switcher: Repositories vs Analytics */}
         <div className="flex items-center justify-center">
-          <div className="p-1.5 rounded-2xl border theme-border flex items-center gap-2" style={{ backgroundColor: 'var(--bg-card)' }}>
+          <div
+            className="p-1 rounded-xl sm:rounded-2xl border theme-border flex items-center gap-1 sm:gap-2"
+            style={{ backgroundColor: 'var(--bg-card)' }}
+          >
             <button
               onClick={() => setActiveTab('repos')}
-              className="px-5 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center gap-2"
+              className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center gap-1.5"
               style={{
                 backgroundColor: activeTab === 'repos' ? 'var(--accent)' : 'transparent',
                 color: activeTab === 'repos' ? 'var(--btn-primary-text)' : 'var(--text-muted)',
               }}
             >
-              <FolderGit2 size={15} />
-              <span>{language === 'bn' ? 'চিহ্নিত রিপোজিটরি (৫)' : 'Featured Repositories (5)'}</span>
+              <FolderGit2 size={14} />
+              <span>{language === 'bn' ? 'রিপোজিটরি (৫)' : 'Featured Repos (5)'}</span>
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className="px-5 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center gap-2"
+              className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center gap-1.5"
               style={{
                 backgroundColor: activeTab === 'analytics' ? 'var(--accent)' : 'transparent',
                 color: activeTab === 'analytics' ? 'var(--btn-primary-text)' : 'var(--text-muted)',
               }}
             >
-              <Activity size={15} />
-              <span>{language === 'bn' ? 'গিটহাব অ্যানালিটিক্স ও স্ট্রিক' : 'Live Stats & Streak'}</span>
+              <Activity size={14} />
+              <span>{language === 'bn' ? 'স্ট্যাটস ও স্ট্রিক' : 'Stats & Streak'}</span>
             </button>
           </div>
         </div>
 
-        {/* Tab 1: Featured Repositories Grid */}
+        {/* Tab 1: Featured Repositories (Mobile Swipeable Deck, Desktop Grid) */}
         {activeTab === 'repos' && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            transition={{ duration: 0.3 }}
+            className="space-y-2"
           >
-            {repositories.map((repo, idx) => (
-              <motion.div
-                key={repo.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{ delay: idx * 0.08, duration: 0.5 }}
-                className="p-6 rounded-3xl border theme-border flex flex-col justify-between group hover:border-emerald-500/60 transition-all duration-300 shadow-sm hover:shadow-xl relative overflow-hidden"
-                style={{ backgroundColor: 'var(--bg-card)' }}
-              >
-                {/* Top Bar: Icon, Name & Badge */}
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-10 h-10 rounded-xl border theme-border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style={{ backgroundColor: 'var(--bg-surface)' }}>
-                        <FolderGit2 className="theme-text-accent" size={19} />
-                      </div>
-                      <div className="min-w-0">
-                        <a
-                          href={repo.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-bold text-base sm:text-lg theme-text-main group-hover:theme-text-accent transition-colors truncate block"
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-3.5 pb-2 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 sm:overflow-visible">
+              {repositories.map((repo, idx) => (
+                <div
+                  key={repo.id}
+                  className="w-[84vw] xs:w-[78vw] sm:w-auto flex-shrink-0 snap-center p-4 sm:p-6 rounded-2xl sm:rounded-3xl border theme-border flex flex-col justify-between group hover:border-emerald-500/60 transition-all duration-300 shadow-xs hover:shadow-xl relative overflow-hidden"
+                  style={{ backgroundColor: 'var(--bg-card)' }}
+                >
+                  {/* Top Bar: Icon, Name & Badge */}
+                  <div className="space-y-2.5 sm:space-y-3.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border theme-border flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
+                          style={{ backgroundColor: 'var(--bg-surface)' }}
                         >
-                          {repo.name}
-                        </a>
-                        <p className="text-[11px] font-mono theme-text-muted flex items-center gap-1.5">
-                          <span
-                            className="w-2 h-2 rounded-full inline-block"
-                            style={{ backgroundColor: repo.languageColor }}
-                          />
-                          <span>{repo.primaryLanguage}</span>
-                        </p>
+                          <FolderGit2 className="theme-text-accent" size={16} />
+                        </div>
+                        <div className="min-w-0">
+                          <a
+                            href={repo.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-sm sm:text-base lg:text-lg theme-text-main group-hover:theme-text-accent transition-colors truncate block"
+                          >
+                            {repo.name}
+                          </a>
+                          <p className="text-[10px] sm:text-[11px] font-mono theme-text-muted flex items-center gap-1">
+                            <span
+                              className="w-1.5 h-1.5 rounded-full inline-block"
+                              style={{ backgroundColor: repo.languageColor }}
+                            />
+                            <span>{repo.primaryLanguage}</span>
+                          </p>
+                        </div>
                       </div>
+
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono font-bold border whitespace-nowrap flex-shrink-0 ${repo.badgeColor}`}
+                      >
+                        {repo.badge}
+                      </span>
                     </div>
 
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border whitespace-nowrap flex-shrink-0 ${repo.badgeColor}`}>
-                      {repo.badge}
-                    </span>
+                    {/* Description (2 lines on mobile, clean leading) */}
+                    <p className="text-[11px] sm:text-xs theme-text-muted leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
+                      {language === 'bn' ? repo.descriptionBn : repo.description}
+                    </p>
+
+                    {/* Highlights Bullet List (Hidden on mobile to save vertical space, shown on sm+) */}
+                    <div className="hidden sm:block space-y-1.5 pt-2 border-t theme-border text-[11px] font-mono">
+                      {(language === 'bn' ? repo.highlightsBn : repo.highlights).slice(0, 3).map((item, hIdx) => (
+                        <p key={hIdx} className="flex items-start gap-1.5 theme-text-muted">
+                          <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 flex-shrink-0" />
+                          <span className="leading-snug">{item}</span>
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* Topic Tags */}
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {repo.topics.slice(0, 3).map((topic) => (
+                        <span
+                          key={topic}
+                          className="px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-mono theme-text-muted border theme-border"
+                          style={{ backgroundColor: 'var(--bg-surface)' }}
+                        >
+                          #{topic}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Description */}
-                  <p className="text-xs theme-text-muted leading-relaxed font-normal min-h-[48px]">
-                    {language === 'bn' ? repo.descriptionBn : repo.description}
-                  </p>
-
-                  {/* Highlights Bullet List */}
-                  <div className="space-y-1.5 pt-2 border-t theme-border text-[11px] font-mono">
-                    {(language === 'bn' ? repo.highlightsBn : repo.highlights).slice(0, 3).map((item, hIdx) => (
-                      <p key={hIdx} className="flex items-start gap-1.5 theme-text-muted">
-                        <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="leading-snug">{item}</span>
-                      </p>
-                    ))}
-                  </div>
-
-                  {/* Topic Tags */}
-                  <div className="flex flex-wrap gap-1.5 pt-2">
-                    {repo.topics.slice(0, 4).map((topic) => (
-                      <span
-                        key={topic}
-                        className="px-2 py-0.5 rounded-md text-[10px] font-mono theme-text-muted border theme-border"
-                        style={{ backgroundColor: 'var(--bg-surface)' }}
-                      >
-                        #{topic}
+                  {/* Footer Actions & Links */}
+                  <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t theme-border flex items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-2.5 text-[11px] font-mono theme-text-muted">
+                      <span className="flex items-center gap-1">
+                        <Star size={11} className="text-amber-400" />
+                        <span>{repo.stars}</span>
                       </span>
-                    ))}
-                  </div>
-                </div>
+                      <span className="flex items-center gap-1">
+                        <GitFork size={11} />
+                        <span>{repo.forks}</span>
+                      </span>
+                    </div>
 
-                {/* Footer Actions & Links */}
-                <div className="pt-5 mt-5 border-t theme-border flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-3 text-xs font-mono theme-text-muted">
-                    <span className="flex items-center gap-1">
-                      <Star size={12} className="text-amber-400" />
-                      <span>{repo.stars}</span>
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <GitFork size={12} />
-                      <span>{repo.forks}</span>
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {repo.demoUrl && (
+                    <div className="flex items-center gap-1.5">
+                      {repo.demoUrl && (
+                        <a
+                          href={repo.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-mono flex items-center gap-1 border border-emerald-500/40 text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white transition-all font-semibold"
+                        >
+                          <span>Live</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
                       <a
-                        href={repo.demoUrl}
+                        href={repo.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1 border border-emerald-500/40 text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white transition-all font-semibold"
+                        className="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-mono flex items-center gap-1 border theme-border hover:theme-text-accent transition-colors font-semibold"
+                        style={{ backgroundColor: 'var(--bg-surface)' }}
                       >
-                        <span>Live Demo</span>
-                        <ExternalLink size={11} />
+                        <FaGithub size={12} />
+                        <span>Repo</span>
+                        <ArrowUpRight size={10} />
                       </a>
-                    )}
-                    <a
-                      href={repo.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1 border theme-border hover:theme-text-accent transition-colors font-semibold"
-                      style={{ backgroundColor: 'var(--bg-surface)' }}
-                    >
-                      <FaGithub size={13} />
-                      <span>Repo</span>
-                      <ArrowUpRight size={11} />
-                    </a>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              ))}
+            </div>
+
+            {/* Subtle Mobile Swipe Cue */}
+            <p className="flex sm:hidden items-center justify-center gap-1 text-[10px] font-mono theme-text-muted text-center pt-1">
+              <span>← {language === 'bn' ? 'রিপোজিটরি দেখতে সোয়াইপ করুন' : 'Swipe to explore 5 repos'} →</span>
+            </p>
           </motion.div>
         )}
 
@@ -543,26 +569,25 @@ export default function GitHubSection() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="space-y-6"
+            transition={{ duration: 0.3 }}
+            className="space-y-4 sm:space-y-6"
           >
             {/* Bento Grid with Live GitHub SVG Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-6">
               {/* Profile Details Card (7 cols) */}
               <div
-                className="lg:col-span-7 p-6 rounded-3xl border theme-border flex flex-col justify-between overflow-hidden"
+                className="lg:col-span-7 p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border theme-border flex flex-col justify-between overflow-hidden"
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
-                <div className="flex items-center justify-between pb-3 border-b theme-border mb-4">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
-                    <Activity size={14} className="theme-text-accent" />
-                    <span>GitHub Profile Summary Analytics</span>
+                <div className="flex items-center justify-between pb-2.5 border-b theme-border mb-3">
+                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
+                    <Activity size={13} className="theme-text-accent" />
+                    <span>Profile Summary Details</span>
                   </div>
-                  <span className="text-[10px] font-mono text-emerald-500 font-bold">LIVE TELEMETRY</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-emerald-500 font-bold">LIVE TELEMETRY</span>
                 </div>
 
-                <div className="w-full overflow-hidden rounded-2xl flex items-center justify-center p-2 bg-[#0d1117] border border-white/10 shadow-inner">
+                <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 bg-[#0d1117] border border-white/10 shadow-inner">
                   <img
                     src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mominul947&theme=tokyonight"
                     alt="Mominul Islam Profile Details on GitHub"
@@ -574,18 +599,18 @@ export default function GitHubSection() {
 
               {/* Repos per Language & Stats (5 cols) */}
               <div
-                className="lg:col-span-5 p-6 rounded-3xl border theme-border flex flex-col justify-between overflow-hidden"
+                className="lg:col-span-5 p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border theme-border flex flex-col justify-between overflow-hidden"
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
-                <div className="flex items-center justify-between pb-3 border-b theme-border mb-4">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
-                    <Code2 size={14} className="theme-text-accent" />
-                    <span>Top Languages by Repository</span>
+                <div className="flex items-center justify-between pb-2.5 border-b theme-border mb-3">
+                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
+                    <Code2 size={13} className="theme-text-accent" />
+                    <span>Top Languages</span>
                   </div>
-                  <span className="text-[10px] font-mono text-sky-400 font-bold">TECH MIX</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-sky-400 font-bold">TECH MIX</span>
                 </div>
 
-                <div className="w-full overflow-hidden rounded-2xl flex items-center justify-center p-2 bg-[#0d1117] border border-white/10 shadow-inner">
+                <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 bg-[#0d1117] border border-white/10 shadow-inner">
                   <img
                     src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mominul947&theme=tokyonight"
                     alt="Mominul Islam Repos per Language"
@@ -597,18 +622,18 @@ export default function GitHubSection() {
 
               {/* GitHub Streak Card (6 cols) */}
               <div
-                className="lg:col-span-6 p-6 rounded-3xl border theme-border overflow-hidden"
+                className="lg:col-span-6 p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border theme-border overflow-hidden"
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
-                <div className="flex items-center justify-between pb-3 border-b theme-border mb-4">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
-                    <Flame size={14} className="text-orange-500" />
-                    <span>GitHub Contribution Streak</span>
+                <div className="flex items-center justify-between pb-2.5 border-b theme-border mb-3">
+                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
+                    <Flame size={13} className="text-orange-500" />
+                    <span>Contribution Streak</span>
                   </div>
-                  <span className="text-[10px] font-mono text-orange-400 font-bold">COMMITS</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-orange-400 font-bold">COMMITS</span>
                 </div>
 
-                <div className="w-full overflow-hidden rounded-2xl flex items-center justify-center p-3 bg-[#0d1117] border border-white/10 shadow-inner">
+                <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl flex items-center justify-center p-2 sm:p-3 bg-[#0d1117] border border-white/10 shadow-inner">
                   <img
                     src="https://streak-stats.demolab.com?user=mominul947&theme=tokyonight&hide_border=true&background=0d1117&ring=10b981&fire=06b6d4&currStreakLabel=10b981"
                     alt="Mominul Islam GitHub Streak"
@@ -620,18 +645,18 @@ export default function GitHubSection() {
 
               {/* Productive Time / Commits UTC+6 (6 cols) */}
               <div
-                className="lg:col-span-6 p-6 rounded-3xl border theme-border overflow-hidden"
+                className="lg:col-span-6 p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border theme-border overflow-hidden"
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
-                <div className="flex items-center justify-between pb-3 border-b theme-border mb-4">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
-                    <Activity size={14} className="text-purple-400" />
-                    <span>Productive Hours (UTC+6 Bangladesh)</span>
+                <div className="flex items-center justify-between pb-2.5 border-b theme-border mb-3">
+                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-mono uppercase tracking-wider theme-text-main font-bold">
+                    <Activity size={13} className="text-purple-400" />
+                    <span>Productive Hours (UTC+6)</span>
                   </div>
-                  <span className="text-[10px] font-mono text-purple-400 font-bold">DAY / NIGHT</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-purple-400 font-bold">DAY / NIGHT</span>
                 </div>
 
-                <div className="w-full overflow-hidden rounded-2xl flex items-center justify-center p-2 bg-[#0d1117] border border-white/10 shadow-inner">
+                <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl flex items-center justify-center p-1.5 sm:p-2 bg-[#0d1117] border border-white/10 shadow-inner">
                   <img
                     src="https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mominul947&theme=tokyonight&utcOffset=6"
                     alt="Mominul Islam Productive Time UTC+6"
@@ -640,37 +665,36 @@ export default function GitHubSection() {
                   />
                 </div>
               </div>
-
             </div>
           </motion.div>
         )}
 
         {/* Bottom Callout Banner */}
         <div
-          className="p-8 sm:p-10 rounded-3xl border theme-border flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
+          className="p-5 sm:p-8 sm:p-10 rounded-2xl sm:rounded-3xl border theme-border flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 relative overflow-hidden"
           style={{ backgroundColor: 'var(--bg-card)' }}
         >
-          <div className="space-y-2 text-center md:text-left">
-            <h4 className="font-billboard text-2xl sm:text-3xl theme-text-main tracking-wide">
+          <div className="space-y-1 sm:space-y-2 text-center md:text-left">
+            <h4 className="font-billboard text-xl sm:text-2xl md:text-3xl theme-text-main tracking-wide">
               {language === 'bn' ? 'ওপেন সোর্স কোড দেখতে চান?' : 'Want to Inspect Full Source Codes?'}
             </h4>
-            <p className="text-xs sm:text-sm theme-text-muted max-w-xl font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm theme-text-muted max-w-xl font-normal leading-relaxed line-clamp-2 sm:line-clamp-none">
               {language === 'bn'
-                ? 'আমার সমস্ত মোবাইল ও ফুল-স্ট্যাক প্রজেক্টের সোর্স কোড, স্থাপত্য এবং ডকুমেন্টেশন গিটহাবে রয়েছে। স্টার দিন অথবা সরাসরি কন্ট্রিবিউট করুন।'
+                ? 'আমার সমস্ত মোবাইল ও ফুল-স্ট্যাক প্রজেক্টের সোর্স কোড, স্থাপত্য এবং ডকুমেন্টেশন গিটহাবে রয়েছে।'
                 : 'Follow my latest repositories, inspect clean software architectures, or star projects directly on GitHub.'}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 flex-shrink-0">
+          <div className="flex items-center justify-center w-full md:w-auto flex-shrink-0">
             <a
               href="https://github.com/mominul947"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-theme-primary px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider font-bold flex items-center gap-2 shadow-lg hover:scale-105 transition-all"
+              className="btn-theme-primary w-full md:w-auto px-5 py-2.5 sm:px-6 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-md hover:scale-105 transition-all"
             >
-              <FaGithub size={17} />
+              <FaGithub size={15} />
               <span>{language === 'bn' ? 'গিটহাবে ফলো করুন' : 'Follow @mominul947'}</span>
-              <ArrowUpRight size={14} />
+              <ArrowUpRight size={13} />
             </a>
           </div>
         </div>
