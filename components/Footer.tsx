@@ -3,11 +3,16 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowUp, Mail, Phone, MapPin, CreditCard } from 'lucide-react'
-import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6'
+import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn, FaGithub } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
 
 const socials = [
+  {
+    icon: FaGithub,
+    href: 'https://github.com/mominul947',
+    label: 'GitHub',
+  },
   {
     icon: FiverrLogo,
     href: 'https://www.fiverr.com/s/WebEmax',
@@ -109,6 +114,15 @@ export default function Footer() {
                 <span>01303482412</span>
               </a>
               <a
+                href="https://github.com/mominul947"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:theme-text-main transition-colors"
+              >
+                <FaGithub size={15} className="theme-text-accent" />
+                <span>github.com/mominul947</span>
+              </a>
+              <a
                 href="https://www.fiverr.com/s/WebEmax"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -131,6 +145,7 @@ export default function Footer() {
                 { label: t.nav.about, href: '#about' },
                 { label: t.nav.apps, href: '#apps' },
                 { label: t.nav.website, href: '#website' },
+                { label: language === 'bn' ? 'গিটহাব' : 'GitHub', href: '#github' },
                 { label: t.nav.services, href: '#projects' },
                 { label: t.nav.contact, href: '#contact' },
               ].map((item) => (

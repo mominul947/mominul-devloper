@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react'
-import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6'
+import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn, FaGithub } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -22,6 +22,12 @@ export default function Contact() {
   const { language, t } = useLanguage()
 
   const contactItems = [
+    {
+      icon: FaGithub,
+      label: language === 'bn' ? 'গিটহাব কোডবেস' : 'GitHub Architecture',
+      value: 'github.com/mominul947',
+      href: 'https://github.com/mominul947',
+    },
     {
       icon: Mail,
       label: language === 'bn' ? 'অফিসিয়াল ইমেইল' : 'Direct Email',
@@ -49,6 +55,11 @@ export default function Contact() {
   ]
 
   const socials = [
+    {
+      icon: FaGithub,
+      href: 'https://github.com/mominul947',
+      label: 'GitHub',
+    },
     {
       icon: FiverrLogo,
       href: 'https://www.fiverr.com/s/WebEmax',

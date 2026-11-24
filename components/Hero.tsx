@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowDown, MapPin, Sparkles, ArrowUpRight, Mail, Phone } from 'lucide-react'
-import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn } from 'react-icons/fa6'
+import { FaFacebookF, FaInstagram, FaThreads, FaWhatsapp, FaLinkedinIn, FaGithub } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import Image from 'next/image'
 import { getExperience, useLiveExperience } from '@/utils/experience'
@@ -339,6 +339,7 @@ export default function Hero() {
                   NETWORKS:
                 </span>
                 {[
+                  { icon: FaGithub, href: 'https://github.com/mominul947', label: 'GitHub', color: 'hover:text-black dark:hover:text-white' },
                   { icon: FaWhatsapp, href: 'https://wa.me/8801303482412', label: 'WhatsApp', color: 'hover:text-emerald-500' },
                   { icon: FaLinkedinIn, href: 'https://www.linkedin.com/in/mominul-islam-b02849445', label: 'LinkedIn', color: 'hover:text-sky-600' },
                   { icon: FaFacebookF, href: 'https://www.facebook.com/md.mominul.islam.80070', label: 'Facebook', color: 'hover:text-blue-600' },
@@ -453,6 +454,7 @@ export default function Hero() {
               className="flex items-center gap-2.5 pt-2"
             >
               {[
+                { icon: FaGithub, href: 'https://github.com/mominul947', label: 'GitHub' },
                 { icon: FaWhatsapp, href: 'https://wa.me/8801303482412', label: 'WhatsApp' },
                 { icon: FaLinkedinIn, href: 'https://www.linkedin.com/in/mominul-islam-b02849445', label: 'LinkedIn' },
                 { icon: FaFacebookF, href: 'https://www.facebook.com/md.mominul.islam.80070', label: 'Facebook' },

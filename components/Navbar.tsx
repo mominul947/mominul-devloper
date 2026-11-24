@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ArrowUpRight, CreditCard } from 'lucide-react'
-import { FaWhatsapp } from 'react-icons/fa6'
+import { FaWhatsapp, FaGithub } from 'react-icons/fa6'
 import FiverrLogo from '@/components/FiverrLogo'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -19,6 +19,7 @@ export default function Navbar() {
     { label: t.nav.about, href: '#about' },
     { label: t.nav.apps, href: '#apps' },
     { label: t.nav.website, href: '#website' },
+    { label: language === 'bn' ? 'গিটহাব' : 'GitHub', href: '#github' },
     { label: t.nav.services, href: '#projects' },
     { label: t.nav.contact, href: '#contact' },
   ]
@@ -30,7 +31,7 @@ export default function Navbar() {
         window.requestAnimationFrame(() => {
           setScrolled(window.scrollY > 30)
 
-          const sections = ['hero', 'about', 'apps', 'app-banners', 'website', 'projects', 'contact']
+          const sections = ['hero', 'about', 'apps', 'app-banners', 'website', 'github', 'projects', 'contact']
           for (let i = sections.length - 1; i >= 0; i--) {
             const sec = sections[i]
             const el = document.getElementById(sec)
@@ -120,6 +121,18 @@ export default function Navbar() {
               <CreditCard size={14} className="flex-shrink-0 text-emerald-500 group-hover:text-current group-hover:scale-110 transition-transform" />
               <span>{t.nav.payOnline}</span>
             </Link>
+
+            <a
+              href="https://github.com/mominul947"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-full text-xs font-mono flex items-center gap-1.5 border theme-border hover:bg-white/80 dark:hover:bg-white/10 transition-all font-bold whitespace-nowrap flex-shrink-0"
+              title="GitHub Profile"
+            >
+              <FaGithub size={15} />
+              <span>GitHub</span>
+              <ArrowUpRight size={11} />
+            </a>
 
             <a
               href="https://www.fiverr.com/s/WebEmax"
@@ -228,6 +241,17 @@ export default function Navbar() {
                   <span>{t.nav.payOnline}</span>
                   <ArrowUpRight size={13} />
                 </Link>
+
+                <a
+                  href="https://github.com/mominul947"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-full text-center text-xs font-mono btn-theme-secondary flex items-center justify-center gap-2 font-bold"
+                >
+                  <FaGithub size={18} />
+                  <span>GitHub Profile</span>
+                  <ArrowUpRight size={13} />
+                </a>
 
                 <a
                   href="https://www.fiverr.com/s/WebEmax"

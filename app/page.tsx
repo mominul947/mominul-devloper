@@ -9,6 +9,7 @@ import Projects from '@/components/Projects'
 import AppShowcase from '@/components/AppShowcase'
 import AppBannerShowcase from '@/components/AppBannerShowcase'
 import WebsiteShowcase from '@/components/WebsiteShowcase'
+import GitHubSection from '@/components/GitHubSection'
 import BoguraCityTeaser from '@/components/BoguraCityTeaser'
 import Skills from '@/components/Skills'
 import Contact from '@/components/Contact'
@@ -33,6 +34,7 @@ export default function Home() {
             <AppShowcase />
             <AppBannerShowcase />
             <WebsiteShowcase />
+            <GitHubSection />
             <BoguraCityTeaser />
             <Projects />
             <Skills />
